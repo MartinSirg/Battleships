@@ -1,10 +1,10 @@
 ﻿{
   "version": "1.0.0",
   "restore": {
-    "projectUniqueName": "C:\\Repos\\C#\\Battleships\\ConsoleApp\\ConsoleApp.csproj",
+    "projectUniqueName": "C:\\Projects Repositories\\C#\\ConsoleApp\\ConsoleApp.csproj",
     "projectName": "ConsoleApp",
-    "projectPath": "C:\\Repos\\C#\\Battleships\\ConsoleApp\\ConsoleApp.csproj",
-    "outputPath": "C:\\Repos\\C#\\Battleships\\ConsoleApp\\obj\\",
+    "projectPath": "C:\\Projects Repositories\\C#\\ConsoleApp\\ConsoleApp.csproj",
+    "outputPath": "C:\\Projects Repositories\\C#\\ConsoleApp\\obj\\",
     "projectStyle": "PackageReference",
     "fallbackFolders": [
       "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

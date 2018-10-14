@@ -1,10 +1,10 @@
 ﻿{
   "version": "1.0.0",
   "restore": {
-    "projectUniqueName": "C:\\Repos\\C#\\Battleships\\GameUI\\GameUI.csproj",
+    "projectUniqueName": "C:\\Projects Repositories\\C#\\GameUI\\GameUI.csproj",
     "projectName": "GameUI",
-    "projectPath": "C:\\Repos\\C#\\Battleships\\GameUI\\GameUI.csproj",
-    "outputPath": "C:\\Repos\\C#\\Battleships\\GameUI\\obj\\",
+    "projectPath": "C:\\Projects Repositories\\C#\\GameUI\\GameUI.csproj",
+    "outputPath": "C:\\Projects Repositories\\C#\\GameUI\\obj\\",
     "projectStyle": "PackageReference",
     "fallbackFolders": [
       "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

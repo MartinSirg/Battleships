@@ -681,28 +681,30 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\User\\.nuget\\packages\\": {},
+    "C:\\Users\\sirgm\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Repos\\C#\\Battleships\\ConsoleApp\\ConsoleApp.csproj",
+      "projectUniqueName": "C:\\Projects Repositories\\C#\\ConsoleApp\\ConsoleApp.csproj",
       "projectName": "ConsoleApp",
-      "projectPath": "C:\\Repos\\C#\\Battleships\\ConsoleApp\\ConsoleApp.csproj",
-      "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-      "outputPath": "C:\\Repos\\C#\\Battleships\\ConsoleApp\\obj\\",
+      "projectPath": "C:\\Projects Repositories\\C#\\ConsoleApp\\ConsoleApp.csproj",
+      "packagesPath": "C:\\Users\\sirgm\\.nuget\\packages\\",
+      "outputPath": "C:\\Projects Repositories\\C#\\ConsoleApp\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\sirgm\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp2.1"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
