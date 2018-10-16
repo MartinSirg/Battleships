@@ -14,5 +14,10 @@ namespace Domain
             Size = size;
             LivesLeft = size;
         }
+
+        public bool IsAlive()
+        {
+            return LivesLeft > 0;
+        }
     }
 }

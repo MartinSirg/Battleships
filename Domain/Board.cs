@@ -6,8 +6,9 @@ namespace Domain
 {
     public class Board
     {
-        public List<List<Tile>> GameBoard { get; set; } //TODO: set private
+        public List<List<Tile>> GameBoard { get; set; }
         private List<Battleship> Battleships { get; set; } = new List<Battleship>();
+        public List<(Tile, BombingResult)> Bombings { get; set; } = new List<(Tile, BombingResult)>();
         private bool CanTouch { get; set; }
         private int MaxCol, MaxRow;
 
@@ -17,10 +18,10 @@ namespace Domain
             MaxCol = totalCols - 1;
             CanTouch = canTouch;
             GameBoard = new List<List<Tile>>(totalRows);
-            for (int row = 0; row < totalRows; row++)
+            for (var row = 0; row < totalRows; row++)
             {
                 GameBoard.Add(new List<Tile>(totalCols));
-                for (int col = 0; col < totalCols; col++)
+                for (var col = 0; col < totalCols; col++)
                 {
                     GameBoard[row].Add(new Tile(row, col, this));
                 }
@@ -75,7 +76,7 @@ namespace Domain
                     if (coord.row - 1 <= 0)      neighbourTiles.Add(GameBoard[coord.row - 1][coord.col]);
                 }
 
-                foreach (Tile tile in neighbourTiles)
+                foreach (var tile in neighbourTiles)
                 {
                     if (!tile.IsEmpty() && tile.Battleship != battleship)
                     {
@@ -94,28 +95,46 @@ namespace Domain
                 battleship.Locations.Add(tile);
             }
 
-        }
+        }        
+        
+        public List<Tile> GetBattleshipLocations()
+        {
+            var result = new List<Tile>();
+            
+            foreach (var battleship in Battleships)
+            {
+                foreach (var tile in battleship.Locations)
+                {
+                    result.Add(tile);
+                }
+            }
 
+            return result;
+        }
+            
         public Battleship GetData(int row, int col)
         {
             return GameBoard[row][col]?.Battleship;
         }
-
+        
         public bool BombLocation(int row, int col)
         {
-            if (!GameBoard[row][col].IsEmpty())
+            var targetTile = GameBoard[row][col];
+            
+            if (targetTile.IsBombed) throw new ArgumentException("This tile has been already bombed.");
+
+            targetTile.IsBombed = true;
+            if (targetTile.IsEmpty())
             {
-                // TODO: isSunk -> true, lives--, console sth
-            }
-            else
-            {
-                Console.WriteLine("You missed");
+                Bombings.Add((targetTile, BombingResult.Miss));
+                return false;
             }
 
+            Bombings.Add((targetTile, BombingResult.Hit));
+            targetTile.Battleship.LivesLeft--;            
             return true;
         }
 
-        //TODO: make private
         public static List<(int row, int col)> GetAllCoords((int row, int col) start, (int row, int col) end)
         {
             int loopStart, loopEnd;
@@ -139,6 +158,15 @@ namespace Domain
 
             return result;
 
+        }
+
+        public bool AnyShipsLeft()
+        {
+            foreach (var battleship in Battleships)
+            {
+                if (battleship.IsAlive()) return true;
+            }
+            return false;
         }
     }
 }
