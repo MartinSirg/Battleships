@@ -1642,6 +1642,19 @@
           "lib/netstandard1.3/System.Xml.XPath.XmlDocument.dll": {}
         }
       },
+      "BLL/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/BLL.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BLL.dll": {}
+        }
+      },
       "Domain/1.0.0": {
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
@@ -1650,6 +1663,19 @@
         },
         "runtime": {
           "bin/placeholder/Domain.dll": {}
+        }
+      },
+      "UI/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "BLL": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/UI.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/UI.dll": {}
         }
       }
     }
@@ -5642,10 +5668,20 @@
         "system.xml.xpath.xmldocument.nuspec"
       ]
     },
+    "BLL/1.0.0": {
+      "type": "project",
+      "path": "../BLL/BLL.csproj",
+      "msbuildProject": "../BLL/BLL.csproj"
+    },
     "Domain/1.0.0": {
       "type": "project",
       "path": "../Domain/Domain.csproj",
       "msbuildProject": "../Domain/Domain.csproj"
+    },
+    "UI/1.0.0": {
+      "type": "project",
+      "path": "../UI/UI.csproj",
+      "msbuildProject": "../UI/UI.csproj"
     }
   },
   "projectFileDependencyGroups": {
@@ -5654,6 +5690,7 @@
       "Microsoft.NET.Test.Sdk >= 15.7.2",
       "Microsoft.NETCore.App >= 2.1.0",
       "NUnit3TestAdapter >= 3.10.0",
+      "UI >= 1.0.0",
       "nunit >= 3.10.1"
     ]
   },
@@ -5689,6 +5726,9 @@
           "projectReferences": {
             "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj": {
               "projectPath": "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj"
+            },
+            "C:\\Projects Repositories\\C#\\UI\\UI.csproj": {
+              "projectPath": "C:\\Projects Repositories\\C#\\UI\\UI.csproj"
             }
           }
         }

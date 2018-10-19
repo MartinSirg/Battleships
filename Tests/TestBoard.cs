@@ -1,6 +1,7 @@
 using System;
 using Domain;
 using NUnit.Framework;
+using UI;
 
 namespace Tests
 {
@@ -15,8 +16,8 @@ namespace Tests
         public void CreateDefaultBoard()
         {
             var board = new Board();
-            Assert.AreEqual(10, board.GameBoard.Capacity);
-            foreach (var col in board.GameBoard)
+            Assert.AreEqual(10, board.Tiles.Capacity);
+            foreach (var col in board.Tiles)
             {
                 Assert.AreEqual(10, col.Capacity);
             }
@@ -26,8 +27,8 @@ namespace Tests
         public void CreateCustomBoard()
         {
             var customBoard = new Board(totalRows: 21, totalCols: 13, canTouch: false);
-            Assert.AreEqual(expected: 21, actual: customBoard.GameBoard.Capacity);
-            foreach (var col in customBoard.GameBoard)
+            Assert.AreEqual(expected: 21, actual: customBoard.Tiles.Capacity);
+            foreach (var col in customBoard.Tiles)
             {
                 Assert.AreEqual(expected: 13, actual: col.Capacity);
             }
@@ -178,9 +179,9 @@ namespace Tests
             board.BombLocation(1, 0);
             board.BombLocation(2, 0);
             
-            Assert.AreSame(board.Bombings[0].Item1, board.GameBoard[0][0]);
-            Assert.AreSame(board.Bombings[1].Item1, board.GameBoard[1][0]);
-            Assert.AreSame(board.Bombings[2].Item1, board.GameBoard[2][0]);
+            Assert.AreSame(board.Bombings[0].Item1, board.Tiles[0][0]);
+            Assert.AreSame(board.Bombings[1].Item1, board.Tiles[1][0]);
+            Assert.AreSame(board.Bombings[2].Item1, board.Tiles[2][0]);
             
             Assert.AreEqual(board.Bombings[0].Item2, BombingResult.Hit);
             Assert.AreEqual(board.Bombings[1].Item2, BombingResult.Miss);
@@ -196,10 +197,10 @@ namespace Tests
             board.AddBattleship((1,0), (1,1), ship2);
             var locations = board.GetBattleshipLocations();
             Assert.True(locations.Count == 4);
-            Assert.True(locations.Contains(board.GameBoard[0][0]));
-            Assert.True(locations.Contains(board.GameBoard[0][1]));
-            Assert.True(locations.Contains(board.GameBoard[1][0]));
-            Assert.True(locations.Contains(board.GameBoard[1][1]));
+            Assert.True(locations.Contains(board.Tiles[0][0]));
+            Assert.True(locations.Contains(board.Tiles[0][1]));
+            Assert.True(locations.Contains(board.Tiles[1][0]));
+            Assert.True(locations.Contains(board.Tiles[1][1]));
         }
     }
 }

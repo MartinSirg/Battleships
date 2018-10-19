@@ -16,3 +16,7 @@ C:\Projects Repositories\C#\Tests\obj\Debug\netcoreapp2.1\Tests.AssemblyInfo.cs
 C:\Projects Repositories\C#\Tests\obj\Debug\netcoreapp2.1\Tests.csproj.CopyComplete
 C:\Projects Repositories\C#\Tests\obj\Debug\netcoreapp2.1\Tests.dll
 C:\Projects Repositories\C#\Tests\obj\Debug\netcoreapp2.1\Tests.pdb
+C:\Projects Repositories\C#\Tests\bin\Debug\netcoreapp2.1\BLL.dll
+C:\Projects Repositories\C#\Tests\bin\Debug\netcoreapp2.1\UI.dll
+C:\Projects Repositories\C#\Tests\bin\Debug\netcoreapp2.1\UI.pdb
+C:\Projects Repositories\C#\Tests\bin\Debug\netcoreapp2.1\BLL.pdb

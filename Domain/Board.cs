@@ -6,7 +6,7 @@ namespace Domain
 {
     public class Board
     {
-        public List<List<Tile>> GameBoard { get; set; }
+        public List<List<Tile>> Tiles { get; set; }
         private List<Battleship> Battleships { get; set; } = new List<Battleship>();
         public List<(Tile, BombingResult)> Bombings { get; set; } = new List<(Tile, BombingResult)>();
         private bool CanTouch { get; set; }
@@ -17,13 +17,13 @@ namespace Domain
             MaxRow = totalRows - 1;
             MaxCol = totalCols - 1;
             CanTouch = canTouch;
-            GameBoard = new List<List<Tile>>(totalRows);
+            Tiles = new List<List<Tile>>(totalRows);
             for (var row = 0; row < totalRows; row++)
             {
-                GameBoard.Add(new List<Tile>(totalCols));
+                Tiles.Add(new List<Tile>(totalCols));
                 for (var col = 0; col < totalCols; col++)
                 {
-                    GameBoard[row].Add(new Tile(row, col, this));
+                    Tiles[row].Add(new Tile(row, col, this));
                 }
             }
         }
@@ -58,7 +58,7 @@ namespace Domain
 
             foreach (var coord in GetAllCoords((start.row, start.col), (end.row, end.col)))
             {
-                if (!GameBoard[coord.row][coord.col].IsEmpty())
+                if (!Tiles[coord.row][coord.col].IsEmpty())
                 {
                     throw new ArgumentException($"({coord.row} : {coord.col}) already contains a ship!");
                 }
@@ -70,10 +70,10 @@ namespace Domain
                 var neighbourTiles = new List<Tile>();
                 foreach (var coord in GetAllCoords((start.row, start.col), (end.row, end.col)))
                 {
-                    if (coord.col + 1 <= MaxCol) neighbourTiles.Add(GameBoard[coord.row][coord.col + 1]);
-                    if (coord.col - 1 <= 0)      neighbourTiles.Add(GameBoard[coord.row][coord.col - 1]);
-                    if (coord.row + 1 <= MaxRow) neighbourTiles.Add(GameBoard[coord.row + 1][coord.col]);
-                    if (coord.row - 1 <= 0)      neighbourTiles.Add(GameBoard[coord.row - 1][coord.col]);
+                    if (coord.col + 1 <= MaxCol) neighbourTiles.Add(Tiles[coord.row][coord.col + 1]);
+                    if (coord.col - 1 <= 0)      neighbourTiles.Add(Tiles[coord.row][coord.col - 1]);
+                    if (coord.row + 1 <= MaxRow) neighbourTiles.Add(Tiles[coord.row + 1][coord.col]);
+                    if (coord.row - 1 <= 0)      neighbourTiles.Add(Tiles[coord.row - 1][coord.col]);
                 }
 
                 foreach (var tile in neighbourTiles)
@@ -90,7 +90,7 @@ namespace Domain
             
             foreach (var coord in GetAllCoords(start:(start.row, start.col), end: (end.row, end.col)))
             {
-                var tile = GameBoard[coord.row][coord.col];
+                var tile = Tiles[coord.row][coord.col];
                 tile.Battleship = battleship;
                 battleship.Locations.Add(tile);
             }
@@ -114,12 +114,12 @@ namespace Domain
             
         public Battleship GetData(int row, int col)
         {
-            return GameBoard[row][col]?.Battleship;
+            return Tiles[row][col]?.Battleship;
         }
         
         public bool BombLocation(int row, int col)
         {
-            var targetTile = GameBoard[row][col];
+            var targetTile = Tiles[row][col];
             
             if (targetTile.IsBombed) throw new ArgumentException("This tile has been already bombed.");
 

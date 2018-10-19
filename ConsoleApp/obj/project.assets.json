@@ -207,6 +207,42 @@
         "build": {
           "build/netstandard2.0/NETStandard.Library.targets": {}
         }
+      },
+      "BLL/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/BLL.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/BLL.dll": {}
+        }
+      },
+      "Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "compile": {
+          "bin/placeholder/Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Domain.dll": {}
+        }
+      },
+      "UI/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "BLL": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/UI.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/UI.dll": {}
+        }
       }
     }
   },
@@ -673,11 +709,29 @@
         "netstandard.library.2.0.3.nupkg.sha512",
         "netstandard.library.nuspec"
       ]
+    },
+    "BLL/1.0.0": {
+      "type": "project",
+      "path": "../BLL/BLL.csproj",
+      "msbuildProject": "../BLL/BLL.csproj"
+    },
+    "Domain/1.0.0": {
+      "type": "project",
+      "path": "../Domain/Domain.csproj",
+      "msbuildProject": "../Domain/Domain.csproj"
+    },
+    "UI/1.0.0": {
+      "type": "project",
+      "path": "../UI/UI.csproj",
+      "msbuildProject": "../UI/UI.csproj"
     }
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v2.1": [
-      "Microsoft.NETCore.App >= 2.1.0"
+      "BLL >= 1.0.0",
+      "Domain >= 1.0.0",
+      "Microsoft.NETCore.App >= 2.1.0",
+      "UI >= 1.0.0"
     ]
   },
   "packageFolders": {
@@ -709,7 +763,17 @@
       },
       "frameworks": {
         "netcoreapp2.1": {
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Projects Repositories\\C#\\BLL\\BLL.csproj": {
+              "projectPath": "C:\\Projects Repositories\\C#\\BLL\\BLL.csproj"
+            },
+            "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj": {
+              "projectPath": "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj"
+            },
+            "C:\\Projects Repositories\\C#\\UI\\UI.csproj": {
+              "projectPath": "C:\\Projects Repositories\\C#\\UI\\UI.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
