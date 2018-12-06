@@ -1,10 +1,10 @@
 ﻿{
   "version": "1.0.0",
   "restore": {
-    "projectUniqueName": "C:\\Projects Repositories\\C#\\GameUI\\GameUI.csproj",
-    "projectName": "GameUI",
-    "projectPath": "C:\\Projects Repositories\\C#\\GameUI\\GameUI.csproj",
-    "outputPath": "C:\\Projects Repositories\\C#\\GameUI\\obj\\",
+    "projectUniqueName": "C:\\Projects Repositories\\C#\\DAL\\DAL.csproj",
+    "projectName": "DAL",
+    "projectPath": "C:\\Projects Repositories\\C#\\DAL\\DAL.csproj",
+    "outputPath": "C:\\Projects Repositories\\C#\\DAL\\obj\\",
     "projectStyle": "PackageReference",
     "fallbackFolders": [
       "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

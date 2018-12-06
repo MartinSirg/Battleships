@@ -7,8 +7,6 @@
         <e p="bin" t="ExcludeRecursive" />
         <e p="BLL.csproj" t="IncludeRecursive" />
         <e p="Game.cs" t="Include" />
-        <e p="IInput.cs" t="Include" />
-        <e p="LetterNumberSystem.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
             <e p="netstandard2.0" t="Include">
@@ -29,12 +27,27 @@
         </e>
         <e p="Program.cs" t="Include" />
       </e>
+      <e p="DAL" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="DAL.csproj" t="IncludeRecursive" />
+        <e p="DbContext.cs" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netstandard2.0" t="Include">
+              <e p="DAL.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+      </e>
       <e p="Domain" t="IncludeRecursive">
+        <e p="ActionEnum.cs" t="Include" />
         <e p="Battleship.cs" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="Board.cs" t="Include" />
         <e p="BombingResult.cs" t="Include" />
         <e p="Domain.csproj" t="IncludeRecursive" />
+        <e p="GameMoves.cs" t="Include" />
+        <e p="LetterNumberSystem.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
             <e p="netstandard2.0" t="Include">
@@ -45,6 +58,31 @@
         <e p="Player.cs" t="Include" />
         <e p="Rules.cs" t="Include" />
         <e p="Tile.cs" t="Include" />
+      </e>
+      <e p="Initializers" t="IncludeRecursive">
+        <e p="ApplicationMenu.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Initializers.csproj" t="IncludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netstandard2.0" t="Include">
+              <e p="Initializers.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+      </e>
+      <e p="MenuSystem" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Menu.cs" t="Include" />
+        <e p="MenuItem.cs" t="Include" />
+        <e p="MenuSystem.csproj" t="IncludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netstandard2.0" t="Include">
+              <e p="MenuSystem.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
       </e>
       <e p="packages" t="ExcludeRecursive" />
       <e p="Tests" t="IncludeRecursive">
@@ -63,6 +101,7 @@
       <e p="UI" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
         <e p="ConsoleUI.cs" t="Include" />
+        <e p="IUserInterface.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
             <e p="netstandard2.0" t="Include">

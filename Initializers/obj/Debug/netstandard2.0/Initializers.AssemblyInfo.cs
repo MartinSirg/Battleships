@@ -7,10 +7,10 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("GameUI")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("Initializers")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
-[assembly: System.Reflection.AssemblyProductAttribute("GameUI")]
-[assembly: System.Reflection.AssemblyTitleAttribute("GameUI")]
+[assembly: System.Reflection.AssemblyProductAttribute("Initializers")]
+[assembly: System.Reflection.AssemblyTitleAttribute("Initializers")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

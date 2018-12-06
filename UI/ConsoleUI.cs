@@ -1,13 +1,20 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
+using System.Threading;
 using BLL;
 using Domain;
+using MenuSystem;
 
 namespace UI
 {
-    public class ConsoleUI : IInput
+    public class ConsoleUI : IUserInterface
     {
         private LetterNumberSystem Letters { get; } = new LetterNumberSystem();
+        public Player CurrentPlayer { get; set; }
+        public Player TargetPlayer { get; set; }
+        public string ShipStartPoint { get; set; }
+        public string ShipEndPoint { get; set; }
         public int MaxWidth { get; set; }
         public int MaxHeight { get; set; }
         private string LeftPad { get; } = "            ";
@@ -153,6 +160,103 @@ namespace UI
         {
             Console.Write(message);
             return Console.ReadLine();
+        }
+
+        public string GetTargetLocation(Board enemyBoard)
+        {
+            Console.Clear();
+            PrintBombedLocations(enemyBoard);
+            Console.Write("Select target: ");
+            return Console.ReadLine();
+        }
+
+        public void ShowShipsAndBombings(Board enemy, Board current)
+        {
+            Console.Clear();
+            PrintBombedLocationsAndFriendlyShips(enemy, current);
+            Console.WriteLine("\nPress enter to go back.");
+            Console.ReadLine();
+        }
+
+        public void ShowBombingResult(BombingResult bombingResult, Board targetBoard)
+        {
+            Console.Clear();
+            PrintBombedLocations(targetBoard);
+            WaitForUser();
+            Console.Clear();
+        }
+
+        public bool AskExitConfirmation()
+        {
+            Console.Write("Are you sure you want to save and exit?(y/n):");
+            var input = Console.ReadLine().ToUpper();
+            while (!input.Equals("Y") && !input.Equals("N"))
+            {
+                Console.Write("Enter \"y\" or \"n\": ");
+                input = Console.ReadLine().ToUpper();
+            }
+
+            return input.Equals("Y");
+        }
+
+        public int GetShipSize()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int GetShipQuantity()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisplayRulesShips(IUserInterface ui)
+        {
+            
+        }
+
+        public void ShowBoardRules(IUserInterface obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ShowCurrentRules(IUserInterface obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisplayCurrentRules(IUserInterface obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisplayAvailableShips(Board currentPlayerBoard, Rules gameRules)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisplayCurrentShips(Board currentPlayerBoard)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetShipStartPoint(IUserInterface obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetShipEndPoint(IUserInterface obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Alert(string pleasePlaceAllShipsOnTheBoard)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void WaitForUser()
+        {
+            Thread.Sleep(2000);
         }
 
         private static string GetTableLine(int length)

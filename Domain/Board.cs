@@ -114,11 +114,19 @@ namespace Domain
             
         public Battleship GetData(int row, int col)
         {
+            if (row > Tiles.Count - 1 || col > Tiles[0].Count)
+            {
+                throw new ArgumentException("Out of range ");
+            }
             return Tiles[row][col]?.Battleship;
         }
         
         public bool BombLocation(int row, int col)
         {
+            if (row > Tiles.Count - 1 || col > Tiles[0].Count)
+            {
+                throw new ArgumentException("Out of range ");
+            }    
             var targetTile = Tiles[row][col];
             
             if (targetTile.IsBombed) throw new ArgumentException("This tile has been already bombed.");

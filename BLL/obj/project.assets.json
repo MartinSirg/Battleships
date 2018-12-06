@@ -35,6 +35,32 @@
         "runtime": {
           "bin/placeholder/Domain.dll": {}
         }
+      },
+      "MenuSystem/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/MenuSystem.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/MenuSystem.dll": {}
+        }
+      },
+      "UI/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/UI.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/UI.dll": {}
+        }
       }
     }
   },
@@ -183,12 +209,24 @@
       "type": "project",
       "path": "../Domain/Domain.csproj",
       "msbuildProject": "../Domain/Domain.csproj"
+    },
+    "MenuSystem/1.0.0": {
+      "type": "project",
+      "path": "../MenuSystem/MenuSystem.csproj",
+      "msbuildProject": "../MenuSystem/MenuSystem.csproj"
+    },
+    "UI/1.0.0": {
+      "type": "project",
+      "path": "../UI/UI.csproj",
+      "msbuildProject": "../UI/UI.csproj"
     }
   },
   "projectFileDependencyGroups": {
     ".NETStandard,Version=v2.0": [
       "Domain >= 1.0.0",
-      "NETStandard.Library >= 2.0.3"
+      "MenuSystem >= 1.0.0",
+      "NETStandard.Library >= 2.0.3",
+      "UI >= 1.0.0"
     ]
   },
   "packageFolders": {
@@ -223,6 +261,12 @@
           "projectReferences": {
             "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj": {
               "projectPath": "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj"
+            },
+            "C:\\Projects Repositories\\C#\\MenuSystem\\MenuSystem.csproj": {
+              "projectPath": "C:\\Projects Repositories\\C#\\MenuSystem\\MenuSystem.csproj"
+            },
+            "C:\\Projects Repositories\\C#\\UI\\UI.csproj": {
+              "projectPath": "C:\\Projects Repositories\\C#\\UI\\UI.csproj"
             }
           }
         }

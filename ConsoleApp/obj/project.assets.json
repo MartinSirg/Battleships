@@ -212,7 +212,9 @@
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
         "dependencies": {
-          "Domain": "1.0.0"
+          "Domain": "1.0.0",
+          "MenuSystem": "1.0.0",
+          "UI": "1.0.0"
         },
         "compile": {
           "bin/placeholder/BLL.dll": {}
@@ -231,11 +233,38 @@
           "bin/placeholder/Domain.dll": {}
         }
       },
+      "Initializers/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "BLL": "1.0.0",
+          "MenuSystem": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Initializers.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Initializers.dll": {}
+        }
+      },
+      "MenuSystem/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/MenuSystem.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/MenuSystem.dll": {}
+        }
+      },
       "UI/1.0.0": {
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
         "dependencies": {
-          "BLL": "1.0.0"
+          "Domain": "1.0.0"
         },
         "compile": {
           "bin/placeholder/UI.dll": {}
@@ -720,6 +749,16 @@
       "path": "../Domain/Domain.csproj",
       "msbuildProject": "../Domain/Domain.csproj"
     },
+    "Initializers/1.0.0": {
+      "type": "project",
+      "path": "../Initializers/Initializers.csproj",
+      "msbuildProject": "../Initializers/Initializers.csproj"
+    },
+    "MenuSystem/1.0.0": {
+      "type": "project",
+      "path": "../MenuSystem/MenuSystem.csproj",
+      "msbuildProject": "../MenuSystem/MenuSystem.csproj"
+    },
     "UI/1.0.0": {
       "type": "project",
       "path": "../UI/UI.csproj",
@@ -730,6 +769,8 @@
     ".NETCoreApp,Version=v2.1": [
       "BLL >= 1.0.0",
       "Domain >= 1.0.0",
+      "Initializers >= 1.0.0",
+      "MenuSystem >= 1.0.0",
       "Microsoft.NETCore.App >= 2.1.0",
       "UI >= 1.0.0"
     ]
@@ -769,6 +810,12 @@
             },
             "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj": {
               "projectPath": "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj"
+            },
+            "C:\\Projects Repositories\\C#\\Initializers\\Initializers.csproj": {
+              "projectPath": "C:\\Projects Repositories\\C#\\Initializers\\Initializers.csproj"
+            },
+            "C:\\Projects Repositories\\C#\\MenuSystem\\MenuSystem.csproj": {
+              "projectPath": "C:\\Projects Repositories\\C#\\MenuSystem\\MenuSystem.csproj"
             },
             "C:\\Projects Repositories\\C#\\UI\\UI.csproj": {
               "projectPath": "C:\\Projects Repositories\\C#\\UI\\UI.csproj"
