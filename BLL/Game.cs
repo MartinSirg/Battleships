@@ -246,5 +246,10 @@ namespace BLL
         {
             throw new NotImplementedException();
         }
+
+        public void ChangeMenuTitle(MenuEnum menuEnum)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
