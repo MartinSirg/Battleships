@@ -254,6 +254,21 @@ namespace UI
             throw new NotImplementedException();
         }
 
+        public string GetMenuShortcut()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisplayNewMenu(Menu menu)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IUserInterface.WaitForUser()
+        {
+            WaitForUser();
+        }
+
         private static void WaitForUser()
         {
             Thread.Sleep(2000);

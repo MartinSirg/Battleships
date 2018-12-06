@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Domain;
 using MenuSystem;
 
@@ -71,17 +72,20 @@ namespace BLL
             do
             {
                 //Check menu title name
-                Console.Clear();
-                Print();
-                var input = Console.ReadLine().ToUpper();
-                if (input == menu.Previous.Shortcut) return menu.Previous.Shortcut;
-                
-                var menuItem = menu.MenuItems.FirstOrDefault( (MenuItem m) => m.Shortcut == input);
+                UI.DisplayNewMenu(menu);        //TODO: vaata yle kas oleks m6tekam kokku viia need kaks meetodit
+                var chosenShortcut = UI.GetMenuShortcut().ToUpper();
+                if (chosenShortcut == menu.Previous.Shortcut) return menu.Previous.Shortcut;
+                if (chosenShortcut == "Q")
+                {
+                    //TODO: return to main menu  
+                } 
+
+                var menuItem = menu.MenuItems.FirstOrDefault(item => item.Shortcut.Equals(chosenShortcut));
                 if (menuItem == null)
                 {
-
-                    Console.WriteLine($"Incorrect choice: {input}");
-                    WaitForUser();
+                    
+                    UI.Alert("No such shortcut");
+                    UI.WaitForUser();
                     continue;
                 }
                 //TODO: check if commandtoexecute is not null
@@ -179,6 +183,66 @@ namespace BLL
         }
 
         public void ShowBoardRules()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ShowCurrentShips()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetTileOfDeleteableShip()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ShowCurrentRuleset()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ShowCurrentAndAvailableShips()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetShipStartTile()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetShipEndTile()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetPlayerNotReady() //Current player.ready = true vms
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetSelectedMode(string modeName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetPlayerReady()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Alert(string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void LoadGame()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string ReaplayGame()
         {
             throw new NotImplementedException();
         }

@@ -1,10 +1,10 @@
 ﻿{
   "version": "1.0.0",
   "restore": {
-    "projectUniqueName": "C:\\Projects Repositories\\C#\\UI\\UI.csproj",
+    "projectUniqueName": "C:\\Repos\\C#\\Battleships\\UI\\UI.csproj",
     "projectName": "UI",
-    "projectPath": "C:\\Projects Repositories\\C#\\UI\\UI.csproj",
-    "outputPath": "C:\\Projects Repositories\\C#\\UI\\obj\\",
+    "projectPath": "C:\\Repos\\C#\\Battleships\\UI\\UI.csproj",
+    "outputPath": "C:\\Repos\\C#\\Battleships\\UI\\obj\\",
     "projectStyle": "PackageReference",
     "fallbackFolders": [
       "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -15,8 +15,11 @@
     "frameworks": {
       "netstandard2.0": {
         "projectReferences": {
-          "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj": {
-            "projectPath": "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj"
+          "C:\\Repos\\C#\\Battleships\\Domain\\Domain.csproj": {
+            "projectPath": "C:\\Repos\\C#\\Battleships\\Domain\\Domain.csproj"
+          },
+          "C:\\Repos\\C#\\Battleships\\MenuSystem\\MenuSystem.csproj": {
+            "projectPath": "C:\\Repos\\C#\\Battleships\\MenuSystem\\MenuSystem.csproj"
           }
         }
       }

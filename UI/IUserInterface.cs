@@ -74,7 +74,15 @@ namespace MenuSystem
         void DisplayCurrentShips(Board currentPlayerBoard);
         
         string GetShipStartPoint(IUserInterface obj);
+        
         string GetShipEndPoint(IUserInterface obj);
+        
         void Alert(string pleasePlaceAllShipsOnTheBoard);
+        
+        string  GetMenuShortcut();
+        
+        void DisplayNewMenu(Menu menu);
+        
+        void WaitForUser();
     }
 }

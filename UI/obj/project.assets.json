@@ -35,6 +35,19 @@
         "runtime": {
           "bin/placeholder/Domain.dll": {}
         }
+      },
+      "MenuSystem/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/MenuSystem.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/MenuSystem.dll": {}
+        }
       }
     }
   },
@@ -183,46 +196,53 @@
       "type": "project",
       "path": "../Domain/Domain.csproj",
       "msbuildProject": "../Domain/Domain.csproj"
+    },
+    "MenuSystem/1.0.0": {
+      "type": "project",
+      "path": "../MenuSystem/MenuSystem.csproj",
+      "msbuildProject": "../MenuSystem/MenuSystem.csproj"
     }
   },
   "projectFileDependencyGroups": {
     ".NETStandard,Version=v2.0": [
       "Domain >= 1.0.0",
+      "MenuSystem >= 1.0.0",
       "NETStandard.Library >= 2.0.3"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\sirgm\\.nuget\\packages\\": {},
+    "C:\\Users\\User\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Projects Repositories\\C#\\UI\\UI.csproj",
+      "projectUniqueName": "C:\\Repos\\C#\\Battleships\\UI\\UI.csproj",
       "projectName": "UI",
-      "projectPath": "C:\\Projects Repositories\\C#\\UI\\UI.csproj",
-      "packagesPath": "C:\\Users\\sirgm\\.nuget\\packages\\",
-      "outputPath": "C:\\Projects Repositories\\C#\\UI\\obj\\",
+      "projectPath": "C:\\Repos\\C#\\Battleships\\UI\\UI.csproj",
+      "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
+      "outputPath": "C:\\Repos\\C#\\Battleships\\UI\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\sirgm\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "netstandard2.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "netstandard2.0": {
           "projectReferences": {
-            "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj": {
-              "projectPath": "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj"
+            "C:\\Repos\\C#\\Battleships\\Domain\\Domain.csproj": {
+              "projectPath": "C:\\Repos\\C#\\Battleships\\Domain\\Domain.csproj"
+            },
+            "C:\\Repos\\C#\\Battleships\\MenuSystem\\MenuSystem.csproj": {
+              "projectPath": "C:\\Repos\\C#\\Battleships\\MenuSystem\\MenuSystem.csproj"
             }
           }
         }

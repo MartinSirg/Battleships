@@ -117,13 +117,13 @@ namespace ConsoleApp
                     {
                         Shortcut = "1",
                         Description = "Ships",
-                        CommandToExecute = ui => ui.RunMenu(customShipsMenu)
+                        CommandToExecute = () => Game.RunMenu(customShipsMenu)
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Board",
-                        CommandToExecute = ui => ui.RunMenu(customBoardMenu)
+                        CommandToExecute = () => Game.RunMenu(customBoardMenu)
                     },
                     new MenuItem
                     {
@@ -142,14 +142,14 @@ namespace ConsoleApp
             var rulesMenu = new Menu
             {
                 Title ="Rules",
-                DisplayBefore = UI.DisplayCurrentRules,
+                DisplayBefore = Game.ShowCurrentRuleset,
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem
                     {
                         Shortcut = "1",
                         Description = "Set custom rules",
-                        CommandToExecute = ui => ui.RunMenu(customRulesMenu)
+                        CommandToExecute = () => Game.RunMenu(customRulesMenu)
                     },
                     new MenuItem
                     {
@@ -163,30 +163,26 @@ namespace ConsoleApp
             var addShipsToBoardMenu = new Menu
             {
                 Title = "Add ship to board",
-                DisplayBefore = ui =>
-                {
-                    ui.DisplayCurrentShips(Game.CurrentPlayer.Board);
-                    ui.DisplayAvailableShips(Game.CurrentPlayer.Board, Game.Rules);
-                },
+                DisplayBefore = Game.ShowCurrentAndAvailableShips,
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem
                     {
                         Shortcut = "1",
                         Description = "Select ship start point(example: D6)",
-                        CommandToExecute = UI.GetShipStartPoint
+                        CommandToExecute = Game.GetShipStartTile
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Select ship end point(example: D7)",
-                        CommandToExecute = UI.GetShipEndPoint
+                        CommandToExecute = Game.GetShipEndTile
                     },
                     new MenuItem
                     {
                         Shortcut = "3",
                         Description = "Confirm ship placement",
-                        CommandToExecute = Game.DeleteShipFromBoard
+                        CommandToExecute = Game.PlaceShipOnBoard
                     }
                 }
             };
@@ -194,46 +190,43 @@ namespace ConsoleApp
             var deleteShipFromBoardMenu = new Menu
             {
                 Title = "Delete ship",
-                DisplayBefore = ui =>
-                {
-                    ui.DisplayCurrentShips(Game.CurrentPlayer.Board);
-                },
+                DisplayBefore = Game.ShowCurrentShips,
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem
                     {
                         Shortcut = "1",
                         Description = "Select occupying tile(example: D6)",
-                        CommandToExecute = UI.GetShipStartPoint
+                        CommandToExecute = Game.GetTileOfDeleteableShip
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Confirm ship deletion(example: D7)",
-                        CommandToExecute = Game.PlaceShipOnBoard
+                        CommandToExecute = Game.DeleteShipFromBoard
                     }
                 }
             };
-            
-            var shipsMenu = new Menu
-            {
-                Title = "Ships",
-                MenuItems = new List<MenuItem>
-                {
-                    new MenuItem
-                    {
-                        Shortcut = "1",
-                        Description = "Add ships menu",
-                        CommandToExecute = ui => ui.RunMenu(addShipsToBoardMenu)
-                    },
-                    new MenuItem
-                    {
-                        Shortcut = "2",
-                        Description = "Delete ships menu",
-                        CommandToExecute = ui => ui.RunMenu(deleteShipFromBoardMenu)
-                    }
-                }
-            };
+//            
+//            var shipsMenu = new Menu
+//            {
+//                Title = "Ships",
+//                MenuItems = new List<MenuItem>
+//                {
+//                    new MenuItem
+//                    {
+//                        Shortcut = "1",
+//                        Description = "Add ships menu",
+//                        CommandToExecute = ui => ui.RunMenu(addShipsToBoardMenu)
+//                    },
+//                    new MenuItem
+//                    {
+//                        Shortcut = "2",
+//                        Description = "Delete ships menu",
+//                        CommandToExecute = ui => ui.RunMenu(deleteShipFromBoardMenu)
+//                    }
+//                }
+//            };
             var playerMenu = new Menu
             {
                 Title = "' menu",
@@ -244,13 +237,13 @@ namespace ConsoleApp
                     {
                         Shortcut = "1",
                         Description = "Add ships menu",
-                        CommandToExecute = ui => ui.RunMenu(addShipsToBoardMenu)
+                        CommandToExecute = () => Game.RunMenu(addShipsToBoardMenu)
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Delete ships menu",
-                        CommandToExecute = ui => ui.RunMenu(deleteShipFromBoardMenu)
+                        CommandToExecute = () => Game.RunMenu(deleteShipFromBoardMenu)
                     },
                     new MenuItem
                     {
@@ -262,8 +255,9 @@ namespace ConsoleApp
                     {
                         Shortcut = "4",
                         Description = "Finished!",
-                        CommandToExecute = ui =>
+                        CommandToExecute = () =>
                         {
+                            Game.SetPlayerReady();
                             PlayersReady++;
                             return "FINISHED";
                         }
@@ -280,50 +274,53 @@ namespace ConsoleApp
                     {
                         Shortcut = "1",
                         Description = "Set game rules",
-                        CommandToExecute = ui => ui.RunMenu(rulesMenu)
+                        CommandToExecute = () => Game.RunMenu(rulesMenu)
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Single player",
-                        CommandToExecute = ui =>
+                        CommandToExecute = () =>
                         {
-                            SinglePlayerSelected = true;
-                            MultiPlayerSelected = false;
-                            if (PlayersReady > 0) PlayersReady = 0;
-                            ui.RunMenu(playerMenu);
-                            return "";
+                            Game.SetPlayerNotReady();
+                            Game.SetSelectedMode("SP");    //TODO: Enumiks teha parameeter
+                            return Game.RunMenu(playerMenu);
                         }
                     },
                     new MenuItem
                     {
                         Shortcut = "3",
                         Description = "Multi player",
-                        CommandToExecute = ui =>
+                        CommandToExecute = () =>
                         {
-                            SinglePlayerSelected = false;
-                            MultiPlayerSelected = true;
-                            if (PlayersReady > 0) PlayersReady = 0;
-                            ui.RunMenu(playerMenu);
+                            Game.SetSelectedMode("MP");
+                            
+                            Game.SetPlayerNotReady();
+                            var selected = Game.RunMenu(playerMenu);
+                            
                             Game.SwitchCurrentPlayer();
-                            ui.RunMenu(playerMenu);
-                            return "";
+                            Game.SetPlayerNotReady();
+                            var selected2 = Game.RunMenu(playerMenu);
+                            return "";    //TODO: maybe do sth with selected values
                         }
                     },
                     new MenuItem
                     {
                         Shortcut = "4",
                         Description = "Start game",
-                        CommandToExecute = ui =>
+                        CommandToExecute = () =>
                         {
                             var ready = Game.CheckIfCanStartGame();
-                            if (!ready) ui.Alert("Please place all ships on the board");
+                            if (!ready)
+                            {
+                                Game.Alert("Please place all ships on the board");
+                                return "";
+                            }
                             else
                             {
-                                PlayersReady = 0;
-                                ui.RunMenu(inGameMenu);
+                                Game.RunMenu(inGameMenu);  //Game starts and ends here, TODO: reset all objects maybe
+                                return "RETURN TO MAIN";
                             }
-                            return "";
                         }
                     }
                 }
@@ -333,11 +330,35 @@ namespace ConsoleApp
             var mainMenu = new Menu
             {
                 Title = "Main menu",
-                MenuItems = new List<MenuItem>()
+                MenuItems = new List<MenuItem>
+                {
+                    new MenuItem
+                    {
+                        Shortcut = "1",
+                        Description = "New game",
+                        CommandToExecute = () => Game.RunMenu(newGameMenu)
+                    },
+                    new MenuItem
+                    {
+                        Shortcut = "2",
+                        Description = "Load game",
+                        CommandToExecute = () =>
+                        {
+                            Game.LoadGame();
+                            return Game.RunMenu(inGameMenu);
+                        }
+                    },
+                    new MenuItem
+                    {
+                        Shortcut = "3",
+                        Description = "Replay finished game",
+                        CommandToExecute = Game.ReaplayGame
+                    }
+                }
                 
             };
             
-            return rulesMenu;
+            return mainMenu;
         }
         
         

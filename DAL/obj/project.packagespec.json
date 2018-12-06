@@ -1,10 +1,10 @@
 ﻿{
   "version": "1.0.0",
   "restore": {
-    "projectUniqueName": "C:\\Projects Repositories\\C#\\DAL\\DAL.csproj",
+    "projectUniqueName": "C:\\Repos\\C#\\Battleships\\DAL\\DAL.csproj",
     "projectName": "DAL",
-    "projectPath": "C:\\Projects Repositories\\C#\\DAL\\DAL.csproj",
-    "outputPath": "C:\\Projects Repositories\\C#\\DAL\\obj\\",
+    "projectPath": "C:\\Repos\\C#\\Battleships\\DAL\\DAL.csproj",
+    "outputPath": "C:\\Repos\\C#\\Battleships\\DAL\\obj\\",
     "projectStyle": "PackageReference",
     "fallbackFolders": [
       "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

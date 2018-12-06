@@ -7,7 +7,7 @@ namespace MenuSystem
 {
     public class Menu
     {
-        public string NameInTitle = "";
+        public string NameInTitle = ""; //TODO: Needs better solution for variable menu title
         public string Title { get; set; }
         public Action DisplayBefore;
         public List<MenuItem> MenuItems { get; set; }
