@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -158,7 +159,7 @@ namespace UI
 
         public string GetString(string message)
         {
-            Console.Write(message);
+            Console.Write($"{message}: ");
             return Console.ReadLine();
         }
 
@@ -182,7 +183,7 @@ namespace UI
         {
             Console.Clear();
             PrintBombedLocations(targetBoard);
-            WaitForUser();
+            ;
             Console.Clear();
         }
 
@@ -249,29 +250,45 @@ namespace UI
             throw new NotImplementedException();
         }
 
-        public void Alert(string pleasePlaceAllShipsOnTheBoard)
+        public void Alert(string alert, int waitTime)
         {
-            throw new NotImplementedException();
+            Console.Beep();
+            Console.WriteLine(alert);
+            Thread.Sleep(waitTime);
         }
 
         public string GetMenuShortcut()
         {
-            throw new NotImplementedException();
+            Console.Write("Enter command: ");
+            return Console.ReadLine();
         }
 
         public void DisplayNewMenu(Menu menu)
         {
-            throw new NotImplementedException();
+            Console.Clear();
+            Console.WriteLine(menu.Title);
+            for (int i = 0; i < menu.Title.Length; i++) Console.Write("-");
+            Console.WriteLine();
+            menu.MenuItems.ForEach(item => Console.WriteLine($"{item.Shortcut}) {item.Description}"));
+            Console.WriteLine($"{menu.Previous.Shortcut}) {menu.Previous.Description}");
         }
 
-        void IUserInterface.WaitForUser()
+        public void WaitForUser()
         {
-            WaitForUser();
+            Thread.Sleep(1000);
         }
 
-        private static void WaitForUser()
+        public string GetSaveGameName()
         {
-            Thread.Sleep(2000);
+            Console.Write("Enter a name for the save game: ");
+            return Console.ReadLine();
+        }
+
+        public void DisplaySavedGames(List<string> names)
+        {
+            Console.Clear();
+            int counter = 1;
+            names.ForEach(s => Console.WriteLine($"{counter++}. {s}"));
         }
 
         private static string GetTableLine(int length)

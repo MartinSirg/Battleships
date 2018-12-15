@@ -14,7 +14,11 @@
     ],
     "frameworks": {
       "netstandard2.0": {
-        "projectReferences": {}
+        "projectReferences": {
+          "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj": {
+            "projectPath": "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj"
+          }
+        }
       }
     },
     "warningProperties": {

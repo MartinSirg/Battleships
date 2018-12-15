@@ -7,8 +7,8 @@ namespace MenuSystem
 {
     public class Menu
     {
-        public string NameInTitle = ""; //TODO: Needs better solution for variable menu title
         public string Title { get; set; }
+        public string TitleWithName;
         public Action DisplayBefore;
         public List<MenuItem> MenuItems { get; set; }
         public MenuItem Previous { get; set; } = new MenuItem()
@@ -16,26 +16,5 @@ namespace MenuSystem
             Shortcut = "X",
             Description = "Previous menu"
         };
-
-        public void Print()
-        {
-            StringBuilder sb = new StringBuilder();
-            if (NameInTitle.Length > 0)
-            {
-                sb.Append($"-------{NameInTitle + Title}-------\n");
-            }
-            else
-            {
-                sb.Append($"-------{Title}-------\n");
-            }
-            foreach (var menuItem in MenuItems)
-            {
-                sb.Append($"{menuItem.Shortcut}) {menuItem.Description}\n");
-            }
-
-            sb.Append("----------------------------\n");
-            sb.Append($"{Previous.Shortcut}) {Previous.Description}");
-            Console.WriteLine(sb.ToString());
-        }
     }
 }

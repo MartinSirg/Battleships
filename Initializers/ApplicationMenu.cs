@@ -12,9 +12,6 @@ namespace ConsoleApp
     {
         public Game Game { get; set; }
         public Menu MainMenu { get; set; }
-        public bool SinglePlayerSelected { get; set; } = false;
-        public bool MultiPlayerSelected { get; set; } = false;
-        public int PlayersReady { get; set; } = 0;
 
         public ApplicationMenu(Game game)
         {
@@ -27,8 +24,8 @@ namespace ConsoleApp
         {
             var inGameMenu = new Menu
             {
-                NameInTitle = Game.CurrentPlayer.Name,
-                Title = "'s turn",
+                Title = "CHANGE ME!!!",
+                TitleWithName = "PLAYER_NAME's turn",
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem
@@ -52,7 +49,7 @@ namespace ConsoleApp
                 }
             };
             
-            var customShipsMenu =new Menu
+            var customShipsMenu = new Menu
             {
                 Title = "Customize your ships",
                 DisplayBefore = Game.DisplayRulesShips,
@@ -162,7 +159,8 @@ namespace ConsoleApp
             
             var addShipsToBoardMenu = new Menu
             {
-                Title = "Add ship to board",
+                Title = "CHANGE ME!!!",
+                TitleWithName = "Add ship to PLAYER_NAME's board",
                 DisplayBefore = Game.ShowCurrentAndAvailableShips,
                 MenuItems = new List<MenuItem>
                 {
@@ -229,8 +227,8 @@ namespace ConsoleApp
 //            };
             var playerMenu = new Menu
             {
-                Title = "' menu",
-                NameInTitle = Game.CurrentPlayer.Name,
+                Title = "CHANGE ME!!!!",
+                TitleWithName = "PLAYER_NAME's menu",
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem
@@ -258,7 +256,6 @@ namespace ConsoleApp
                         CommandToExecute = () =>
                         {
                             Game.SetPlayerReady();
-                            PlayersReady++;
                             return "FINISHED";
                         }
                     }
@@ -296,11 +293,14 @@ namespace ConsoleApp
                             Game.SetSelectedMode("MP");
                             
                             Game.SetPlayerNotReady();
+                            playerMenu.Title = $"{Game.CurrentPlayer.Name}'s menu";
                             var selected = Game.RunMenu(playerMenu);
                             
                             Game.SwitchCurrentPlayer();
                             Game.SetPlayerNotReady();
+                            playerMenu.Title = $"{Game.CurrentPlayer.Name}'s menu";
                             var selected2 = Game.RunMenu(playerMenu);
+                            Game.SwitchCurrentPlayer();
                             return "";    //TODO: maybe do sth with selected values
                         }
                     },
@@ -313,14 +313,13 @@ namespace ConsoleApp
                             var ready = Game.CheckIfCanStartGame();
                             if (!ready)
                             {
-                                Game.Alert("Please place all ships on the board");
-                                return "";
+                                Game.Alert("Not ready", 1000);
+                                return ""; 
                             }
-                            else
-                            {
-                                Game.RunMenu(inGameMenu);  //Game starts and ends here, TODO: reset all objects maybe
-                                return "RETURN TO MAIN";
-                            }
+
+                            inGameMenu.Title = $"{Game.CurrentPlayer.Name}'s turn";
+                            Game.RunMenu(inGameMenu);  //Game starts and ends here, TODO: reset all objects maybe
+                            return "Q";
                         }
                     }
                 }
@@ -336,7 +335,11 @@ namespace ConsoleApp
                     {
                         Shortcut = "1",
                         Description = "New game",
-                        CommandToExecute = () => Game.RunMenu(newGameMenu)
+                        CommandToExecute = () =>
+                        {
+                            Game.NewGame();
+                            return Game.RunMenu(newGameMenu);
+                        }
                     },
                     new MenuItem
                     {
@@ -344,7 +347,9 @@ namespace ConsoleApp
                         Description = "Load game",
                         CommandToExecute = () =>
                         {
-                            Game.LoadGame();
+                            var loadResult = Game.LoadGame();
+                            if (loadResult.Equals("Q")) return "Q";
+                            inGameMenu.Title = $"{Game.CurrentPlayer.Name}'s turn";
                             return Game.RunMenu(inGameMenu);
                         }
                     },
@@ -352,7 +357,7 @@ namespace ConsoleApp
                     {
                         Shortcut = "3",
                         Description = "Replay finished game",
-                        CommandToExecute = Game.ReaplayGame
+                        CommandToExecute = Game.ReplayGame
                     }
                 }
                 

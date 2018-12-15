@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using DAL;
 using Domain;
 using MenuSystem;
 
@@ -16,11 +18,14 @@ namespace BLL
         public GameMoves GameMoves = new GameMoves();
         private LetterNumberSystem Converter = new LetterNumberSystem();
         private IUserInterface UI;
+        private DbContext DbContext;
+        public string SelectedMode { get; set; }
 
-        public Game(IUserInterface ui)
+        public Game(IUserInterface ui, DbContext dbContext)
         {
             Rules = Rules.GetDefaultRules();
             UI = ui;
+            DbContext = dbContext;
             var board1 = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
             var board2 = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
             
@@ -61,7 +66,9 @@ namespace BLL
             CurrentPlayer = temp;
             UI.CurrentPlayer = CurrentPlayer;
             UI.TargetPlayer = TargetPlayer;
-            return "";
+            
+            //TODO: check if anyone has won!
+            return "CHANGE NAME";
         }
         
         //TODO: Generate battleships for board
@@ -72,26 +79,47 @@ namespace BLL
             do
             {
                 //Check menu title name
-                UI.DisplayNewMenu(menu);        //TODO: vaata yle kas oleks m6tekam kokku viia need kaks meetodit
+                UI.DisplayNewMenu(menu);
                 var chosenShortcut = UI.GetMenuShortcut().ToUpper();
                 if (chosenShortcut == menu.Previous.Shortcut) return menu.Previous.Shortcut;
-                if (chosenShortcut == "Q")
+                if (chosenShortcut == "Q" && !menu.Title.Equals("Main menu"))
                 {
-                    //TODO: return to main menu  
+                    //TODO: more checks(not in game)
+                    return "Q";
+
                 } 
 
                 var menuItem = menu.MenuItems.FirstOrDefault(item => item.Shortcut.Equals(chosenShortcut));
                 if (menuItem == null)
                 {
                     
-                    UI.Alert("No such shortcut");
-                    UI.WaitForUser();
+                    UI.Alert("No such shortcut", 500);
                     continue;
                 }
-                //TODO: check if commandtoexecute is not null
 
-                var commandChosen = menuItem.CommandToExecute();
-                menu.NameInTitle = CurrentPlayer.Name;
+                if (menuItem.CommandToExecute == null)
+                {
+                    UI.Alert("Command not specified", 500);
+                    continue;
+                    
+                }
+
+                var postActionCommand = menuItem.CommandToExecute();
+                if (postActionCommand.Equals("Q") && !menu.Title.Equals("Main menu"))
+                {
+                    return "Q";
+                }
+                if (postActionCommand.Equals("FINISHED"))
+                {
+                    break;
+                }
+
+                if (postActionCommand.Equals("CHANGE NAME"))
+                {
+                    String namedTitle = menu.TitleWithName;
+                    menu.Title = namedTitle.Replace("PLAYER_NAME", CurrentPlayer.Name);
+                }
+//                menu.NameInTitle = CurrentPlayer.Name;
             } while (!done);
 
             return "";
@@ -99,7 +127,31 @@ namespace BLL
 
         public string SaveGame()
         {
-            throw new NotImplementedException();
+            DbContext.Rules.Add(Rules);
+            DbContext.Boards.Add(Player1.Board);
+            DbContext.Boards.Add(Player2.Board);
+            DbContext.Players.Add(Player1);
+            DbContext.Players.Add(Player2);
+            DbContext.GameMoves.Add(GameMoves);
+            string name = UI.GetSaveGameName();
+            while (DbContext.TotalGame.Exists(tuple => tuple.name.Equals(name)))
+            {
+                UI.Alert($"Enter a different name {name} is already taken.", 0);
+                name = UI.GetSaveGameName();
+            }
+            
+            DbContext.TotalGame.Add((
+                name,
+                DbContext.GameMoves.FindIndex(moves => moves == GameMoves),
+                DbContext.Players.FindIndex(player => player == Player1),
+                DbContext.Players.FindIndex(player => player == Player2),
+                DbContext.Boards.FindIndex(board => board == Player1.Board),
+                DbContext.Boards.FindIndex(board => board == Player2.Board),
+                DbContext.Rules.FindIndex(rules => rules == Rules)
+                ));
+            CurrentPlayer = new Player(new Board(), "Player 1" );
+            TargetPlayer = new Player(new Board(), "Player 2" );
+            return "Q";
         }
 
         public string AddShipToRules()
@@ -159,22 +211,35 @@ namespace BLL
 
         public string ChangePlayersName()
         {
-            throw new NotImplementedException();
+            CurrentPlayer.Name = UI.GetString("Enter your name");
+            return "CHANGE NAME";
         }
 
-        public string SwitchCurrentPlayer()
+        public void SwitchCurrentPlayer()
         {
-            throw new NotImplementedException();
+            Player temp = CurrentPlayer;
+            CurrentPlayer = TargetPlayer;
+            TargetPlayer = temp;
         }
 
         public bool CheckIfCanStartGame()
         {
-            throw new NotImplementedException();
+            if (SelectedMode == null)
+            {
+                UI.Alert("Game mode is not selected", 1000);
+                return false;
+            }
+            
+            //TODO: check if all ships have been placed
+            
+            if (SelectedMode.Equals("SP")) return CurrentPlayer.IsReady;
+            return CurrentPlayer.IsReady && TargetPlayer.IsReady;
         }
 
         public string ShowShipsAndBombings()
         {
-            throw new NotImplementedException();
+            UI.ShowShipsAndBombings(TargetPlayer.Board, CurrentPlayer.Board);
+            return "";
         }
 
         public void DisplayRulesShips()
@@ -219,37 +284,97 @@ namespace BLL
 
         public void SetPlayerNotReady() //Current player.ready = true vms
         {
-            throw new NotImplementedException();
+            CurrentPlayer.IsReady = false;
         }
 
         public void SetSelectedMode(string modeName)
         {
-            throw new NotImplementedException();
+            switch (modeName)
+            {
+                    case "MP" : 
+                        SelectedMode = "MP";
+                        break;
+                    case "SP" :
+                        SelectedMode = "SP";
+                        break;
+                    default:
+                        throw new Exception("Unknown exception at Game.SetSelectedMode");
+            }
         }
+
+        
 
         public void SetPlayerReady()
         {
-            throw new NotImplementedException();
+            CurrentPlayer.IsReady = true;
         }
 
-        public void Alert(string message)
+        public void Alert(string message, int waitTime)
+        {
+            UI.Alert(message, waitTime);
+        }
+
+        public string LoadGame()
+        {
+            List<string> names = new List<string>();
+            DbContext.TotalGame.ForEach(tuple => names.Add(tuple.name));
+            UI.DisplaySavedGames(names);
+            int num;
+            while (true)
+            {
+                string saveGameNumber = UI.GetString("Enter saved game number or Q to go back");
+
+                if (saveGameNumber.ToUpper().Equals("Q")) return "Q";
+                if (!int.TryParse(saveGameNumber, out num))
+                {
+                    UI.Alert("Not a number", 0);
+                    continue;
+                }
+
+                if (int.Parse(saveGameNumber) <= 0 || int.Parse(saveGameNumber) > names.Count)
+                {
+                    UI.Alert("No such save game number", 0);
+                    continue;
+                }
+                break;
+            }
+
+            (string name, int gameMoves, int player1, int player2, int p1board, int p2board, int rules) totalgame =
+                DbContext.TotalGame[num - 1];
+            Player1 = DbContext.Players[totalgame.player1];
+            Player2 = DbContext.Players[totalgame.player2];
+            Rules = DbContext.Rules[totalgame.rules];
+            GameMoves = DbContext.GameMoves[totalgame.gameMoves];
+            if (GameMoves.Moves.Count == 0)
+            {
+                TargetPlayer = Player2;
+                CurrentPlayer = Player1;
+            }
+            else
+            {
+                CurrentPlayer = GameMoves.Moves[GameMoves.Moves.Count - 1].target;
+                TargetPlayer = CurrentPlayer == Player1 ? Player2 : Player1;
+            }
+
+            return "";
+        }
+
+        public string ReplayGame()
         {
             throw new NotImplementedException();
         }
 
-        public void LoadGame()
+//        public void ChangeMenuTitle(MenuEnum menuEnum)
+//        {
+//            throw new NotImplementedException();
+//        }
+        public void NewGame()
         {
-            throw new NotImplementedException();
-        }
-
-        public string ReaplayGame()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ChangeMenuTitle(MenuEnum menuEnum)
-        {
-            throw new NotImplementedException();
+            Board board1 = new Board(), board2 = new Board();
+            Player1 = new Player(board1, "Player 1");
+            Player2 = new Player(board2, "Player 2");
+            CurrentPlayer = Player1;
+            TargetPlayer = Player2;
         }
     }
 }

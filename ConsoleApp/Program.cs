@@ -1,5 +1,6 @@
 ﻿using System;
 using BLL;
+using DAL;
 using Domain;
 using MenuSystem;
 using UI;
@@ -25,7 +26,15 @@ namespace ConsoleApp
 //            ui.PrintBombedLocationsAndFriendlyShips(board, board);
 //            Console.ReadLine();
             IUserInterface ui = new ConsoleUI();
-            Game game = new Game(ui);
+            DbContext dbContext = new DbContext();
+            dbContext.Boards.Add(new Board());
+            dbContext.Boards.Add(new Board());
+            dbContext.Players.Add(new Player(dbContext.Boards[0], "Player 1"));
+            dbContext.Players.Add(new Player(dbContext.Boards[1], "Player 2"));
+            dbContext.GameMoves.Add(new GameMoves());
+            dbContext.Rules.Add(Rules.GetDefaultRules());
+            dbContext.TotalGame.Add((name: "sample1", gameMoves: 0, player1: 0, player2: 1, p1board: 0, p2board: 1, rules: 0));
+            Game game = new Game(ui, dbContext);
             
             ApplicationMenu applicationMenu = new ApplicationMenu(game);
             Menu main = applicationMenu.GetMain();

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Domain;
 
 namespace MenuSystem
@@ -77,12 +78,16 @@ namespace MenuSystem
         
         string GetShipEndPoint(IUserInterface obj);
         
-        void Alert(string pleasePlaceAllShipsOnTheBoard);
+        void Alert(string alert, int waitTime);
         
         string  GetMenuShortcut();
         
         void DisplayNewMenu(Menu menu);
         
         void WaitForUser();
+        
+        string GetSaveGameName();
+        
+        void DisplaySavedGames(List<string> names);
     }
 }

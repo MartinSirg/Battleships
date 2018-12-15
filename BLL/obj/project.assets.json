@@ -26,6 +26,19 @@
           "build/netstandard2.0/NETStandard.Library.targets": {}
         }
       },
+      "DAL/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "dependencies": {
+          "Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/DAL.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DAL.dll": {}
+        }
+      },
       "Domain/1.0.0": {
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
@@ -206,6 +219,11 @@
         "netstandard.library.nuspec"
       ]
     },
+    "DAL/1.0.0": {
+      "type": "project",
+      "path": "../DAL/DAL.csproj",
+      "msbuildProject": "../DAL/DAL.csproj"
+    },
     "Domain/1.0.0": {
       "type": "project",
       "path": "../Domain/Domain.csproj",
@@ -224,6 +242,7 @@
   },
   "projectFileDependencyGroups": {
     ".NETStandard,Version=v2.0": [
+      "DAL >= 1.0.0",
       "Domain >= 1.0.0",
       "MenuSystem >= 1.0.0",
       "NETStandard.Library >= 2.0.3",
@@ -260,6 +279,9 @@
       "frameworks": {
         "netstandard2.0": {
           "projectReferences": {
+            "C:\\Projects Repositories\\C#\\DAL\\DAL.csproj": {
+              "projectPath": "C:\\Projects Repositories\\C#\\DAL\\DAL.csproj"
+            },
             "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj": {
               "projectPath": "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj"
             },
