@@ -177,5 +177,12 @@ namespace Domain
             }
             return false;
         }
+
+        public void DeleteShipFromBoard(Tile tile)
+        {
+            if (tile.IsEmpty()) return;
+            tile.Battleship.Locations.ForEach(tile1 => tile1.Battleship = null);
+            tile.Battleship = null;
+        }
     }
 }

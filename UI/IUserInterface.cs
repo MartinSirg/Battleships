@@ -72,7 +72,7 @@ namespace MenuSystem
         
         void DisplayAvailableShips(Board currentPlayerBoard, Rules gameRules);
         
-        void DisplayCurrentShips(Board currentPlayerBoard);
+        void DisplayCurrentShips(Board currentPlayerBoard, string type);
         
         string GetShipStartPoint();
         
@@ -89,5 +89,7 @@ namespace MenuSystem
         string GetSaveGameName();
         
         void DisplaySavedGames(List<string> names);
+        
+        string GetDeletableShipTile();
     }
 }

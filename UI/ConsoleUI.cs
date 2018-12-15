@@ -115,7 +115,7 @@ namespace UI
             Console.Write(sb.ToString());
         }
 
-        public void PrintFriendlyShips(Board currentBoard)
+        public void PrintFriendlyShipsAdding(Board currentBoard)
         {
             var sb = new StringBuilder();
             var line = GetTableLine(currentBoard.Tiles[0].Count);
@@ -171,7 +171,7 @@ namespace UI
         {
             Console.Clear();
             PrintBombedLocations(enemyBoard);
-            Console.Write("Select target: ");
+            Console.Write("Select target(or \"back\"): ");
             return Console.ReadLine().ToUpper();
         }
 
@@ -242,20 +242,93 @@ namespace UI
             boats.ToList().ForEach(pair => Console.WriteLine($"Size: {pair.Key} - {pair.Value} available"));
         }
 
-        public void DisplayCurrentShips(Board currentPlayerBoard)
+        public void DisplayCurrentShips(Board currentPlayerBoard, string type)
         {
-            PrintFriendlyShips(currentPlayerBoard);
+            switch (type)
+            {
+                    case "REGULAR":
+                        PrintFriendlyShips(currentPlayerBoard);
+                        break;
+                    case "ADDING":
+                        PrintFriendlyShipsAdding(currentPlayerBoard);
+                        break;
+                    case "DELETING":
+                        PrintFriendlyShipsDeleting(currentPlayerBoard);
+                        break;
+                    default:
+                        Alert("UNKNOWN ERROR in DisplayCurrentShips in ConsoleUI", 5000);
+                        break;
+            }
+        }
+
+        private void PrintFriendlyShipsDeleting(Board currentBoard)
+        {
+            var sb = new StringBuilder();
+            var line = GetTableLine(currentBoard.Tiles[0].Count);
+            sb.Append(LeftPad).Append("   ").Append("Your ships:\n");
+            sb.Append(LeftPad).Append("   ").Append(GetTopNumbersLine(currentBoard.Tiles[0].Count)).Append("\n");
+            sb.Append(LeftPad).Append("   ").Append(line).Append("\n");
+            for (var index = 0; index < currentBoard.Tiles.Count; index++)
+            {
+                var row = currentBoard.Tiles[index];
+                sb.Append(LeftPad).Append(Letters.GetLetter(index + 1).PadLeft(2)).Append(" |");
+                foreach (var tile in row)
+                {
+                    if (tile.IsHighlightedStart) sb.PrintInColor(" - ", ConsoleColor.Red);
+                    else if (tile.IsEmpty()) sb.Append("   ");
+                    else sb.PrintInColor(" + ", ConsoleColor.Green);
+
+                    sb.Append("|");
+                }
+
+                sb.Append("\n").Append(LeftPad).Append("   ").Append(line).Append("\n");
+            }
+            
+            sb.Append("\n").Append(LeftPad).Append(" ");
+            sb.PrintInColor(" + ", ConsoleColor.Green).Append(" : Placed ship tile\n").Append(LeftPad).Append(" ");
+            sb.PrintInColor(" - ", ConsoleColor.Red).Append(" : Selected tile of deletable ship \n");
+
+            Console.WriteLine(sb.ToString());
+        }
+
+        private void PrintFriendlyShips(Board currentBoard)
+        {
+            var sb = new StringBuilder();
+            var line = GetTableLine(currentBoard.Tiles[0].Count);
+            sb.Append(LeftPad).Append("   ").Append("Your ships:\n");
+            sb.Append(LeftPad).Append("   ").Append(GetTopNumbersLine(currentBoard.Tiles[0].Count)).Append("\n");
+            sb.Append(LeftPad).Append("   ").Append(line).Append("\n");
+            for (var index = 0; index < currentBoard.Tiles.Count; index++)
+            {
+                var row = currentBoard.Tiles[index];
+                sb.Append(LeftPad).Append(Letters.GetLetter(index + 1).PadLeft(2)).Append(" |");
+                foreach (var tile in row)
+                {
+                    if (tile.IsEmpty()) sb.Append("   ");
+                    else if (tile.IsBombed) sb.PrintInColor(" - ", ConsoleColor.Red);
+                    else sb.PrintInColor(" + ", ConsoleColor.Green);
+
+                    sb.Append("|");
+                }
+
+                sb.Append("\n").Append(LeftPad).Append("   ").Append(line).Append("\n");
+            }
+            
+            sb.Append("\n").Append(LeftPad).Append(" ");
+            sb.PrintInColor(" + ", ConsoleColor.Green).Append(" : Placed ship tile\n").Append(LeftPad).Append(" ");
+
+            Console.WriteLine(sb.ToString());
         }
 
         public string GetShipStartPoint()
         {
-            Console.Write("Enter ship start tile: ");
+            Console.Write("Enter ship start tile(or \"back\"): ");
             return Console.ReadLine().ToUpper();
         }
 
         public string GetShipEndPoint()
         {
-            Console.Write("Enter ship end tile: ");
+            Console.Write("Enter ship end tile(or \"back\"): ");
             return Console.ReadLine().ToUpper();
         }
 
@@ -289,7 +362,7 @@ namespace UI
 
         public string GetSaveGameName()
         {
-            Console.Write("Enter a name for the save game: ");
+            Console.Write("Enter a name for the save game(or \"back\"): ");
             return Console.ReadLine();
         }
 
@@ -298,6 +371,12 @@ namespace UI
             Console.Clear();
             int counter = 1;
             names.ForEach(s => Console.WriteLine($"{counter++}. {s}"));
+        }
+
+        public string GetDeletableShipTile()
+        {
+            Console.Write("Enter a tile occupying a ship you wish to delete(or \"back\"): ");
+            return Console.ReadLine().ToUpper();
         }
 
         private static string GetTableLine(int length)

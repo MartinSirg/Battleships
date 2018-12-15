@@ -188,7 +188,7 @@ namespace ConsoleApp
             var deleteShipFromBoardMenu = new Menu
             {
                 Title = "Delete ship",
-                DisplayBefore = Game.ShowCurrentShips,
+                DisplayBefore = Game.ShowCurrentShipsDeleting,
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem
@@ -200,7 +200,7 @@ namespace ConsoleApp
                     new MenuItem
                     {
                         Shortcut = "2",
-                        Description = "Confirm ship deletion(example: D7)",
+                        Description = "Confirm ship deletion",
                         CommandToExecute = Game.DeleteShipFromBoard
                     }
                 }
@@ -237,7 +237,8 @@ namespace ConsoleApp
                         Description = "Add ships menu",
                         CommandToExecute = () =>
                         {
-                            addShipsToBoardMenu.Title = $"{Game.CurrentPlayer.Name}'s ship menu";
+                            Game.ClearCurrentHighlights();
+                            addShipsToBoardMenu.Title = $"{Game.CurrentPlayer.Name}'s add ships menu";
                             return Game.RunMenu(addShipsToBoardMenu);
                         }
                     },
@@ -245,7 +246,12 @@ namespace ConsoleApp
                     {
                         Shortcut = "2",
                         Description = "Delete ships menu",
-                        CommandToExecute = () => Game.RunMenu(deleteShipFromBoardMenu)
+                        CommandToExecute = () =>
+                        {
+                            Game.ClearCurrentHighlights();
+                            deleteShipFromBoardMenu.Title = $"{Game.CurrentPlayer.Name}'s delete ship menu";
+                            return Game.RunMenu(deleteShipFromBoardMenu);
+                        }
                     },
                     new MenuItem
                     {

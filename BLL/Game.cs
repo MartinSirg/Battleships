@@ -41,7 +41,8 @@ namespace BLL
         public string BombShip()
         {
             var target = TargetPlayer;
-            string targetLocation = UI.GetTargetLocation(target.Board);
+            string targetLocation = UI.GetTargetLocation(target.Board).ToUpper();
+            if (targetLocation.Equals("BACK")) return "";
             
             if (string.IsNullOrEmpty(targetLocation))
             {
@@ -149,18 +150,24 @@ namespace BLL
 
         public string SaveGame()
         {
+            string name = UI.GetSaveGameName();
+            if (name.ToUpper().Equals("BACK")) return "";
+            
+            while (DbContext.TotalGame.Exists(tuple => tuple.name.Equals(name)))
+            {
+                UI.Alert($"Enter a different name {name} is already taken.", 0);
+                name = UI.GetSaveGameName();
+                if (name.ToUpper().Equals("BACK")) return "";
+            }
+            
+            
             DbContext.Rules.Add(Rules);
             DbContext.Boards.Add(Player1.Board);
             DbContext.Boards.Add(Player2.Board);
             DbContext.Players.Add(Player1);
             DbContext.Players.Add(Player2);
             DbContext.GameMoves.Add(GameMoves);
-            string name = UI.GetSaveGameName();
-            while (DbContext.TotalGame.Exists(tuple => tuple.name.Equals(name)))
-            {
-                UI.Alert($"Enter a different name {name} is already taken.", 0);
-                name = UI.GetSaveGameName();
-            }
+            
             
             DbContext.TotalGame.Add((
                 name,
@@ -228,6 +235,12 @@ namespace BLL
             Rules.BoatSizesAndQuantities.ForEach(tuple => boats.Add(tuple.size, tuple.quantity));
             CurrentPlayer.Board.Battleships.ForEach(battleship => boats[battleship.Size]--);
             Tile start = CurrentPlayer.Board.HighlightedStart, end = CurrentPlayer.Board.HighLightedEnd;
+            if (start == null || end == null)
+            {
+                UI.Alert("Start and End not specified", 1000);
+                return "";
+            }
+
             bool hasCommonAxis = start.Row - end.Row == 0 || start.Col - end.Col == 0;
             if (!hasCommonAxis)
             {
@@ -265,7 +278,21 @@ namespace BLL
 
         public string DeleteShipFromBoard()
         {
-            throw new NotImplementedException();
+            Tile deletable = CurrentPlayer.Board.HighlightedStart;
+            if (deletable == null)
+            {
+                UI.Alert("Tile of occupying ship not specified", 1500);
+                return "";
+            }
+
+            if (deletable.IsEmpty())
+            {
+                UI.Alert("Selected tile does not contain a ship", 1000);
+                return "";
+            }
+            CurrentPlayer.Board.DeleteShipFromBoard(deletable);
+            deletable.IsHighlightedStart = false;
+            return "";
         }
 
         public string ChangePlayersName()
@@ -311,14 +338,29 @@ namespace BLL
             throw new NotImplementedException();
         }
 
-        public void ShowCurrentShips()
+        public void ShowCurrentShipsRegular()
         {
-            throw new NotImplementedException();
+            UI.DisplayCurrentShips(CurrentPlayer.Board, "REGULAR");
         }
 
         public string GetTileOfDeleteableShip()
         {
-            throw new NotImplementedException();
+            if (CurrentPlayer.Board.HighlightedStart != null)
+                CurrentPlayer.Board.HighlightedStart.IsHighlightedStart = false;
+            Tile startTile;
+            while (true)
+            {
+                string userInput = UI.GetDeletableShipTile().ToUpper();
+                if (userInput.Equals("BACK")) return "";
+                startTile = GetTile(userInput, CurrentPlayer.Board);
+                if (startTile == null) UI.Alert("Invalid location", 0);
+                else if (startTile.IsEmpty()) UI.Alert("Tile doesn't contain a ship", 0);
+                else break;
+            }
+
+            startTile.IsHighlightedStart = true;
+            CurrentPlayer.Board.HighlightedStart = startTile;
+            return "";
         }
 
         public void ShowCurrentRuleset()
@@ -328,7 +370,7 @@ namespace BLL
 
         public void ShowCurrentAndAvailableShips()
         {
-            UI.DisplayCurrentShips(CurrentPlayer.Board);
+            UI.DisplayCurrentShips(CurrentPlayer.Board, "ADDING");
             UI.DisplayAvailableShips(CurrentPlayer.Board, Rules);
         }
 
@@ -339,15 +381,13 @@ namespace BLL
             Tile startTile;
             while (true)
             {
-                startTile = GetTile(UI.GetShipStartPoint(), CurrentPlayer.Board);
+                string userInput = UI.GetShipStartPoint().ToUpper();
+                if (userInput.Equals("BACK")) return "";
+                
+                startTile = GetTile(userInput, CurrentPlayer.Board);
                 if (startTile == null) UI.Alert("Invalid location", 0);
+                else if (startTile.IsEmpty() == false) UI.Alert("This tile already contains a ship", 0);
                 else break;
-            }
-
-            if (startTile.IsEmpty() == false)
-            {
-                UI.Alert("Already contains a ship", 1000);
-                return "";
             }
 
             startTile.IsHighlightedStart = true;
@@ -364,7 +404,6 @@ namespace BLL
                 else if (stringRow.Length > 0 && char.IsDigit(c)) stringCol += c;
                 else
                 {
-                    UI.Alert("Invalid location", 1000);
                     return null;
                 }
             }
@@ -376,17 +415,14 @@ namespace BLL
             }
             catch (IndexOutOfRangeException e)
             {
-                UI.Alert("Invalid location", 1000);
                 return null;
             }
             catch (ArgumentException e)
             {
-                UI.Alert("Invalid location", 1000);
                 return null;
             }
             catch (FormatException e)
             {
-                UI.Alert("Invalid location", 1000);
                 return null;
             }
         }
@@ -398,14 +434,13 @@ namespace BLL
             Tile endTile;
             while (true)
             {
-                endTile = GetTile(UI.GetShipEndPoint(), CurrentPlayer.Board);
+                string userInput = UI.GetShipStartPoint().ToUpper();
+                if (userInput.Equals("BACK")) return "";
+
+                endTile = GetTile(userInput, CurrentPlayer.Board);
                 if (endTile == null) UI.Alert("Invalid location", 0);
+                else if(endTile.IsEmpty() == false) UI.Alert("This tile already contains a ship", 0);
                 else break;
-            }
-            if (endTile.IsEmpty() == false)
-            {
-                UI.Alert("Already contains a ship", 1000);
-                return "";
             }
             
             endTile.IsHighlightedEnd = true;
@@ -432,8 +467,6 @@ namespace BLL
                         throw new Exception("Unknown exception at Game.SetSelectedMode");
             }
         }
-
-        
 
         public void SetPlayerReady()
         {
@@ -506,6 +539,26 @@ namespace BLL
             Player2 = new Player(board2, "Player 2");
             CurrentPlayer = Player1;
             TargetPlayer = Player2;
+        }
+
+        public void ShowCurrentShipsDeleting()
+        {
+            UI.DisplayCurrentShips(CurrentPlayer.Board, "DELETING");
+        }
+
+        public void ClearCurrentHighlights()
+        {
+            if (CurrentPlayer.Board.HighlightedStart != null)
+            {
+                CurrentPlayer.Board.HighlightedStart.IsHighlightedStart = false;
+                CurrentPlayer.Board.HighlightedStart = null;   
+            }
+
+            if (CurrentPlayer.Board.HighLightedEnd != null)
+            {
+                CurrentPlayer.Board.HighLightedEnd.IsHighlightedEnd = false;
+                CurrentPlayer.Board.HighLightedEnd = null;   
+            }
         }
     }
 }
