@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using DAL;
@@ -64,8 +66,8 @@ namespace BLL
             Player temp = TargetPlayer;
             TargetPlayer = CurrentPlayer;
             CurrentPlayer = temp;
-            UI.CurrentPlayer = CurrentPlayer;
-            UI.TargetPlayer = TargetPlayer;
+//            UI.CurrentPlayer = CurrentPlayer;
+//            UI.TargetPlayer = TargetPlayer;
             
             //TODO: check if anyone has won!
             return "CHANGE NAME";
@@ -105,24 +107,44 @@ namespace BLL
                 }
 
                 var postActionCommand = menuItem.CommandToExecute();
-                if (postActionCommand.Equals("Q") && !menu.Title.Equals("Main menu"))
-                {
-                    return "Q";
-                }
-                if (postActionCommand.Equals("FINISHED"))
-                {
-                    break;
-                }
+                if (postActionCommand.Equals("Q") && !menu.Title.Equals("Main menu")) return "Q";
+                if (postActionCommand.Equals("FINISHED"))break;
+                PostAction(menu, postActionCommand);
 
-                if (postActionCommand.Equals("CHANGE NAME"))
-                {
-                    String namedTitle = menu.TitleWithName;
-                    menu.Title = namedTitle.Replace("PLAYER_NAME", CurrentPlayer.Name);
-                }
 //                menu.NameInTitle = CurrentPlayer.Name;
             } while (!done);
 
             return "";
+        }
+
+        private void PostAction(Menu menu, string postActionCommand)
+        {
+            //Changes menu's title
+            if (postActionCommand.Equals("CHANGE NAME"))
+            {
+                String namedTitle = menu.TitleWithName;
+                menu.Title = namedTitle.Replace("PLAYER_NAME", CurrentPlayer.Name);
+            }
+            //Highlights spot on board
+            else if (postActionCommand.Contains("HIGHLIGHT_START"))
+            {
+                
+            } 
+            else if (postActionCommand.Contains("HIGHLIGHT_END"))
+            {
+                if (CurrentPlayer.Board.HighLightedEnd != null)
+                    CurrentPlayer.Board.HighLightedEnd.IsHighlightedEnd = false;
+                string stringRow = "", stringCol = "", tile = postActionCommand.Replace("HIGHLIGHT_END:", "");
+                foreach (var c in tile)
+                {
+                    if (stringCol.Length == 0 && Char.IsLetter(c)) stringRow += c;
+                    else if (stringRow.Length > 0 && char.IsDigit(c)) stringCol += c;
+                    else throw new ArgumentException("Invalid location");
+                }
+                int row = Converter.GetNumberFromLetters(stringRow) - 1, col = int.Parse(stringCol) - 1;
+                CurrentPlayer.Board.Tiles[row][col].IsHighlightedEnd = true;
+                CurrentPlayer.Board.HighLightedEnd = CurrentPlayer.Board.Tiles[row][col];
+            }
         }
 
         public string SaveGame()
@@ -201,7 +223,44 @@ namespace BLL
 
         public string PlaceShipOnBoard()
         {
-            throw new NotImplementedException();
+            //Key size, Value Quantity;
+            Dictionary<int, int>  boats = new Dictionary<int, int>();
+            Rules.BoatSizesAndQuantities.ForEach(tuple => boats.Add(tuple.size, tuple.quantity));
+            CurrentPlayer.Board.Battleships.ForEach(battleship => boats[battleship.Size]--);
+            Tile start = CurrentPlayer.Board.HighlightedStart, end = CurrentPlayer.Board.HighLightedEnd;
+            bool hasCommonAxis = start.Row - end.Row == 0 || start.Col - end.Col == 0;
+            if (!hasCommonAxis)
+            {
+                UI.Alert("Cant place ship. Start and end tile must have one common axis", 4000);
+                return "";
+            }
+
+            var length = start.Row - end.Row == 0 ? Math.Abs(start.Col - end.Col) + 1: Math.Abs(start.Row - end.Row) + 1;
+            if (!boats.ContainsKey(length))
+            {
+                UI.Alert($"size {length} ship is not allowed.", 2000);
+                return "";
+            }
+            if (boats[length] <= 0)
+            {
+                UI.Alert($"You can't place more size {length} ships", 2000);
+                return "";
+            }
+
+            try
+            {
+                CurrentPlayer.Board.AddBattleship((start.Row, start.Col), (end.Row, end.Col), new Battleship(length));
+                start.IsHighlightedStart = false;
+                end.IsHighlightedEnd = false;
+                CurrentPlayer.Board.HighLightedEnd = null;
+                CurrentPlayer.Board.HighlightedStart = null;
+                return "";
+            }
+            catch (Exception e)
+            {
+                UI.Alert(e.Message, 5000);
+                return "";
+            }
         }
 
         public string DeleteShipFromBoard()
@@ -269,17 +328,89 @@ namespace BLL
 
         public void ShowCurrentAndAvailableShips()
         {
-            throw new NotImplementedException();
+            UI.DisplayCurrentShips(CurrentPlayer.Board);
+            UI.DisplayAvailableShips(CurrentPlayer.Board, Rules);
         }
 
         public string GetShipStartTile()
         {
-            throw new NotImplementedException();
+            if (CurrentPlayer.Board.HighlightedStart != null)
+                CurrentPlayer.Board.HighlightedStart.IsHighlightedStart = false;
+            Tile startTile;
+            while (true)
+            {
+                startTile = GetTile(UI.GetShipStartPoint(), CurrentPlayer.Board);
+                if (startTile == null) UI.Alert("Invalid location", 0);
+                else break;
+            }
+
+            if (startTile.IsEmpty() == false)
+            {
+                UI.Alert("Already contains a ship", 1000);
+                return "";
+            }
+
+            startTile.IsHighlightedStart = true;
+            CurrentPlayer.Board.HighlightedStart = startTile;
+            return "";
+        }
+
+        private Tile GetTile(string location, Board board)
+        {
+            string stringRow = "", stringCol = "";
+            foreach (var c in location)
+            {
+                if (stringCol.Length == 0 && Char.IsLetter(c)) stringRow += c;
+                else if (stringRow.Length > 0 && char.IsDigit(c)) stringCol += c;
+                else
+                {
+                    UI.Alert("Invalid location", 1000);
+                    return null;
+                }
+            }
+
+            try
+            {
+                int row = Converter.GetNumberFromLetters(stringRow) - 1, col = int.Parse(stringCol) - 1;
+                return board.Tiles[row]?[col];
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                UI.Alert("Invalid location", 1000);
+                return null;
+            }
+            catch (ArgumentException e)
+            {
+                UI.Alert("Invalid location", 1000);
+                return null;
+            }
+            catch (FormatException e)
+            {
+                UI.Alert("Invalid location", 1000);
+                return null;
+            }
         }
 
         public string GetShipEndTile()
         {
-            throw new NotImplementedException();
+            if (CurrentPlayer.Board.HighLightedEnd != null)
+                CurrentPlayer.Board.HighLightedEnd.IsHighlightedEnd = false;
+            Tile endTile;
+            while (true)
+            {
+                endTile = GetTile(UI.GetShipEndPoint(), CurrentPlayer.Board);
+                if (endTile == null) UI.Alert("Invalid location", 0);
+                else break;
+            }
+            if (endTile.IsEmpty() == false)
+            {
+                UI.Alert("Already contains a ship", 1000);
+                return "";
+            }
+            
+            endTile.IsHighlightedEnd = true;
+            CurrentPlayer.Board.HighLightedEnd = endTile;
+            return "";
         }
 
         public void SetPlayerNotReady() //Current player.ready = true vms

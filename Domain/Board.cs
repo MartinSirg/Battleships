@@ -7,10 +7,11 @@ namespace Domain
     public class Board
     {
         public List<List<Tile>> Tiles { get; set; }
-        private List<Battleship> Battleships { get; set; } = new List<Battleship>();
+        public List<Battleship> Battleships { get; set; } = new List<Battleship>();
         public List<(Tile, BombingResult)> Bombings { get; set; } = new List<(Tile, BombingResult)>();
         private bool CanTouch { get; set; }
         private int MaxCol, MaxRow;
+        public Tile HighlightedStart, HighLightedEnd;
 
         public Board(int totalRows = 10, int totalCols = 10, bool canTouch = true)
         {

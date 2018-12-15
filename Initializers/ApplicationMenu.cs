@@ -235,7 +235,11 @@ namespace ConsoleApp
                     {
                         Shortcut = "1",
                         Description = "Add ships menu",
-                        CommandToExecute = () => Game.RunMenu(addShipsToBoardMenu)
+                        CommandToExecute = () =>
+                        {
+                            addShipsToBoardMenu.Title = $"{Game.CurrentPlayer.Name}'s ship menu";
+                            return Game.RunMenu(addShipsToBoardMenu);
+                        }
                     },
                     new MenuItem
                     {

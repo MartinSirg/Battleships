@@ -7,6 +7,8 @@ namespace Domain
         public int Row { get; set; }
         public int Col { get; set; }
         public Board Board { get; set; }
+        public bool IsHighlightedStart { get; set; }
+        public bool IsHighlightedEnd { get; set; }
 
         public Tile(int row, int col, Board board)
         {

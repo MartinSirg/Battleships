@@ -12,8 +12,8 @@ namespace UI
     public class ConsoleUI : IUserInterface
     {
         private LetterNumberSystem Letters { get; } = new LetterNumberSystem();
-        public Player CurrentPlayer { get; set; }
-        public Player TargetPlayer { get; set; }
+//        public Player CurrentPlayer { get; set; }
+//        public Player TargetPlayer { get; set; }
         public string ShipStartPoint { get; set; }
         public string ShipEndPoint { get; set; }
         public int MaxWidth { get; set; }
@@ -115,20 +115,22 @@ namespace UI
             Console.Write(sb.ToString());
         }
 
-        public void PrintFriendlyShips(Board enemyBoard)
+        public void PrintFriendlyShips(Board currentBoard)
         {
             var sb = new StringBuilder();
-            var line = GetTableLine(enemyBoard.Tiles[0].Count);
+            var line = GetTableLine(currentBoard.Tiles[0].Count);
             sb.Append(LeftPad).Append("   ").Append("Your ships:\n");
-            sb.Append(LeftPad).Append("   ").Append(GetTopNumbersLine(enemyBoard.Tiles[0].Count)).Append("\n");
+            sb.Append(LeftPad).Append("   ").Append(GetTopNumbersLine(currentBoard.Tiles[0].Count)).Append("\n");
             sb.Append(LeftPad).Append("   ").Append(line).Append("\n");
-            for (var index = 0; index < enemyBoard.Tiles.Count; index++)
+            for (var index = 0; index < currentBoard.Tiles.Count; index++)
             {
-                var row = enemyBoard.Tiles[index];
+                var row = currentBoard.Tiles[index];
                 sb.Append(LeftPad).Append(Letters.GetLetter(index + 1).PadLeft(2)).Append(" |");
                 foreach (var tile in row)
                 {
-                    if (tile.IsEmpty()) sb.Append("   ");
+                    if (tile.IsHighlightedStart) sb.PrintInColor(" - ", ConsoleColor.DarkCyan);
+                    else if (tile.IsHighlightedEnd) sb.PrintInColor(" + ", ConsoleColor.DarkCyan);
+                    else if (tile.IsEmpty()) sb.Append("   ");
                     else if (tile.IsBombed) sb.PrintInColor(" - ", ConsoleColor.Red);
                     else sb.PrintInColor(" + ", ConsoleColor.Green);
 
@@ -139,8 +141,10 @@ namespace UI
             }
             
             sb.Append("\n").Append(LeftPad).Append(" ");
-            sb.PrintInColor(" + ", ConsoleColor.Green).Append(" : Alive ship tile\n").Append(LeftPad).Append(" ");
-            sb.PrintInColor(" - ", ConsoleColor.Red).Append(" : Sunk ship tile\n");
+            sb.PrintInColor(" + ", ConsoleColor.Green).Append(" : Placed ship tile\n").Append(LeftPad).Append(" ");
+            sb.PrintInColor(" - ", ConsoleColor.DarkCyan).Append(" : Selected ship start\n").Append(LeftPad).Append(" ");
+            sb.PrintInColor(" + ", ConsoleColor.DarkCyan).Append(" : Selected ship end\n");
+//            sb.PrintInColor(" - ", ConsoleColor.Red).Append(" : Sunk ship tile\n");
 
             Console.WriteLine(sb.ToString());
         }
@@ -168,7 +172,7 @@ namespace UI
             Console.Clear();
             PrintBombedLocations(enemyBoard);
             Console.Write("Select target: ");
-            return Console.ReadLine();
+            return Console.ReadLine().ToUpper();
         }
 
         public void ShowShipsAndBombings(Board enemy, Board current)
@@ -183,7 +187,7 @@ namespace UI
         {
             Console.Clear();
             PrintBombedLocations(targetBoard);
-            ;
+            Thread.Sleep(2000);
             Console.Clear();
         }
 
@@ -232,27 +236,31 @@ namespace UI
 
         public void DisplayAvailableShips(Board currentPlayerBoard, Rules gameRules)
         {
-            throw new NotImplementedException();
+            Dictionary<int, int>  boats = new Dictionary<int, int>();
+            gameRules.BoatSizesAndQuantities.ForEach(tuple => boats.Add(tuple.size, tuple.quantity));
+            currentPlayerBoard.Battleships.ForEach(battleship => boats[battleship.Size]--);
+            boats.ToList().ForEach(pair => Console.WriteLine($"Size: {pair.Key} - {pair.Value} available"));
         }
 
         public void DisplayCurrentShips(Board currentPlayerBoard)
         {
-            throw new NotImplementedException();
+            PrintFriendlyShips(currentPlayerBoard);
         }
 
-        public string GetShipStartPoint(IUserInterface obj)
+        public string GetShipStartPoint()
         {
-            throw new NotImplementedException();
+            Console.Write("Enter ship start tile: ");
+            return Console.ReadLine().ToUpper();
         }
 
-        public string GetShipEndPoint(IUserInterface obj)
+        public string GetShipEndPoint()
         {
-            throw new NotImplementedException();
+            Console.Write("Enter ship end tile: ");
+            return Console.ReadLine().ToUpper();
         }
 
         public void Alert(string alert, int waitTime)
         {
-            Console.Beep();
             Console.WriteLine(alert);
             Thread.Sleep(waitTime);
         }
@@ -260,13 +268,14 @@ namespace UI
         public string GetMenuShortcut()
         {
             Console.Write("Enter command: ");
-            return Console.ReadLine();
+            return Console.ReadLine().ToUpper();
         }
 
         public void DisplayNewMenu(Menu menu)
         {
             Console.Clear();
             Console.WriteLine(menu.Title);
+            menu.DisplayBefore?.Invoke();
             for (int i = 0; i < menu.Title.Length; i++) Console.Write("-");
             Console.WriteLine();
             menu.MenuItems.ForEach(item => Console.WriteLine($"{item.Shortcut}) {item.Description}"));

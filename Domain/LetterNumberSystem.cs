@@ -39,6 +39,10 @@ namespace BLL
 
         }
         
+        /**
+         * returns a number from the letter
+         * i.e - A returns 1, B returns 2, Z returns 26
+         */
         public int GetNumberFromLetters(string letters)
         {
             if (string.IsNullOrEmpty(letters))

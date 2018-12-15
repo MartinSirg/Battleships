@@ -28,6 +28,7 @@ namespace ConsoleApp
             IUserInterface ui = new ConsoleUI();
             DbContext dbContext = new DbContext();
             dbContext.Boards.Add(new Board());
+            dbContext.Boards[0].AddBattleship((0, 0), (0, 2), new Battleship(3));
             dbContext.Boards.Add(new Board());
             dbContext.Players.Add(new Player(dbContext.Boards[0], "Player 1"));
             dbContext.Players.Add(new Player(dbContext.Boards[1], "Player 2"));

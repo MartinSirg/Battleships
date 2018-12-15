@@ -6,8 +6,8 @@ namespace MenuSystem
 {
     public interface IUserInterface
     {
-        Player CurrentPlayer { get; set; }
-        Player TargetPlayer { get; set; }
+//        Player CurrentPlayer { get; set; }
+//        Player TargetPlayer { get; set; }
 
         string ShipStartPoint { get; set; }
         string ShipEndPoint { get; set; }
@@ -74,9 +74,9 @@ namespace MenuSystem
         
         void DisplayCurrentShips(Board currentPlayerBoard);
         
-        string GetShipStartPoint(IUserInterface obj);
+        string GetShipStartPoint();
         
-        string GetShipEndPoint(IUserInterface obj);
+        string GetShipEndPoint();
         
         void Alert(string alert, int waitTime);
         

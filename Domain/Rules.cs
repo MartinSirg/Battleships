@@ -8,7 +8,7 @@ namespace Domain
         public int BoardRows { get; set; }
         public int BoardCols { get; set; }
         public string Name { get; set; }
-        public List<(int, int)> BoatSizesAndQuantities { get; set; }
+        public List<(int size, int quantity)> BoatSizesAndQuantities { get; set; }
 
         public Rules(bool canShipsTouch, int boardRows, int boardCols, List<(int, int)> boatSizesAndQuantities)
         {
