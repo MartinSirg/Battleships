@@ -70,26 +70,26 @@ namespace MenuSystem
         
         void DisplayCurrentRules(IUserInterface obj);
         
-        void DisplayAvailableShips(Board currentPlayerBoard, Rules gameRules);
+        void DisplayAvailableShips(List<KeyValuePair<int,int>> availableShips);
         
         void DisplayCurrentShips(Board currentPlayerBoard, string type);
         
-        string GetShipStartPoint();
-        
-        string GetShipEndPoint();
+        string GetShipEndPoint(Board currentPlayerBoard, List<KeyValuePair<int,int>> availableShips);
+
+        string GetShipStartPoint(Board currentPlayerBoard, List<KeyValuePair<int,int>> availableShips);
         
         void Alert(string alert, int waitTime);
-        
+
         string  GetMenuShortcut();
-        
+
         void DisplayNewMenu(Menu menu);
-        
+
         void WaitForUser();
-        
+
         string GetSaveGameName();
-        
+
         void DisplaySavedGames(List<string> names);
-        
+
         string GetDeletableShipTile();
     }
 }

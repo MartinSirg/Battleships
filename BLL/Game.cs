@@ -41,37 +41,40 @@ namespace BLL
         public string BombShip()
         {
             var target = TargetPlayer;
-            string targetLocation = UI.GetTargetLocation(target.Board).ToUpper();
-            if (targetLocation.Equals("BACK")) return "";
-            
-            if (string.IsNullOrEmpty(targetLocation))
+            Tile targetTile;
+            while (true)
             {
-                throw new ArgumentException("Empty target location string");
+                string userInput = UI.GetTargetLocation(target.Board).ToUpper();
+                if (userInput.Equals("X")) return "";
+                targetTile = GetTile(userInput, target.Board);
+                if (targetTile == null) UI.Alert("Invalid location", 1000);
+                else if(targetTile.IsBombed) UI.Alert("Target already bombed", 1000);
+                else break;
             }
-
-            string stringRow = "", stringCol = "";
-            foreach (var c in targetLocation)
-            {
-                if (stringCol.Length == 0 && Char.IsLetter(c)) stringRow += c;
-                else if (stringRow.Length > 0 && char.IsDigit(c)) stringCol += c;
-                else throw new ArgumentException("Invalid location");
-            }
-
-            int row = Converter.GetNumberFromLetters(stringRow) - 1, col = int.Parse(stringCol) - 1;
-            bool result = target.Board.BombLocation(row, col);
+            bool result = target.Board.BombLocation(targetTile.Row, targetTile.Col);
             BombingResult b = result ? BombingResult.Hit : BombingResult.Miss;
-            GameMoves.Moves.Add((target, target.Board.Tiles[row][col], b));
+            GameMoves.Moves.Add((target, targetTile, b));
             UI.ShowBombingResult(b, target.Board);
-            
-            //Switching player status
-            Player temp = TargetPlayer;
-            TargetPlayer = CurrentPlayer;
-            CurrentPlayer = temp;
-//            UI.CurrentPlayer = CurrentPlayer;
-//            UI.TargetPlayer = TargetPlayer;
-            
             //TODO: check if anyone has won!
-            return "CHANGE NAME";
+            //Switching player status
+            if (SelectedMode.Equals("MP"))
+            {
+                Player temp = TargetPlayer;
+                TargetPlayer = CurrentPlayer;
+                CurrentPlayer = temp;
+                return "CHANGE NAME";
+            }
+            
+            //TODO: possible error: after going into game enemy board resets
+            List<Tile> tiles = new List<Tile>();
+            CurrentPlayer.Board.Tiles.ForEach(row => row.ForEach(tile => tiles.Add(tile))); //Adds all tiles to list
+            CurrentPlayer.Board.Bombings.ForEach(tuple => tiles.Remove(tuple.tile)); //Removes bombed tiles from list
+            Tile computerTarget = tiles[new Random().Next(0, tiles.Count - 1)];
+            bool computerResultbool = CurrentPlayer.Board.BombLocation(computerTarget.Row, computerTarget.Col);
+            BombingResult computerResult = computerResultbool ? BombingResult.Hit : BombingResult.Miss;
+            GameMoves.Moves.Add((CurrentPlayer, computerTarget, computerResult));
+            UI.ShowBombingResult(computerResult, CurrentPlayer.Board);
+            return "";
         }
         
         //TODO: Generate battleships for board
@@ -151,13 +154,13 @@ namespace BLL
         public string SaveGame()
         {
             string name = UI.GetSaveGameName();
-            if (name.ToUpper().Equals("BACK")) return "";
+            if (name.ToUpper().Equals("X")) return "";
             
             while (DbContext.TotalGame.Exists(tuple => tuple.name.Equals(name)))
             {
                 UI.Alert($"Enter a different name {name} is already taken.", 0);
                 name = UI.GetSaveGameName();
-                if (name.ToUpper().Equals("BACK")) return "";
+                if (name.ToUpper().Equals("X")) return "";
             }
             
             
@@ -351,7 +354,7 @@ namespace BLL
             while (true)
             {
                 string userInput = UI.GetDeletableShipTile().ToUpper();
-                if (userInput.Equals("BACK")) return "";
+                if (userInput.Equals("X")) return "";
                 startTile = GetTile(userInput, CurrentPlayer.Board);
                 if (startTile == null) UI.Alert("Invalid location", 0);
                 else if (startTile.IsEmpty()) UI.Alert("Tile doesn't contain a ship", 0);
@@ -371,7 +374,12 @@ namespace BLL
         public void ShowCurrentAndAvailableShips()
         {
             UI.DisplayCurrentShips(CurrentPlayer.Board, "ADDING");
-            UI.DisplayAvailableShips(CurrentPlayer.Board, Rules);
+            
+            Dictionary<int, int>  ships = new Dictionary<int, int>();
+            Rules.BoatSizesAndQuantities.ForEach(tuple => ships.Add(tuple.size, tuple.quantity));
+            CurrentPlayer.Board.Battleships.ForEach(battleship => ships[battleship.Size]--);
+            
+            UI.DisplayAvailableShips(ships.ToList());
         }
 
         public string GetShipStartTile()
@@ -381,9 +389,9 @@ namespace BLL
             Tile startTile;
             while (true)
             {
-                string userInput = UI.GetShipStartPoint().ToUpper();
-                if (userInput.Equals("BACK")) return "";
-                
+                ShowCurrentAndAvailableShips();
+                string userInput = UI.GetShipStartPoint(CurrentPlayer.Board, AvailableShipsList(CurrentPlayer).ToList()).ToUpper();
+                if (userInput.Equals("X")) return "";
                 startTile = GetTile(userInput, CurrentPlayer.Board);
                 if (startTile == null) UI.Alert("Invalid location", 0);
                 else if (startTile.IsEmpty() == false) UI.Alert("This tile already contains a ship", 0);
@@ -393,6 +401,14 @@ namespace BLL
             startTile.IsHighlightedStart = true;
             CurrentPlayer.Board.HighlightedStart = startTile;
             return "";
+        }
+
+        private Dictionary<int, int> AvailableShipsList(Player player)
+        {
+            Dictionary<int, int>  availableShips = new Dictionary<int, int>();
+            Rules.BoatSizesAndQuantities.ForEach(tuple => availableShips.Add(tuple.size, tuple.quantity));
+            player.Board.Battleships.ForEach(battleship => availableShips[battleship.Size]--);
+            return availableShips;
         }
 
         private Tile GetTile(string location, Board board)
@@ -434,8 +450,8 @@ namespace BLL
             Tile endTile;
             while (true)
             {
-                string userInput = UI.GetShipStartPoint().ToUpper();
-                if (userInput.Equals("BACK")) return "";
+                string userInput = UI.GetShipEndPoint(CurrentPlayer.Board, AvailableShipsList(CurrentPlayer).ToList()).ToUpper();
+                if (userInput.Equals("X")) return "";
 
                 endTile = GetTile(userInput, CurrentPlayer.Board);
                 if (endTile == null) UI.Alert("Invalid location", 0);
@@ -558,6 +574,79 @@ namespace BLL
             {
                 CurrentPlayer.Board.HighLightedEnd.IsHighlightedEnd = false;
                 CurrentPlayer.Board.HighLightedEnd = null;   
+            }
+        }
+
+        public string GenerateOpponent()
+        {
+            TargetPlayer.Name = "Computer";
+            GenerateRandomBoard(TargetPlayer);
+            
+            UI.DisplayCurrentShips(TargetPlayer.Board, "REGULAR");
+            UI.Alert("", 10000);
+            return "";
+
+        }
+
+        private void GenerateRandomBoard(Player player)
+        {
+            Dictionary<int, int> availableShips = AvailableShipsList(player);
+            var random = new Random();
+
+            while (availableShips.Any(pair => pair.Value > 0)) // Loop til there are ships available
+            {
+                int sizeKey = availableShips.First(pair => pair.Value > 0).Key;
+                var ship = new Battleship(sizeKey);
+                var counter = 1;
+                while (true)
+                {
+                    if (++counter > 50000)
+                    {
+                        UI.Alert("Infinite loop", 5000);
+                        return;
+                    }
+                    Tile start = player.Board.Tiles[random.Next(Rules.BoardRows - 1)][random.Next(Rules.BoardCols - 1)];
+                    bool isVertical = random.Next(0, 2) == 0;
+                    int directionSign = random.Next(0, 2) == 0 ? -1 : 1;
+                    if (isVertical)
+                    {
+                        try
+                        {
+                            Tile end = player.Board.Tiles[start.Row + (sizeKey - 1) * directionSign][start.Col];
+                            player.Board.AddBattleship((start.Row, start.Col), (end.Row, end.Col), ship);
+                            availableShips[sizeKey]--;
+                            break;
+
+                        }
+                        catch (ArgumentException e)
+                        {
+                            
+                        }
+                        catch (IndexOutOfRangeException e)
+                        {
+                            
+                        }
+                        
+                    }
+                    else
+                    {
+                        try
+                        {
+                            Tile end = player.Board.Tiles[start.Row][start.Col + (sizeKey - 1) * directionSign];
+                            player.Board.AddBattleship((start.Row, start.Col), (end.Row, end.Col), ship);
+                            availableShips[sizeKey]--;
+                            break;
+                        }
+                        catch (ArgumentException e)
+                        {
+                            
+                        }
+                        catch (IndexOutOfRangeException e)
+                        {
+                            
+                        }
+                    }
+                }
             }
         }
     }

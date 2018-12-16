@@ -291,7 +291,10 @@ namespace ConsoleApp
                         {
                             Game.SetPlayerNotReady();
                             Game.SetSelectedMode("SP");    //TODO: Enumiks teha parameeter
-                            return Game.RunMenu(playerMenu);
+                            var afterAction = Game.RunMenu(playerMenu);
+                            if (afterAction != "") return afterAction;
+                            Game.GenerateOpponent();
+                            return "";
                         }
                     },
                     new MenuItem

@@ -171,7 +171,7 @@ namespace UI
         {
             Console.Clear();
             PrintBombedLocations(enemyBoard);
-            Console.Write("Select target(or \"back\"): ");
+            Console.Write("Select target(or \"x\"): ");
             return Console.ReadLine().ToUpper();
         }
 
@@ -234,12 +234,9 @@ namespace UI
             throw new NotImplementedException();
         }
 
-        public void DisplayAvailableShips(Board currentPlayerBoard, Rules gameRules)
+        public void DisplayAvailableShips(List<KeyValuePair<int,int>> availableShips)
         {
-            Dictionary<int, int>  boats = new Dictionary<int, int>();
-            gameRules.BoatSizesAndQuantities.ForEach(tuple => boats.Add(tuple.size, tuple.quantity));
-            currentPlayerBoard.Battleships.ForEach(battleship => boats[battleship.Size]--);
-            boats.ToList().ForEach(pair => Console.WriteLine($"Size: {pair.Key} - {pair.Value} available"));
+            availableShips.ForEach(pair => Console.WriteLine($"Size: {pair.Key} - {pair.Value} available"));
         }
 
         public void DisplayCurrentShips(Board currentPlayerBoard, string type)
@@ -320,15 +317,21 @@ namespace UI
             Console.WriteLine(sb.ToString());
         }
 
-        public string GetShipStartPoint()
+        public string GetShipStartPoint(Board currentPlayerBoard, List<KeyValuePair<int,int>> availableShips)
         {
-            Console.Write("Enter ship start tile(or \"back\"): ");
+            Console.Clear();
+            DisplayCurrentShips(currentPlayerBoard, "ADDING");
+            DisplayAvailableShips(availableShips);
+            Console.Write("Enter ship start tile(or \"x\"): ");
             return Console.ReadLine().ToUpper();
         }
 
-        public string GetShipEndPoint()
+        public string GetShipEndPoint(Board currentPlayerBoard, List<KeyValuePair<int,int>> availableShips)
         {
-            Console.Write("Enter ship end tile(or \"back\"): ");
+            Console.Clear();
+            DisplayCurrentShips(currentPlayerBoard, "ADDING");
+            DisplayAvailableShips(availableShips);
+            Console.Write("Enter ship end tile(or \"x\"): ");
             return Console.ReadLine().ToUpper();
         }
 
@@ -362,7 +365,7 @@ namespace UI
 
         public string GetSaveGameName()
         {
-            Console.Write("Enter a name for the save game(or \"back\"): ");
+            Console.Write("Enter a name for the save game(or \"x\"): ");
             return Console.ReadLine();
         }
 
@@ -375,7 +378,7 @@ namespace UI
 
         public string GetDeletableShipTile()
         {
-            Console.Write("Enter a tile occupying a ship you wish to delete(or \"back\"): ");
+            Console.Write("Enter a tile occupying a ship you wish to delete(or \"x\"): ");
             return Console.ReadLine().ToUpper();
         }
 

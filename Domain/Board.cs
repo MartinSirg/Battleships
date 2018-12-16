@@ -8,7 +8,7 @@ namespace Domain
     {
         public List<List<Tile>> Tiles { get; set; }
         public List<Battleship> Battleships { get; set; } = new List<Battleship>();
-        public List<(Tile, BombingResult)> Bombings { get; set; } = new List<(Tile, BombingResult)>();
+        public List<(Tile tile, BombingResult bombingResult)> Bombings { get; set; } = new List<(Tile, BombingResult)>();
         private bool CanTouch { get; set; }
         private int MaxCol, MaxRow;
         public Tile HighlightedStart, HighLightedEnd;
