@@ -289,6 +289,12 @@ namespace ConsoleApp
                         Description = "Single player",
                         CommandToExecute = () =>
                         {
+                            if (Game.SelectedMode.Equals("MP"))
+                            {
+                                Game.ResetTargetPlayer("Computer");
+                            }
+                            playerMenu.Title = $"{Game.CurrentPlayer.Name}'s menu";
+
                             Game.SetPlayerNotReady();
                             Game.SetSelectedMode("SP");    //TODO: Enumiks teha parameeter
                             var afterAction = Game.RunMenu(playerMenu);
@@ -303,6 +309,10 @@ namespace ConsoleApp
                         Description = "Multi player",
                         CommandToExecute = () =>
                         {
+                            if (Game.SelectedMode.Equals("SP"))
+                            {
+                                Game.ResetTargetPlayer("Player 2");
+                            }
                             Game.SetSelectedMode("MP");
                             
                             Game.SetPlayerNotReady();

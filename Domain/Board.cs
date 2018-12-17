@@ -181,8 +181,10 @@ namespace Domain
         public void DeleteShipFromBoard(Tile tile)
         {
             if (tile.IsEmpty()) return;
+            var ship = tile.Battleship;
             tile.Battleship.Locations.ForEach(tile1 => tile1.Battleship = null);
             tile.Battleship = null;
+            Battleships.Remove(ship);
         }
     }
 }

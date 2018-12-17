@@ -176,30 +176,28 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\sirgm\\.nuget\\packages\\": {},
+    "C:\\Users\\User\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj",
+      "projectUniqueName": "C:\\Repos\\C#\\Battleships\\Domain\\Domain.csproj",
       "projectName": "Domain",
-      "projectPath": "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj",
-      "packagesPath": "C:\\Users\\sirgm\\.nuget\\packages\\",
-      "outputPath": "C:\\Projects Repositories\\C#\\Domain\\obj\\",
+      "projectPath": "C:\\Repos\\C#\\Battleships\\Domain\\Domain.csproj",
+      "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
+      "outputPath": "C:\\Repos\\C#\\Battleships\\Domain\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\sirgm\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "netstandard2.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {

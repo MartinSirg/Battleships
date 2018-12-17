@@ -21,7 +21,7 @@ namespace BLL
         private LetterNumberSystem Converter = new LetterNumberSystem();
         private IUserInterface UI;
         private DbContext DbContext;
-        public string SelectedMode { get; set; }
+        public string SelectedMode { get; set; } = "";
 
         public Game(IUserInterface ui, DbContext dbContext)
         {
@@ -605,7 +605,7 @@ namespace BLL
                         UI.Alert("Infinite loop", 5000);
                         return;
                     }
-                    Tile start = player.Board.Tiles[random.Next(Rules.BoardRows - 1)][random.Next(Rules.BoardCols - 1)];
+                    Tile start = player.Board.Tiles[random.Next(Rules.BoardRows)][random.Next(Rules.BoardCols)];
                     bool isVertical = random.Next(0, 2) == 0;
                     int directionSign = random.Next(0, 2) == 0 ? -1 : 1;
                     if (isVertical)
@@ -648,6 +648,12 @@ namespace BLL
                     }
                 }
             }
+        }
+
+        public void ResetTargetPlayer(String name)
+        {
+            TargetPlayer.Board = new Board();
+            TargetPlayer.Name = name;
         }
     }
 }
