@@ -175,7 +175,7 @@ namespace UI
             return Console.ReadLine().ToUpper();
         }
 
-        public void ShowShipsAndBombings(Board enemy, Board current)
+        public void DisplayShipsAndBombings(Board enemy, Board current)
         {
             Console.Clear();
             PrintBombedLocationsAndFriendlyShips(enemy, current);
@@ -183,7 +183,7 @@ namespace UI
             Console.ReadLine();
         }
 
-        public void ShowBombingResult(BombingResult bombingResult, Board targetBoard)
+        public void DisplayBombingResult(BombingResult bombingResult, Board targetBoard)
         {
             Console.Clear();
             PrintBombedLocations(targetBoard);
@@ -219,20 +219,22 @@ namespace UI
             
         }
 
-        public void ShowBoardRules(IUserInterface obj)
+        public void DisplayBoardRules(Rules rules)
         {
-            throw new NotImplementedException();
+            Console.WriteLine($"Number of rows: {rules.BoardRows}");
+            Console.WriteLine($"Number of cols: {rules.BoardCols}");
+            Console.WriteLine($"Ships can touch: {rules.CanShipsTouch}");
         }
 
-        public void ShowCurrentRules(IUserInterface obj)
+        public void DisplayCurrentRules(Rules rules)
         {
-            throw new NotImplementedException();
+            Console.WriteLine($"Ruleset name: {rules.Name}");
+            Console.WriteLine($"Number of rows: {rules.BoardRows}");
+            Console.WriteLine($"Number of cols: {rules.BoardCols}");
+            Console.WriteLine($"Ships can touch: {rules.CanShipsTouch}");
+            rules.BoatSizesAndQuantities.ForEach(tuple => Console.WriteLine($"Size: {tuple.size} - {tuple.quantity}"));
         }
 
-        public void DisplayCurrentRules(IUserInterface obj)
-        {
-            throw new NotImplementedException();
-        }
 
         public void DisplayAvailableShips(List<KeyValuePair<int,int>> availableShips)
         {
@@ -380,6 +382,30 @@ namespace UI
         {
             Console.Write("Enter a tile occupying a ship you wish to delete(or \"x\"): ");
             return Console.ReadLine().ToUpper();
+        }
+
+        public string GetRulesetName()
+        {
+            Console.Clear();
+            Console.Write("Enter a name for your custom rules: ");
+            return Console.ReadLine();
+
+        }
+
+        public string ConfirmBoatsOverride()
+        {
+            Console.Clear();
+            Console.Write("Are you sure you want to change this setting? \n" +
+                          "Changes may reset ships on boards if necessary (YES/NO):");
+            return Console.ReadLine();
+        }
+
+        public string GetShipsCanTouch(bool current)
+        {
+            Console.Clear();
+            Console.WriteLine($"Current ships can touch: {current}");
+            Console.Write("Enter whether ships can touch(YES/NO): ");
+            return Console.ReadLine();
         }
 
         private static string GetTableLine(int length)

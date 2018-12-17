@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
@@ -54,7 +55,7 @@ namespace BLL
             bool result = target.Board.BombLocation(targetTile.Row, targetTile.Col);
             BombingResult b = result ? BombingResult.Hit : BombingResult.Miss;
             GameMoves.Moves.Add((target, targetTile, b));
-            UI.ShowBombingResult(b, target.Board);
+            UI.DisplayBombingResult(b, target.Board);
             //TODO: check if anyone has won!
             //Switching player status
             if (SelectedMode.Equals("MP"))
@@ -73,7 +74,7 @@ namespace BLL
             bool computerResultbool = CurrentPlayer.Board.BombLocation(computerTarget.Row, computerTarget.Col);
             BombingResult computerResult = computerResultbool ? BombingResult.Hit : BombingResult.Miss;
             GameMoves.Moves.Add((CurrentPlayer, computerTarget, computerResult));
-            UI.ShowBombingResult(computerResult, CurrentPlayer.Board);
+            UI.DisplayBombingResult(computerResult, CurrentPlayer.Board);
             return "";
         }
         
@@ -203,27 +204,86 @@ namespace BLL
 
         public string EditShipsCanTouchRule()
         {
-            throw new NotImplementedException();
+            while (true)
+            {
+                string userInput = UI.GetShipsCanTouch(Rules.CanShipsTouch).ToUpper();
+                if (userInput.Equals("X")) return "";
+                if (!userInput.Equals("YES") && !userInput.Equals("NO"))
+                {
+                    UI.Alert("Invalid input", 1000);
+                    continue;
+                }
+
+                if (userInput.Equals("YES") && !Rules.CanShipsTouch || //User input and current are different
+                    userInput.Equals("NO") && Rules.CanShipsTouch)
+                {
+                    Rules.CanShipsTouch = userInput.Equals("YES");
+                    CurrentPlayer.Board = new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch);
+                    TargetPlayer.Board = new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch);
+                }
+
+                return "";
+            }
         }
 
         public string EditBoardHeight()
         {
-            throw new NotImplementedException();
+            while (true)
+            {
+                string userInput = UI.GetNewBoardHeight(Rules.BoardCols);
+                if (userInput.ToUpper().Equals("X")) return "";
+                if (!int.TryParse(userInput, out var rows))
+                {
+                    UI.Alert("Invalid input, enter a number or X", 2000);
+                    continue;
+                }
+                if (Rules.BoardRows == rows) return "";        //current is new, else reset boards
+                CurrentPlayer.Board = new Board(rows, Rules.BoardCols, Rules.CanShipsTouch);
+                TargetPlayer.Board = new Board(rows, Rules.BoardCols, Rules.CanShipsTouch);
+                Rules.BoardCols = rows;
+                return "";
+            }
         }
 
         public string EditBoardWidth()
         {
-            throw new NotImplementedException();
+            while (true)
+            {
+                string userInput = UI.GetNewBoardWidth(Rules.BoardCols);
+                if (userInput.ToUpper().Equals("X")) return "";
+                if (!int.TryParse(userInput, out var cols))
+                {
+                    UI.Alert("Invalid input, enter a number or X", 2000);
+                    continue;
+                }
+                if (Rules.BoardCols == cols) return "";        //current is new, else reset boards
+                CurrentPlayer.Board = new Board(Rules.BoardRows, cols, Rules.CanShipsTouch);
+                TargetPlayer.Board = new Board(Rules.BoardRows, cols, Rules.CanShipsTouch);
+                Rules.BoardCols = cols;
+                return "";
+            }
         }
 
-        public string SetRulesName()
+        public string SetRulesetName()
         {
-            throw new NotImplementedException();
+            while (true)
+            {
+                string userInput = UI.GetRulesetName();
+                if (userInput.ToUpper().Equals("X")) return "";
+                if (userInput.ToUpper().Equals("STANDARD RULES"))
+                {
+                    UI.Alert("Name can't be Standard rules", 2000);
+                    continue;
+                }
+                Rules.Name = UI.GetRulesetName();
+                return "";
+            }
         }
 
         public string SetStandardRules()
         {
-            throw new NotImplementedException();
+            Rules = Rules.GetDefaultRules();
+            return "";
         }
 
         public string LoadCustomRulesPreset()
@@ -325,9 +385,9 @@ namespace BLL
             return CurrentPlayer.IsReady && TargetPlayer.IsReady;
         }
 
-        public string ShowShipsAndBombings()
+        public string DisplayShipsAndBombings()
         {
-            UI.ShowShipsAndBombings(TargetPlayer.Board, CurrentPlayer.Board);
+            UI.DisplayShipsAndBombings(TargetPlayer.Board, CurrentPlayer.Board);
             return "";
         }
 
@@ -336,12 +396,12 @@ namespace BLL
             throw new NotImplementedException();
         }
 
-        public void ShowBoardRules()
+        public void DisplayBoardRules()
         {
-            throw new NotImplementedException();
+            UI.DisplayBoardRules(Rules);
         }
 
-        public void ShowCurrentShipsRegular()
+        public void DisplayCurrentShipsRegular()
         {
             UI.DisplayCurrentShips(CurrentPlayer.Board, "REGULAR");
         }
@@ -366,12 +426,12 @@ namespace BLL
             return "";
         }
 
-        public void ShowCurrentRuleset()
+        public void DisplayCurrentRuleset()
         {
-            throw new NotImplementedException();
+            UI.DisplayCurrentRules(Rules);
         }
 
-        public void ShowCurrentAndAvailableShips()
+        public void DisplayCurrentAndAvailableShips()
         {
             UI.DisplayCurrentShips(CurrentPlayer.Board, "ADDING");
             
@@ -389,7 +449,7 @@ namespace BLL
             Tile startTile;
             while (true)
             {
-                ShowCurrentAndAvailableShips();
+                DisplayCurrentAndAvailableShips();
                 string userInput = UI.GetShipStartPoint(CurrentPlayer.Board, AvailableShipsList(CurrentPlayer).ToList()).ToUpper();
                 if (userInput.Equals("X")) return "";
                 startTile = GetTile(userInput, CurrentPlayer.Board);
@@ -557,7 +617,7 @@ namespace BLL
             TargetPlayer = Player2;
         }
 
-        public void ShowCurrentShipsDeleting()
+        public void DisplayCurrentShipsDeleting()
         {
             UI.DisplayCurrentShips(CurrentPlayer.Board, "DELETING");
         }
@@ -654,6 +714,29 @@ namespace BLL
         {
             TargetPlayer.Board = new Board();
             TargetPlayer.Name = name;
+        }
+
+        public string SaveCustomRules()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool ConfirmBoatsOverride()
+        {
+            List<string> correctInputs = new List<string>{"YES", "NO", "Y", "N"};
+            while (true)
+            {
+                string userInput = UI.ConfirmBoatsOverride();
+                if (correctInputs.Contains(userInput.ToUpper()) == false)
+                {
+                    UI.Alert("Incorrect input", 1000);
+                }
+                else
+                {
+                    return userInput.Equals("YES") || userInput.Equals("Y");
+                }
+            }
+            
         }
     }
 }

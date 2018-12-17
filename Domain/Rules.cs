@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 
 namespace Domain
 {
-    public class Rules
+    public class Rules: ICloneable
     {
         public bool CanShipsTouch { get; set; }
         public int BoardRows { get; set; }
@@ -30,6 +31,13 @@ namespace Domain
             Rules rules = new Rules(true, 10, 10, boats);
             rules.Name = "Standard rules";
             return rules;
+        }
+
+        public object Clone()
+        {
+            List<(int size, int quantity)> boats = new List<(int size, int quantity)>();
+            BoatSizesAndQuantities.ForEach(tuple => boats.Add((tuple.size, tuple.quantity)));
+            return new Rules(CanShipsTouch, BoardRows, BoardCols, boats);
         }
     }
 }

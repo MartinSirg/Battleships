@@ -6,55 +6,23 @@ namespace MenuSystem
 {
     public interface IUserInterface
     {
-//        Player CurrentPlayer { get; set; }
-//        Player TargetPlayer { get; set; }
-
         string ShipStartPoint { get; set; }
+
         string ShipEndPoint { get; set; }
-//        bool DefaultRules { get; }
-//        
-//        ((int, int), (int, int)) GetShipStartAndEndLocations();
-//        
-//        (int, int) GetBombingLocation();
-//
-//        /*
-//         *Parameters:
-//         *     errorMessage: Error message given, if called again due to invalid input
-//         *     correctInput: If the first value was correct, it is passed as well, otherwise it remains -1 
-//         * 
-//         * Returns: tuple(int, int)
-//         *     Item1 - size of ship
-//         *     Item2 - quantity of those ships 
-//         */
-//        (int, int) GetShipSizeAndQuantity(string errorMessage = "", int previousCorrectLength = -1);
-//
-//        (int, int, bool) GetCustomRules();
+
         int MaxWidth { get; set; }
-        int MaxHeight { get; set; }
-//        Game Game { get; set; }
-
-//        ActionEnum ShowMenu(Menu menu);
-
-//        (int x, int y) AddShip();
-
-//        int DeleteShip();
         
-//        (int len, int quantity) AddShipToRules();
-
-//        (int len, int newQuantity) EditShip();
-
-//        int RemoveShipFromRules();
+        int MaxHeight { get; set; }
 
         int GetInteger(string message);
 
         string GetString(string message);
 
-
         string GetTargetLocation(Board enemyBoard);
 
-        void ShowShipsAndBombings(Board enemy, Board current);
+        void DisplayShipsAndBombings(Board enemy, Board current);
         
-        void ShowBombingResult(BombingResult bombingResult, Board targetBoard);
+        void DisplayBombingResult(BombingResult bombingResult, Board targetBoard);
 
         bool AskExitConfirmation();
         
@@ -64,11 +32,9 @@ namespace MenuSystem
         
         void DisplayRulesShips(IUserInterface ui);
         
-        void ShowBoardRules(IUserInterface obj);
+        void DisplayBoardRules(Rules rules);
         
-        void ShowCurrentRules(IUserInterface obj);
-        
-        void DisplayCurrentRules(IUserInterface obj);
+        void DisplayCurrentRules(Rules rules);
         
         void DisplayAvailableShips(List<KeyValuePair<int,int>> availableShips);
         
@@ -80,7 +46,7 @@ namespace MenuSystem
         
         void Alert(string alert, int waitTime);
 
-        string  GetMenuShortcut();
+        string GetMenuShortcut();
 
         void DisplayNewMenu(Menu menu);
 
@@ -91,5 +57,15 @@ namespace MenuSystem
         void DisplaySavedGames(List<string> names);
 
         string GetDeletableShipTile();
+        
+        string GetRulesetName();
+        
+        string ConfirmBoatsOverride();
+        
+        string GetShipsCanTouch(bool current);
+        
+        string GetNewBoardHeight(int currentRows);
+        
+        string GetNewBoardWidth(int currentCols);
     }
 }

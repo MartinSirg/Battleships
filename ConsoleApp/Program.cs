@@ -27,6 +27,7 @@ namespace ConsoleApp
 //            Console.ReadLine();
             IUserInterface ui = new ConsoleUI();
             DbContext dbContext = new DbContext();
+            
             dbContext.Boards.Add(new Board());
             dbContext.Boards[0].AddBattleship((0, 0), (0, 2), new Battleship(3));
             dbContext.Boards.Add(new Board());
@@ -35,11 +36,14 @@ namespace ConsoleApp
             dbContext.GameMoves.Add(new GameMoves());
             dbContext.Rules.Add(Rules.GetDefaultRules());
             dbContext.TotalGame.Add((name: "sample1", gameMoves: 0, player1: 0, player2: 1, p1board: 0, p2board: 1, rules: 0));
-            Game game = new Game(ui, dbContext);
             
-            ApplicationMenu applicationMenu = new ApplicationMenu(game);
-            Menu main = applicationMenu.GetMain();
-            game.RunMenu(menu: main);
+            Game game = new Game(ui, dbContext);
+            game.DisplayCurrentRuleset();
+            Console.ReadLine();
+
+//            ApplicationMenu applicationMenu = new ApplicationMenu(game);
+//            Menu main = applicationMenu.GetMain();
+//            game.RunMenu(menu: main);
         }
     }
 }

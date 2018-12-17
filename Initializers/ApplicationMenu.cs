@@ -38,7 +38,7 @@ namespace ConsoleApp
                     {
                         Shortcut = "2", 
                         Description = "Show my ships and bombings",
-                        CommandToExecute = Game.ShowShipsAndBombings
+                        CommandToExecute = Game.DisplayShipsAndBombings
                     },
                     new MenuItem
                     {
@@ -82,32 +82,33 @@ namespace ConsoleApp
             var customBoardMenu = new Menu
             {
                 Title = "Customize the game board",
-                DisplayBefore = Game.ShowBoardRules,
+                DisplayBefore = Game.DisplayBoardRules,
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem
                     {
                         Shortcut = "1",
                         Description = "Set ships can touch rule.",
-                        CommandToExecute = Game.EditShipsCanTouchRule
+                        CommandToExecute = () => Game.ConfirmBoatsOverride() ? Game.EditShipsCanTouchRule() : ""
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Set board width",
-                        CommandToExecute = Game.EditBoardWidth
+                        CommandToExecute = () => Game.ConfirmBoatsOverride() ? Game.EditBoardWidth() : ""
                     },
                     new MenuItem
                     {
                         Shortcut = "3",
                         Description = "Set board height",
-                        CommandToExecute = Game.EditBoardHeight
+                        CommandToExecute = () => Game.ConfirmBoatsOverride() ? Game.EditBoardHeight() : ""
                     }
                 }
             };
             var customRulesMenu = new Menu
             {
                 Title = "Custom rules",
+                DisplayBefore = Game.DisplayCurrentRuleset,
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem
@@ -126,27 +127,41 @@ namespace ConsoleApp
                     {
                         Shortcut = "3",
                         Description = "Set name",
-                        CommandToExecute = Game.SetRulesName
+                        CommandToExecute = Game.SetRulesetName
                     },
                     new MenuItem
                     {
                         Shortcut = "4",
                         Description = "Load custom rules preset",
                         CommandToExecute = Game.LoadCustomRulesPreset
+                    },
+                    new MenuItem
+                    {
+                        Shortcut = "5",
+                        Description = "Save custom rules preset",
+                        CommandToExecute = Game.SaveCustomRules
                     }
                 }
             };
             var rulesMenu = new Menu
             {
                 Title ="Rules",
-                DisplayBefore = Game.ShowCurrentRuleset,
+                DisplayBefore = () => Game.DisplayCurrentRuleset(),
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem
                     {
                         Shortcut = "1",
                         Description = "Set custom rules",
-                        CommandToExecute = () => Game.RunMenu(customRulesMenu)
+                        CommandToExecute = () =>
+                        {
+                            if (Game.Rules.Name.Equals("Standard rules"))
+                            {
+                                Game.Rules = (Rules) Game.Rules.Clone();
+                                Game.Rules.Name = "Custom rules";
+                            }
+                            return Game.RunMenu(customRulesMenu);
+                        }
                     },
                     new MenuItem
                     {
@@ -161,7 +176,7 @@ namespace ConsoleApp
             {
                 Title = "CHANGE ME!!!",
                 TitleWithName = "Add ship to PLAYER_NAME's board",
-                DisplayBefore = Game.ShowCurrentAndAvailableShips,
+                DisplayBefore = () => Game.DisplayCurrentAndAvailableShips(),
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem
@@ -188,7 +203,7 @@ namespace ConsoleApp
             var deleteShipFromBoardMenu = new Menu
             {
                 Title = "Delete ship",
-                DisplayBefore = Game.ShowCurrentShipsDeleting,
+                DisplayBefore = () => Game.DisplayCurrentShipsDeleting(),
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem
@@ -205,26 +220,7 @@ namespace ConsoleApp
                     }
                 }
             };
-//            
-//            var shipsMenu = new Menu
-//            {
-//                Title = "Ships",
-//                MenuItems = new List<MenuItem>
-//                {
-//                    new MenuItem
-//                    {
-//                        Shortcut = "1",
-//                        Description = "Add ships menu",
-//                        CommandToExecute = ui => ui.RunMenu(addShipsToBoardMenu)
-//                    },
-//                    new MenuItem
-//                    {
-//                        Shortcut = "2",
-//                        Description = "Delete ships menu",
-//                        CommandToExecute = ui => ui.RunMenu(deleteShipFromBoardMenu)
-//                    }
-//                }
-//            };
+
             var playerMenu = new Menu
             {
                 Title = "CHANGE ME!!!!",
@@ -294,7 +290,6 @@ namespace ConsoleApp
                                 Game.ResetTargetPlayer("Computer");
                             }
                             playerMenu.Title = $"{Game.CurrentPlayer.Name}'s menu";
-
                             Game.SetPlayerNotReady();
                             Game.SetSelectedMode("SP");    //TODO: Enumiks teha parameeter
                             var afterAction = Game.RunMenu(playerMenu);
