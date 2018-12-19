@@ -347,6 +347,7 @@ namespace ConsoleApp
             var mainMenu = new Menu
             {
                 Title = "Main menu",
+                
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem

@@ -408,6 +408,16 @@ namespace UI
             return Console.ReadLine();
         }
 
+        public string GetNewBoardHeight(int currentRows)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetNewBoardWidth(int currentCols)
+        {
+            throw new NotImplementedException();
+        }
+
         private static string GetTableLine(int length)
         {
             var sb = new StringBuilder();

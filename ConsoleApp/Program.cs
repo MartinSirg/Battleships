@@ -38,12 +38,12 @@ namespace ConsoleApp
             dbContext.TotalGame.Add((name: "sample1", gameMoves: 0, player1: 0, player2: 1, p1board: 0, p2board: 1, rules: 0));
             
             Game game = new Game(ui, dbContext);
-            game.DisplayCurrentRuleset();
-            Console.ReadLine();
+//            game.DisplayCurrentRuleset();
+//            Console.ReadLine();
 
-//            ApplicationMenu applicationMenu = new ApplicationMenu(game);
-//            Menu main = applicationMenu.GetMain();
-//            game.RunMenu(menu: main);
+            ApplicationMenu applicationMenu = new ApplicationMenu(game);
+            Menu main = applicationMenu.GetMain();
+            game.RunMenu(menu: main);
         }
     }
 }
