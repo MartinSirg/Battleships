@@ -36,11 +36,11 @@ namespace UI
             Console.WindowHeight = 35;
         }
 
-        public void PrintBombedLocations(Board enemyBoard)
+        public void PrintBombedLocations(Board enemyBoard, Player current)
         {
             var sb = new StringBuilder();
             var line = GetTableLine(enemyBoard.Tiles[0].Count);
-            sb.Append(LeftPad).Append("   ").Append("Your bombings:\n");
+            sb.Append(LeftPad).Append("   ").Append($"{current.Name} bombings:\n");
             sb.Append(LeftPad).Append("   ").Append(GetTopNumbersLine(enemyBoard.Tiles[0].Count)).Append("\n");
             sb.Append(LeftPad).Append("   ").Append(line).Append("\n");
             for (var index = 0; index < enemyBoard.Tiles.Count; index++)
@@ -167,10 +167,10 @@ namespace UI
             return Console.ReadLine();
         }
 
-        public string GetTargetLocation(Board enemyBoard)
+        public string GetTargetLocation(Board enemyBoard, Player currentPlayer)
         {
             Console.Clear();
-            PrintBombedLocations(enemyBoard);
+            PrintBombedLocations(enemyBoard, currentPlayer);
             Console.Write("Select target(or \"x\"): ");
             return Console.ReadLine().ToUpper();
         }
@@ -183,12 +183,10 @@ namespace UI
             Console.ReadLine();
         }
 
-        public void DisplayBombingResult(BombingResult bombingResult, Board targetBoard)
+        public void DisplayBombingResult(BombingResult bombingResult, Board targetBoard, Player currentPlayer)
         {
             Console.Clear();
-            PrintBombedLocations(targetBoard);
-            Thread.Sleep(2000);
-            Console.Clear();
+            PrintBombedLocations(targetBoard, currentPlayer);
         }
 
         public bool AskExitConfirmation()
@@ -204,19 +202,27 @@ namespace UI
             return input.Equals("Y");
         }
 
-        public int GetShipSize()
+        public string GetShipSize(Rules rules)
         {
-            throw new NotImplementedException();
+            Console.Clear();
+            Console.WriteLine("Add ship");
+            rules.BoatSizesAndQuantities.ForEach(tuple => Console.WriteLine($"Size: {tuple.size} - {tuple.quantity}"));
+            Console.WriteLine("Ship size cant be more than 10 and less than 0");
+            Console.WriteLine("Entered size cant already exist");
+            Console.Write("Enter new ship's size: ");
+            return Console.ReadLine();
         }
 
-        public int GetShipQuantity()
+        public string GetShipQuantity(int size)
         {
-            throw new NotImplementedException();
+            Console.Clear();
+            Console.Write($"Enter size {size} ship's quantity(can't be less than 1 and more than 5): ");
+            return Console.ReadLine();
         }
 
-        public void DisplayRulesShips(IUserInterface ui)
+        public void DisplayRulesShips(Rules rules)
         {
-            
+            rules.BoatSizesAndQuantities.ForEach(tuple => Console.WriteLine($"Size: {tuple.size} - {tuple.quantity}"));
         }
 
         public void DisplayBoardRules(Rules rules)
@@ -357,7 +363,7 @@ namespace UI
             for (int i = 0; i < menu.Title.Length; i++) Console.Write("-");
             Console.WriteLine();
             menu.MenuItems.ForEach(item => Console.WriteLine($"{item.Shortcut}) {item.Description}"));
-            Console.WriteLine($"{menu.Previous.Shortcut}) {menu.Previous.Description}");
+            if (menu.Previous != null) Console.WriteLine($"{menu.Previous.Shortcut}) {menu.Previous.Description}");
         }
 
         public void WaitForUser()
@@ -404,18 +410,39 @@ namespace UI
         {
             Console.Clear();
             Console.WriteLine($"Current ships can touch: {current}");
-            Console.Write("Enter whether ships can touch(YES/NO): ");
+            Console.Write("Enter whether ships can touch(YES/NO or x): ");
             return Console.ReadLine();
         }
 
         public string GetNewBoardHeight(int currentRows)
         {
-            throw new NotImplementedException();
+            Console.Clear();
+            Console.WriteLine($"Current board rows(height): {currentRows}");
+            Console.Write("Enter amount of rows(or x): ");
+            return Console.ReadLine();
         }
 
         public string GetNewBoardWidth(int currentCols)
         {
-            throw new NotImplementedException();
+            Console.Clear();
+            Console.WriteLine($"Current board columns(width): {currentCols}");
+            Console.Write("Enter amount of columns(or x): ");
+            return Console.ReadLine();
+            
+        }
+
+        public string GetExistingShipSize(Rules rules)
+        {
+            Console.Clear();
+            rules.BoatSizesAndQuantities.ForEach(tuple => Console.WriteLine($"Size: {tuple.size} - {tuple.quantity}"));
+            Console.Write("Enter an existing ship's size: ");
+            return Console.ReadLine();
+        }
+
+        public void Continue()
+        {
+            Console.WriteLine("Press any key to continue");
+            Console.ReadLine();
         }
 
         private static string GetTableLine(int length)

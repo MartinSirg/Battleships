@@ -796,47 +796,49 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\User\\.nuget\\packages\\": {},
+    "C:\\Users\\sirgm\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Repos\\C#\\Battleships\\ConsoleApp\\ConsoleApp.csproj",
+      "projectUniqueName": "C:\\Projects Repositories\\C#\\ConsoleApp\\ConsoleApp.csproj",
       "projectName": "ConsoleApp",
-      "projectPath": "C:\\Repos\\C#\\Battleships\\ConsoleApp\\ConsoleApp.csproj",
-      "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-      "outputPath": "C:\\Repos\\C#\\Battleships\\ConsoleApp\\obj\\",
+      "projectPath": "C:\\Projects Repositories\\C#\\ConsoleApp\\ConsoleApp.csproj",
+      "packagesPath": "C:\\Users\\sirgm\\.nuget\\packages\\",
+      "outputPath": "C:\\Projects Repositories\\C#\\ConsoleApp\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\sirgm\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp2.1"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "netcoreapp2.1": {
           "projectReferences": {
-            "C:\\Repos\\C#\\Battleships\\BLL\\BLL.csproj": {
-              "projectPath": "C:\\Repos\\C#\\Battleships\\BLL\\BLL.csproj"
+            "C:\\Projects Repositories\\C#\\BLL\\BLL.csproj": {
+              "projectPath": "C:\\Projects Repositories\\C#\\BLL\\BLL.csproj"
             },
-            "C:\\Repos\\C#\\Battleships\\Domain\\Domain.csproj": {
-              "projectPath": "C:\\Repos\\C#\\Battleships\\Domain\\Domain.csproj"
+            "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj": {
+              "projectPath": "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj"
             },
-            "C:\\Repos\\C#\\Battleships\\Initializers\\Initializers.csproj": {
-              "projectPath": "C:\\Repos\\C#\\Battleships\\Initializers\\Initializers.csproj"
+            "C:\\Projects Repositories\\C#\\Initializers\\Initializers.csproj": {
+              "projectPath": "C:\\Projects Repositories\\C#\\Initializers\\Initializers.csproj"
             },
-            "C:\\Repos\\C#\\Battleships\\MenuSystem\\MenuSystem.csproj": {
-              "projectPath": "C:\\Repos\\C#\\Battleships\\MenuSystem\\MenuSystem.csproj"
+            "C:\\Projects Repositories\\C#\\MenuSystem\\MenuSystem.csproj": {
+              "projectPath": "C:\\Projects Repositories\\C#\\MenuSystem\\MenuSystem.csproj"
             },
-            "C:\\Repos\\C#\\Battleships\\UI\\UI.csproj": {
-              "projectPath": "C:\\Repos\\C#\\Battleships\\UI\\UI.csproj"
+            "C:\\Projects Repositories\\C#\\UI\\UI.csproj": {
+              "projectPath": "C:\\Projects Repositories\\C#\\UI\\UI.csproj"
             }
           }
         }

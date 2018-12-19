@@ -2,6 +2,7 @@
 using BLL;
 using DAL;
 using Domain;
+using Initializers;
 using MenuSystem;
 using UI;
 
@@ -35,7 +36,8 @@ namespace ConsoleApp
             dbContext.Players.Add(new Player(dbContext.Boards[1], "Player 2"));
             dbContext.GameMoves.Add(new GameMoves());
             dbContext.Rules.Add(Rules.GetDefaultRules());
-            dbContext.TotalGame.Add((name: "sample1", gameMoves: 0, player1: 0, player2: 1, p1board: 0, p2board: 1, rules: 0));
+            dbContext.TotalGame.Add((name: "sample1", gameMoves: 0, player1: 0, player2: 1, rules: 0));
+            
             
             Game game = new Game(ui, dbContext);
 //            game.DisplayCurrentRuleset();

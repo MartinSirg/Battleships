@@ -122,6 +122,12 @@ namespace Domain
             return Tiles[row][col]?.Battleship;
         }
         
+        public void UnBomb(Tile tile)
+        {
+            if (tile.IsBombed && !tile.IsEmpty()) tile.Battleship.LivesLeft++;
+            tile.IsBombed = false;
+        }
+        
         public bool BombLocation(int row, int col)
         {
             if (row > Tiles.Count - 1 || col > Tiles[0].Count)

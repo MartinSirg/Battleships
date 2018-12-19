@@ -3,7 +3,7 @@ namespace Domain
     public class Tile
     {
         public Battleship Battleship { get; set; }
-        public bool IsBombed { get; set; }
+        public bool IsBombed { get; set; } = false;
         public int Row { get; set; }
         public int Col { get; set; }
         public Board Board { get; set; }

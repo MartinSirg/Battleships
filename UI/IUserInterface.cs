@@ -18,19 +18,19 @@ namespace MenuSystem
 
         string GetString(string message);
 
-        string GetTargetLocation(Board enemyBoard);
+        string GetTargetLocation(Board enemyBoard, Player currentPlayer);
 
         void DisplayShipsAndBombings(Board enemy, Board current);
         
-        void DisplayBombingResult(BombingResult bombingResult, Board targetBoard);
+        void DisplayBombingResult(BombingResult bombingResult, Board targetBoard, Player currentPlayer);
 
         bool AskExitConfirmation();
         
-        int GetShipSize();
+        string GetShipSize(Rules rules);
         
-        int GetShipQuantity();
+        string GetShipQuantity(int size);
         
-        void DisplayRulesShips(IUserInterface ui);
+        void DisplayRulesShips(Rules rules);
         
         void DisplayBoardRules(Rules rules);
         
@@ -67,5 +67,9 @@ namespace MenuSystem
         string GetNewBoardHeight(int currentRows);
         
         string GetNewBoardWidth(int currentCols);
+        
+        string GetExistingShipSize(Rules rules);
+        
+        void Continue();
     }
 }

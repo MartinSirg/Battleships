@@ -10,7 +10,8 @@ namespace DAL
         public List<Player> Players { get; set; } = new List<Player>();
         public List<Board> Boards { get; set; } = new List<Board>();
         public List<Rules> Rules { get; set; } = new List<Rules>();
-        
+        public List<(string name, int gameMoves, int player1, int player2, int rules)> FinishedGames { get; set; }= 
+            new List<(string name, int gameMoves, int player1, int player2, int rules)>();
         /**
          * 1. String = game name
          * 2. int = GameMoves primary index
@@ -20,8 +21,8 @@ namespace DAL
          * 6. int = Player 2 Board primary index in Boards
          * 7. int = Rules primary index
          */
-        public List<(string name, int gameMoves, int player1, int player2, int p1board, int p2board, int rules)> TotalGame { get; set;} = 
-            new List<(string , int, int, int, int, int, int)>();
+        public List<(string name, int gameMoves, int player1, int player2, int rules)> TotalGame { get; set;} = 
+            new List<(string , int, int, int, int)>();
         
     }
 }

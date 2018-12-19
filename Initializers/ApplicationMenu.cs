@@ -1,12 +1,9 @@
-
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using BLL;
 using Domain;
 using MenuSystem;
 
-namespace ConsoleApp
+namespace Initializers
 {
     public class ApplicationMenu
     {
@@ -25,6 +22,7 @@ namespace ConsoleApp
             var inGameMenu = new Menu
             {
                 Title = "CHANGE ME!!!",
+                Previous = null,
                 TitleWithName = "PLAYER_NAME's turn",
                 MenuItems = new List<MenuItem>
                 {
@@ -45,6 +43,17 @@ namespace ConsoleApp
                         Shortcut = "9",
                         Description = "Save and Exit",
                         CommandToExecute = Game.SaveGame
+                    },
+                    new MenuItem
+                    {
+                        Shortcut = "8",
+                        Description = "Exit without saving",
+                        CommandToExecute = () =>
+                        {
+                            Game.Player1.Board = new Board(Game.Rules.BoardRows, Game.Rules.BoardCols, Game.Rules.CanShipsTouch);
+                            Game.Player2.Board = new Board(Game.Rules.BoardRows, Game.Rules.BoardCols, Game.Rules.CanShipsTouch);
+                            return "Q";
+                        }
                     }
                 }
             };
@@ -89,19 +98,19 @@ namespace ConsoleApp
                     {
                         Shortcut = "1",
                         Description = "Set ships can touch rule.",
-                        CommandToExecute = () => Game.ConfirmBoatsOverride() ? Game.EditShipsCanTouchRule() : ""
+                        CommandToExecute = Game.EditShipsCanTouchRule
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
-                        Description = "Set board width",
-                        CommandToExecute = () => Game.ConfirmBoatsOverride() ? Game.EditBoardWidth() : ""
+                        Description = "Set board cols",
+                        CommandToExecute = Game.EditBoardWidth
                     },
                     new MenuItem
                     {
                         Shortcut = "3",
-                        Description = "Set board height",
-                        CommandToExecute = () => Game.ConfirmBoatsOverride() ? Game.EditBoardHeight() : ""
+                        Description = "Set board rows",
+                        CommandToExecute = Game.EditBoardHeight
                     }
                 }
             };
@@ -128,18 +137,6 @@ namespace ConsoleApp
                         Shortcut = "3",
                         Description = "Set name",
                         CommandToExecute = Game.SetRulesetName
-                    },
-                    new MenuItem
-                    {
-                        Shortcut = "4",
-                        Description = "Load custom rules preset",
-                        CommandToExecute = Game.LoadCustomRulesPreset
-                    },
-                    new MenuItem
-                    {
-                        Shortcut = "5",
-                        Description = "Save custom rules preset",
-                        CommandToExecute = Game.SaveCustomRules
                     }
                 }
             };
@@ -196,7 +193,14 @@ namespace ConsoleApp
                         Shortcut = "3",
                         Description = "Confirm ship placement",
                         CommandToExecute = Game.PlaceShipOnBoard
+                    },
+                    new MenuItem
+                    {
+                        Shortcut = "9",
+                        Description = "Generate random board",
+                        CommandToExecute = () => Game.GenerateRandomBoard(Game.CurrentPlayer)
                     }
+                    
                 }
             };
             
@@ -217,6 +221,17 @@ namespace ConsoleApp
                         Shortcut = "2",
                         Description = "Confirm ship deletion",
                         CommandToExecute = Game.DeleteShipFromBoard
+                    },
+                    new MenuItem
+                    {
+                        Shortcut = "9",
+                        Description = "Delete all ships",
+                        CommandToExecute = () =>
+                        {
+                            Game.CurrentPlayer.Board = new Board(Game.Rules.BoardRows, Game.Rules.BoardCols,
+                                    Game.Rules.CanShipsTouch);
+                            return "";
+                        }
                     }
                 }
             };

@@ -1,10 +1,10 @@
 ﻿{
   "version": "1.0.0",
   "restore": {
-    "projectUniqueName": "C:\\Repos\\C#\\Battleships\\MenuSystem\\MenuSystem.csproj",
+    "projectUniqueName": "C:\\Projects Repositories\\C#\\MenuSystem\\MenuSystem.csproj",
     "projectName": "MenuSystem",
-    "projectPath": "C:\\Repos\\C#\\Battleships\\MenuSystem\\MenuSystem.csproj",
-    "outputPath": "C:\\Repos\\C#\\Battleships\\MenuSystem\\obj\\",
+    "projectPath": "C:\\Projects Repositories\\C#\\MenuSystem\\MenuSystem.csproj",
+    "outputPath": "C:\\Projects Repositories\\C#\\MenuSystem\\obj\\",
     "projectStyle": "PackageReference",
     "fallbackFolders": [
       "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -15,8 +15,8 @@
     "frameworks": {
       "netstandard2.0": {
         "projectReferences": {
-          "C:\\Repos\\C#\\Battleships\\Domain\\Domain.csproj": {
-            "projectPath": "C:\\Repos\\C#\\Battleships\\Domain\\Domain.csproj"
+          "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj": {
+            "projectPath": "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj"
           }
         }
       }
