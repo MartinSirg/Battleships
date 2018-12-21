@@ -19,18 +19,18 @@ namespace BLL
         public Player Player2 { get; set; }
         public Player CurrentPlayer { get; set; }
         public Player TargetPlayer { get; set; }
-        public GameMoves GameMoves = new GameMoves();
+        public List<GameMove> GameMoves = new List<GameMove>();
         private LetterNumberSystem Converter = new LetterNumberSystem();
         private IUserInterface UI;
-        private DbContext DbContext;
+        private AppDbContext _appDbContext;
         public string SelectedMode { get; set; } = "";
         public const int MAX_ROWS = 24, MIN_ROWS = 10, MIN_COLS = 10, MAX_COLS = 24;
 
-        public Game(IUserInterface ui, DbContext dbContext)
+        public Game(IUserInterface ui, AppDbContext appDbContext)
         {
             Rules = Rules.GetDefaultRules();
             UI = ui;
-            DbContext = dbContext;
+            _appDbContext = appDbContext;
             var board1 = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
             var board2 = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
             
@@ -54,7 +54,7 @@ namespace BLL
             }
             bool result = TargetPlayer.Board.BombLocation(targetTile.Row, targetTile.Col);
             BombingResult b = result ? BombingResult.Hit : BombingResult.Miss;
-            GameMoves.Moves.Add((TargetPlayer, targetTile, b));
+            GameMoves.Add(new GameMove(TargetPlayer, targetTile));
             UI.DisplayBombingResult(b, TargetPlayer.Board, CurrentPlayer);
             UI.Continue();
 
@@ -75,12 +75,12 @@ namespace BLL
             //Generating random bombing location for computer
             List<Tile> tiles = new List<Tile>();                
             CurrentPlayer.Board.Tiles.ForEach(row => row.ForEach(tile => tiles.Add(tile))); //Adds all tiles to list
-            CurrentPlayer.Board.Bombings.ForEach(tuple => tiles.Remove(tuple.tile)); //Removes bombed tiles from list
+            CurrentPlayer.Board.Bombings.ForEach(tile => tiles.Remove(tile)); //Removes bombed tiles from list
             
             Tile computerTarget = tiles[new Random().Next(0, tiles.Count - 1)];
             bool computerResultbool = CurrentPlayer.Board.BombLocation(computerTarget.Row, computerTarget.Col);
             BombingResult computerResult = computerResultbool ? BombingResult.Hit : BombingResult.Miss;
-            GameMoves.Moves.Add((CurrentPlayer, computerTarget, computerResult));
+            GameMoves.Add(new GameMove(CurrentPlayer, computerTarget));
             UI.DisplayBombingResult(computerResult, CurrentPlayer.Board, TargetPlayer);
             UI.Continue();
             
@@ -97,24 +97,24 @@ namespace BLL
         private void SaveFinishedGame()
         {
             string name = UI.GetSaveGameName();
-            while (DbContext.FinishedGames.Exists(tuple => tuple.name.Equals(name)))
+            while (_appDbContext.FinishedGamesOld.Exists(tuple => tuple.name.Equals(name)))
             {
                 UI.Alert($"Enter a different name {name} is already taken.", 0);
                 name = UI.GetSaveGameName();
             }
             
-            DbContext.Rules.Add(Rules);
-            DbContext.Players.Add(Player1);
-            DbContext.Players.Add(Player2);
-            DbContext.GameMoves.Add(GameMoves);
+            _appDbContext.RulesOld.Add(Rules);
+            _appDbContext.PlayersOld.Add(Player1);
+            _appDbContext.PlayersOld.Add(Player2);
+            _appDbContext.GameMovesOld.Add(GameMoves);
             
             
-            DbContext.FinishedGames.Add((
+            _appDbContext.FinishedGamesOld.Add((
                 name,
-                DbContext.GameMoves.FindIndex(moves => moves == GameMoves),
-                DbContext.Players.FindIndex(player => player == Player1),
-                DbContext.Players.FindIndex(player => player == Player2),
-                DbContext.Rules.FindIndex(rules => rules == Rules)
+                _appDbContext.GameMovesOld.FindIndex(moves => moves == GameMoves),
+                _appDbContext.PlayersOld.FindIndex(player => player == Player1),
+                _appDbContext.PlayersOld.FindIndex(player => player == Player2),
+                _appDbContext.RulesOld.FindIndex(rules => rules == Rules)
             ));
             CurrentPlayer = new Player(new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch), "Player 1" );
             TargetPlayer = new Player(new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch), "Player 2" );
@@ -198,7 +198,7 @@ namespace BLL
             string name = UI.GetSaveGameName();
             if (name.ToUpper().Equals("X")) return "";
             
-            while (DbContext.TotalGame.Exists(tuple => tuple.name.Equals(name)))
+            while (_appDbContext.TotalGameOld.Exists(tuple => tuple.name.Equals(name)))
             {
                 UI.Alert($"Enter a different name {name} is already taken.", 0);
                 name = UI.GetSaveGameName();
@@ -206,21 +206,21 @@ namespace BLL
             }
             
             
-            DbContext.Rules.Add(Rules);
-            DbContext.Players.Add(Player1);
-            DbContext.Players.Add(Player2);
-            DbContext.GameMoves.Add(GameMoves);
+            _appDbContext.RulesOld.Add(Rules);
+            _appDbContext.PlayersOld.Add(Player1);
+            _appDbContext.PlayersOld.Add(Player2);
+            _appDbContext.GameMovesOld.Add(GameMoves);
             
             
-            DbContext.TotalGame.Add((
+            _appDbContext.TotalGameOld.Add((
                 name,
-                DbContext.GameMoves.FindIndex(moves => moves == GameMoves),
-                DbContext.Players.FindIndex(player => player == Player1),
-                DbContext.Players.FindIndex(player => player == Player2),
-                DbContext.Rules.FindIndex(rules => rules == Rules)
+                _appDbContext.GameMovesOld.FindIndex(moves => moves == GameMoves),
+                _appDbContext.PlayersOld.FindIndex(player => player == Player1),
+                _appDbContext.PlayersOld.FindIndex(player => player == Player2),
+                _appDbContext.RulesOld.FindIndex(rules => rules == Rules)
                 ));
-            CurrentPlayer = new Player(new Board(), "Player 1" );
-            TargetPlayer = new Player(new Board(), "Player 2" );
+            CurrentPlayer = new Player(new Board(10,10,true), "Player 1" );
+            TargetPlayer = new Player(new Board(10,10,true), "Player 2" );
             Player1 = CurrentPlayer;
             Player2 = TargetPlayer;
             return "Q";
@@ -233,7 +233,7 @@ namespace BLL
                 string userInputSize = UI.GetShipSize(Rules);
                 if (userInputSize.ToUpper().Equals("X")) return "";
                 List<int> currentSizes = new List<int>();
-                Rules.BoatSizesAndQuantities.ForEach(tuple => currentSizes.Add(tuple.size));
+                Rules.BoatRules.ForEach(rule => currentSizes.Add(rule.Size));
                 if (!int.TryParse(userInputSize, out var size) || size < 1 || size > 10 || currentSizes.Contains(size))
                 {
                     UI.Alert("Invalid input", 500);
@@ -252,11 +252,11 @@ namespace BLL
                     }
                     break;
                 }
-                Rules.BoatSizesAndQuantities.Add((size, quantity));
-                Rules.BoatSizesAndQuantities.Sort((tuple, valueTuple) =>
+                Rules.BoatRules.Add(new BoatRule(size, quantity));
+                Rules.BoatRules.Sort((rule, boatRule) =>
                 {
-                    if(tuple.size > valueTuple.size) return 1;
-                    if(tuple.size < valueTuple.size) return -1;
+                    if(rule.Size > boatRule.Size) return 1;
+                    if(rule.Size < boatRule.Size) return -1;
                     return 0;
                 });
                 return "";
@@ -269,7 +269,7 @@ namespace BLL
             {
                 string userInputSize = UI.GetExistingShipSize(Rules);
                 if (userInputSize.ToUpper().Equals("X")) return "";
-                if (!int.TryParse(userInputSize, out var size) || Rules.BoatSizesAndQuantities.All(tuple => tuple.size != size))
+                if (!int.TryParse(userInputSize, out var size) || Rules.BoatRules.All(rule => rule.Size != size))
                 {
                     UI.Alert("Invalid input", 500);
                     continue;
@@ -289,11 +289,8 @@ namespace BLL
                 }
 
                 int index = 0;
-                Rules.BoatSizesAndQuantities.ForEach(tuple =>
-                {
-                    if (tuple.size == size) index = Rules.BoatSizesAndQuantities.IndexOf(tuple);
-                });
-                Rules.BoatSizesAndQuantities[index] = (size, quantity);
+                Rules.BoatRules.Find(rule => rule.Size == size).Quantity = quantity;
+     
                 CurrentPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
                 TargetPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
                 return "";
@@ -306,12 +303,12 @@ namespace BLL
             {
                 string userInputSize = UI.GetExistingShipSize(Rules);
                 if (userInputSize.ToUpper().Equals("X")) return "";
-                if (!int.TryParse(userInputSize, out var size) || Rules.BoatSizesAndQuantities.All(tuple => tuple.size != size))
+                if (!int.TryParse(userInputSize, out var size) || Rules.BoatRules.All(rule => rule.Size != size))
                 {
                     UI.Alert("Invalid input", 500);
                     continue;
                 }
-                Rules.BoatSizesAndQuantities.Remove(Rules.BoatSizesAndQuantities.Find(tuple => tuple.size == size));
+                Rules.BoatRules.Remove(Rules.BoatRules.Find(rule => rule.Size == size));
                 CurrentPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
                 TargetPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
                 return "";
@@ -408,7 +405,7 @@ namespace BLL
         {
             //Key size, Value Quantity;
             Dictionary<int, int>  boats = new Dictionary<int, int>();
-            Rules.BoatSizesAndQuantities.ForEach(tuple => boats.Add(tuple.size, tuple.quantity));
+            Rules.BoatRules.ForEach(rule => boats.Add(rule.Size, rule.Quantity));
             CurrentPlayer.Board.Battleships.ForEach(battleship => boats[battleship.Size]--);
             Tile start = CurrentPlayer.Board.HighlightedStart, end = CurrentPlayer.Board.HighLightedEnd;
             if (start == null || end == null)
@@ -493,7 +490,7 @@ namespace BLL
             }
             
             Dictionary<int, int>  ships = new Dictionary<int, int>();
-            Rules.BoatSizesAndQuantities.ForEach(tuple => ships.Add(tuple.size, tuple.quantity));
+            Rules.BoatRules.ForEach(rule => ships.Add(rule.Size, rule.Quantity));
             CurrentPlayer.Board.Battleships.ForEach(battleship => ships[battleship.Size]--);
             if (ships.Any(pair => pair.Value > 0))
             {
@@ -502,7 +499,7 @@ namespace BLL
             }
             
             ships = new Dictionary<int, int>();
-            Rules.BoatSizesAndQuantities.ForEach(tuple => ships.Add(tuple.size, tuple.quantity));
+            Rules.BoatRules.ForEach(rule => ships.Add(rule.Size, rule.Quantity));
             TargetPlayer.Board.Battleships.ForEach(battleship => ships[battleship.Size]--);
             if (ships.Any(pair => pair.Value > 0))
             {
@@ -565,7 +562,7 @@ namespace BLL
             UI.DisplayCurrentShips(CurrentPlayer.Board, "ADDING");
             
             Dictionary<int, int>  ships = new Dictionary<int, int>();
-            Rules.BoatSizesAndQuantities.ForEach(tuple => ships.Add(tuple.size, tuple.quantity));
+            Rules.BoatRules.ForEach(rule => ships.Add(rule.Size, rule.Quantity));
             CurrentPlayer.Board.Battleships.ForEach(battleship => ships[battleship.Size]--);
             
             UI.DisplayAvailableShips(ships.ToList());
@@ -595,7 +592,7 @@ namespace BLL
         private Dictionary<int, int> AvailableShipsList(Player player)
         {
             Dictionary<int, int>  availableShips = new Dictionary<int, int>();
-            Rules.BoatSizesAndQuantities.ForEach(tuple => availableShips.Add(tuple.size, tuple.quantity));
+            Rules.BoatRules.ForEach(rule => availableShips.Add(rule.Size, rule.Quantity));
             player.Board.Battleships.ForEach(battleship => availableShips[battleship.Size]--);
             return availableShips;
         }
@@ -686,7 +683,7 @@ namespace BLL
         public string LoadGame()
         {
             List<string> names = new List<string>();
-            DbContext.TotalGame.ForEach(tuple => names.Add(tuple.name));
+            _appDbContext.TotalGameOld.ForEach(tuple => names.Add(tuple.name));
             UI.DisplaySavedGames(names);
             int num;
             while (true)
@@ -709,19 +706,19 @@ namespace BLL
             }
 
             (string name, int gameMoves, int player1, int player2, int rules) totalGame =
-                DbContext.TotalGame[num - 1];
-            Player1 = DbContext.Players[totalGame.player1];
-            Player2 = DbContext.Players[totalGame.player2];
-            Rules = DbContext.Rules[totalGame.rules];
-            GameMoves = DbContext.GameMoves[totalGame.gameMoves];
-            if (GameMoves.Moves.Count == 0)
+                _appDbContext.TotalGameOld[num - 1];
+            Player1 = _appDbContext.PlayersOld[totalGame.player1];
+            Player2 = _appDbContext.PlayersOld[totalGame.player2];
+            Rules = _appDbContext.RulesOld[totalGame.rules];
+            GameMoves = _appDbContext.GameMovesOld[totalGame.gameMoves];
+            if (GameMoves.Count == 0)
             {
                 TargetPlayer = Player2;
                 CurrentPlayer = Player1;
             }
             else
             {
-                CurrentPlayer = GameMoves.Moves[GameMoves.Moves.Count - 1].target;
+                CurrentPlayer = GameMoves[GameMoves.Count - 1].Target;
                 TargetPlayer = CurrentPlayer == Player1 ? Player2 : Player1;
             }
 
@@ -731,7 +728,7 @@ namespace BLL
         public string ReplayGame()
         {
             List<string> names = new List<string>();
-            DbContext.FinishedGames.ForEach(tuple => names.Add(tuple.name));
+            _appDbContext.FinishedGamesOld.ForEach(tuple => names.Add(tuple.name));
             UI.DisplaySavedGames(names);
 
             int num;
@@ -754,27 +751,27 @@ namespace BLL
                 break;
             }
             
-            (string name, int gameMoves, int player1, int player2, int rules) finishedGame = DbContext.FinishedGames[num - 1];
-            Player1 = DbContext.Players[finishedGame.player1];
-            Player2 = DbContext.Players[finishedGame.player2];
-            Rules = DbContext.Rules[finishedGame.rules];
-            GameMoves = DbContext.GameMoves[finishedGame.gameMoves];
-            Player1.Board.Bombings = new List<(Tile tile, BombingResult bombingResult)>();
-            Player2.Board.Bombings = new List<(Tile tile, BombingResult bombingResult)>();
-            Console.WriteLine(GameMoves.Moves.Count);
+            (string name, int gameMoves, int player1, int player2, int rules) finishedGame = _appDbContext.FinishedGamesOld[num - 1];
+            Player1 = _appDbContext.PlayersOld[finishedGame.player1];
+            Player2 = _appDbContext.PlayersOld[finishedGame.player2];
+            Rules = _appDbContext.RulesOld[finishedGame.rules];
+            GameMoves = _appDbContext.GameMovesOld[finishedGame.gameMoves];
+            Player1.Board.Bombings = new List<Tile>();
+            Player2.Board.Bombings = new List<Tile>();
+            Console.WriteLine(GameMoves.Count);
             Thread.Sleep(1000);
             
-            GameMoves.Moves.ForEach(tuple => tuple.target.Board.UnBomb(tuple.tile));
+            GameMoves.ForEach(move => move.Target.Board.UnBomb(move.Tile));
             Player lastMoveBy = Player1;
-            GameMoves.Moves.ForEach(tuple =>
+            GameMoves.ForEach(move =>
             {
-                Tile targetTile = tuple.tile;
-                bool result = tuple.target.Board.BombLocation(targetTile.Row, targetTile.Col);
+                Tile targetTile = move.Tile;
+                bool result = move.Target.Board.BombLocation(targetTile.Row, targetTile.Col);
                 BombingResult b = result ? BombingResult.Hit : BombingResult.Miss;
-                UI.DisplayBombingResult(b, tuple.target.Board, Player1 == tuple.target ? Player2 : Player1);
-                UI.Alert($"{tuple.target.Name} is bombed at {Converter.GetLetter(tuple.tile.Row + 1)}:{tuple.tile.Col + 1} and it's a {(tuple.result == BombingResult.Hit ? "Hit" : "Miss")}", 0);
+                UI.DisplayBombingResult(b, move.Target.Board, Player1 == move.Target ? Player2 : Player1);
+                UI.Alert($"{move.Target.Name} is bombed at {Converter.GetLetter(move.Tile.Row + 1)}:{move.Tile.Col + 1} and it's a {(b == BombingResult.Hit ? "Hit" : "Miss")}", 0);
                 UI.Continue();
-                lastMoveBy = tuple.target == Player1 ? Player2 : Player1;
+                lastMoveBy = move.Target == Player1 ? Player2 : Player1;
             });
             UI.Alert($"{lastMoveBy.Name} has won the game!", 0);
             UI.Continue();
@@ -890,7 +887,7 @@ namespace BLL
 
         public void ResetTargetPlayer(String name)
         {
-            TargetPlayer.Board = new Board();
+            TargetPlayer.Board = new Board(10,10,true);
             TargetPlayer.Name = name;
         }
 

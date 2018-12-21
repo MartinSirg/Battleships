@@ -351,7 +351,7 @@ namespace Initializers
                             }
 
                             inGameMenu.Title = $"{Game.CurrentPlayer.Name}'s turn";
-                            Game.RunMenu(inGameMenu);  //Game starts and ends here, TODO: reset all objects maybe
+                            Game.RunMenu(inGameMenu);  //Game starts and ends here,
                             return "Q";
                         }
                     }

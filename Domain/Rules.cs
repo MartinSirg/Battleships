@@ -1,24 +1,34 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Domain
 {
     public class Rules: ICloneable
     {
+        public int RulesId { get; set; }
+        
         public bool CanShipsTouch { get; set; }
         public int BoardRows { get; set; }
         public int BoardCols { get; set; }
+        
+        [MaxLength(64)]
         public string Name { get; set; }
-        public List<(int size, int quantity)> BoatSizesAndQuantities { get; set; }
 
-        public Rules(bool canShipsTouch, int boardRows, int boardCols, List<(int, int)> boatSizesAndQuantities)
+        public List<BoatRule> BoatRules { get; set; } = new List<BoatRule>();
+
+        public Rules(bool canShipsTouch, int boardRows, int boardCols, List<(int, int)> boatRules)
         {
             CanShipsTouch = canShipsTouch;
             BoardRows = boardRows;
             BoardCols = boardCols;
-            BoatSizesAndQuantities = boatSizesAndQuantities;
+            boatRules.ForEach(tuple => BoatRules.Add(new BoatRule(tuple.Item1, tuple.Item2)));
         }
-        
+
+        private Rules()
+        {
+        }
+
 
         public static Rules GetDefaultRules()
         {
@@ -36,7 +46,7 @@ namespace Domain
         public object Clone()
         {
             List<(int size, int quantity)> boats = new List<(int size, int quantity)>();
-            BoatSizesAndQuantities.ForEach(tuple => boats.Add((tuple.size, tuple.quantity)));
+            BoatRules.ForEach(rule => boats.Add((rule.Size, rule.Quantity)));
             return new Rules(CanShipsTouch, BoardRows, BoardCols, boats);
         }
     }

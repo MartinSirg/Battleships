@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BLL;
 using DAL;
 using Domain;
@@ -27,21 +28,22 @@ namespace ConsoleApp
 //            ui.PrintBombedLocationsAndFriendlyShips(board, board);
 //            Console.ReadLine();
             IUserInterface ui = new ConsoleUI();
-            DbContext dbContext = new DbContext();
+            AppDbContext appDbContext = new AppDbContext();
             
-            dbContext.Boards.Add(new Board());
-            dbContext.Boards[0].AddBattleship((0, 0), (0, 2), new Battleship(3));
-            dbContext.Boards.Add(new Board());
-            dbContext.Players.Add(new Player(dbContext.Boards[0], "Player 1"));
-            dbContext.Players.Add(new Player(dbContext.Boards[1], "Player 2"));
-            dbContext.GameMoves.Add(new GameMoves());
-            dbContext.Rules.Add(Rules.GetDefaultRules());
-            dbContext.TotalGame.Add((name: "sample1", gameMoves: 0, player1: 0, player2: 1, rules: 0));
+            appDbContext.BoardsOld.Add(new Board(10,10,true));
+            appDbContext.BoardsOld[0].AddBattleship((0, 0), (0, 2), new Battleship(3));
+            appDbContext.BoardsOld.Add(new Board(10,10,true));
+            appDbContext.PlayersOld.Add(new Player(appDbContext.BoardsOld[0], "Player 1"));
+            appDbContext.PlayersOld.Add(new Player(appDbContext.BoardsOld[1], "Player 2"));
+            appDbContext.GameMovesOld.Add(new List<GameMove>());
+            appDbContext.RulesOld.Add(Rules.GetDefaultRules());
+            appDbContext.TotalGameOld.Add((name: "sample1", gameMoves: 0, player1: 0, player2: 1, rules: 0));
             
             
-            Game game = new Game(ui, dbContext);
+            Game game = new Game(ui, appDbContext);
 //            game.DisplayCurrentRuleset();
 //            Console.ReadLine();
+
 
             ApplicationMenu applicationMenu = new ApplicationMenu(game);
             Menu main = applicationMenu.GetMain();

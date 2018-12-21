@@ -206,7 +206,7 @@ namespace UI
         {
             Console.Clear();
             Console.WriteLine("Add ship");
-            rules.BoatSizesAndQuantities.ForEach(tuple => Console.WriteLine($"Size: {tuple.size} - {tuple.quantity}"));
+            rules.BoatRules.ForEach(rule => Console.WriteLine($"Size: {rule.Size} - {rule.Quantity}"));
             Console.WriteLine("Ship size cant be more than 10 and less than 0");
             Console.WriteLine("Entered size cant already exist");
             Console.Write("Enter new ship's size: ");
@@ -222,7 +222,7 @@ namespace UI
 
         public void DisplayRulesShips(Rules rules)
         {
-            rules.BoatSizesAndQuantities.ForEach(tuple => Console.WriteLine($"Size: {tuple.size} - {tuple.quantity}"));
+            rules.BoatRules.ForEach(rule => Console.WriteLine($"Size: {rule.Size} - {rule.Quantity}"));
         }
 
         public void DisplayBoardRules(Rules rules)
@@ -238,7 +238,7 @@ namespace UI
             Console.WriteLine($"Number of rows: {rules.BoardRows}");
             Console.WriteLine($"Number of cols: {rules.BoardCols}");
             Console.WriteLine($"Ships can touch: {rules.CanShipsTouch}");
-            rules.BoatSizesAndQuantities.ForEach(tuple => Console.WriteLine($"Size: {tuple.size} - {tuple.quantity}"));
+            rules.BoatRules.ForEach(rule => Console.WriteLine($"Size: {rule.Size} - {rule.Quantity}"));
         }
 
 
@@ -434,7 +434,7 @@ namespace UI
         public string GetExistingShipSize(Rules rules)
         {
             Console.Clear();
-            rules.BoatSizesAndQuantities.ForEach(tuple => Console.WriteLine($"Size: {tuple.size} - {tuple.quantity}"));
+            rules.BoatRules.ForEach(rule => Console.WriteLine($"Size: {rule.Size} - {rule.Quantity}"));
             Console.Write("Enter an existing ship's size: ");
             return Console.ReadLine();
         }

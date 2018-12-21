@@ -8,4 +8,10 @@
       <ProjectReference Include="..\Domain\Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.2.0" />
+      <PackageReference Include="MySql.Data.EntityFrameworkCore" Version="8.0.13" />
+    </ItemGroup>
+
 </Project>

@@ -1,19 +1,23 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace Domain
 {
     public class Board
     {
+        public int BoardId { get; set; }
+        
         public List<List<Tile>> Tiles { get; set; }
         public List<Battleship> Battleships { get; set; } = new List<Battleship>();
-        public List<(Tile tile, BombingResult bombingResult)> Bombings { get; set; } = new List<(Tile, BombingResult)>();
+        public List<Tile> Bombings { get; set; } = new List<Tile>();
         private bool CanTouch { get; set; }
         private int MaxCol, MaxRow;
+//        [NotMapped]
         public Tile HighlightedStart, HighLightedEnd;
 
-        public Board(int totalRows = 10, int totalCols = 10, bool canTouch = true)
+        public Board(int totalRows, int totalCols, bool canTouch)
         {
             MaxRow = totalRows - 1;
             MaxCol = totalCols - 1;
@@ -27,6 +31,10 @@ namespace Domain
                     Tiles[row].Add(new Tile(row, col, this));
                 }
             }
+        }
+
+        private Board()
+        {
         }
 
         public void AddBattleship((int row, int col) start, (int row, int col) end, Battleship battleship)
@@ -87,7 +95,6 @@ namespace Domain
             }
 
             Battleships.Add(battleship);
-            battleship.RelatedBoard = this;
             
             foreach (var coord in GetAllCoords(start:(start.row, start.col), end: (end.row, end.col)))
             {
@@ -141,11 +148,13 @@ namespace Domain
             targetTile.IsBombed = true;
             if (targetTile.IsEmpty())
             {
-                Bombings.Add((targetTile, BombingResult.Miss));
+//                Bombings.Add((targetTile, BombingResult.Miss));
+                Bombings.Add(targetTile);
                 return false;
             }
 
-            Bombings.Add((targetTile, BombingResult.Hit));
+//            Bombings.Add((targetTile, BombingResult.Hit));
+            Bombings.Add(targetTile);
             targetTile.Battleship.LivesLeft--;            
             return true;
         }

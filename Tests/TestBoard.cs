@@ -15,7 +15,7 @@ namespace Tests
         [Test]
         public void CreateDefaultBoard()
         {
-            var board = new Board();
+            var board = new Board(10,10,true);
             Assert.AreEqual(10, board.Tiles.Capacity);
             foreach (var col in board.Tiles)
             {
@@ -37,7 +37,7 @@ namespace Tests
         [Test]
         public void TestAddBattleshipNormal()
         {
-            var board = new Board();
+            var board = new Board(10,10,true);
             var battleship = new Battleship(3);
             board.AddBattleship((0, 0), (0, 2), battleship);
             Assert.AreSame(battleship, board.GetData(0,0));
@@ -47,7 +47,7 @@ namespace Tests
         [Test]
         public void TestAddBattleshipDiagonal()
         {
-            var board = new Board();
+            var board = new Board(10,10,true);
             var battleship = new Battleship(2);
             Assert.That(() => board.AddBattleship((0,0),(1,1),battleship), Throws.ArgumentException);
         }
@@ -55,7 +55,7 @@ namespace Tests
         [Test]
         public void TestAddBattleshipOnAnotherShip()
         {
-            var board = new Board();
+            var board = new Board(10,10,true);
             Battleship ship1 = new Battleship(1), ship2 = new Battleship(3);
             board.AddBattleship((0,0),(0,2),ship2);
             Assert.That(() => board.AddBattleship((0,1),(0,1),ship1), Throws.ArgumentException);
@@ -64,7 +64,7 @@ namespace Tests
         [Test]
         public void TestAddBattleshipOutOfBounds()
         {
-            var board = new Board();
+            var board = new Board(10,10,true);
             var ship = new Battleship(1);
             Assert.That(() => board.AddBattleship((10,10),(10,10),ship), Throws.ArgumentException);
         }
@@ -72,7 +72,7 @@ namespace Tests
         [Test]
         public void TestAddBattleshipPointsDistanceNotSameLengthAsShip()
         {
-            var board = new Board();
+            var board = new Board(10,10,true);
             Battleship ship1 = new Battleship(3), ship2 = new Battleship(1);
             
             Assert.That(() => board.AddBattleship((0,0),(0,1),ship1), Throws.ArgumentException);
@@ -130,14 +130,14 @@ namespace Tests
         [Test]
         public void TestGetData()
         {
-            var board = new Board();
+            var board = new Board(10,10,true);
             Assert.IsNull(board.GetData(0,0));
         }
 
         [Test]
         public void TestBombLocationContainingShip()
         {
-            var board = new Board();
+            var board = new Board(10,10,true);
             var ship = new Battleship(3);
             board.AddBattleship((0,0), (0,2), ship);
             Assert.True(board.BombLocation(0,0));
@@ -148,14 +148,14 @@ namespace Tests
         [Test]
         public void TestBombLocationEmptyTile()
         {
-            var board = new Board();
+            var board = new Board(10,10,true);
             Assert.False(board.BombLocation(0,0));
         }
 
         [Test]
         public void TestBombLocationTwice()
         {
-            var board = new Board();
+            var board = new Board(10,10,true);
             var battleship = new Battleship(3);
             board.AddBattleship((0,0), (2,0), battleship);
             
@@ -169,29 +169,9 @@ namespace Tests
         }
 
         [Test]
-        public void TestBombings()
-        {
-            var board = new Board();
-            var battleship = new Battleship(1);
-            
-            board.AddBattleship((0,0), (0,0), battleship);
-            board.BombLocation(0, 0);
-            board.BombLocation(1, 0);
-            board.BombLocation(2, 0);
-            
-            Assert.AreSame(board.Bombings[0].Item1, board.Tiles[0][0]);
-            Assert.AreSame(board.Bombings[1].Item1, board.Tiles[1][0]);
-            Assert.AreSame(board.Bombings[2].Item1, board.Tiles[2][0]);
-            
-            Assert.AreEqual(board.Bombings[0].Item2, BombingResult.Hit);
-            Assert.AreEqual(board.Bombings[1].Item2, BombingResult.Miss);
-            Assert.AreEqual(board.Bombings[2].Item2, BombingResult.Miss);
-        }
-
-        [Test]
         public void TestGetBattleshipLocations()
         {
-            var board = new Board();
+            var board = new Board(10,10,true);
             Battleship ship1 = new Battleship(2), ship2 = new Battleship(2);
             board.AddBattleship((0,0), (0,1), ship1);
             board.AddBattleship((1,0), (1,1), ship2);
