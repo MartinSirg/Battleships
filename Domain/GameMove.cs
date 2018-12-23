@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Domain
@@ -17,6 +18,11 @@ namespace Domain
 
         private GameMove()
         {
+        }
+
+        public override string ToString()
+        {
+            return $"{Target.Name} is bombed at:\t\t {Tile}";
         }
     }
 }

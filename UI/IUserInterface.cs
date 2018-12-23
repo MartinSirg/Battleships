@@ -54,7 +54,7 @@ namespace MenuSystem
 
         string GetSaveGameName();
 
-        void DisplaySavedGames(List<string> names);
+        void DisplaySavedGames(List<SaveGame> saves);
 
         string GetDeletableShipTile();
         

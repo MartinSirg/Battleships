@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Domain
 {
-    public class Board
+    public class Board : ICloneable
     {
         public int BoardId { get; set; }
         
@@ -201,6 +201,33 @@ namespace Domain
             tile.Battleship.Locations.ForEach(tile1 => tile1.Battleship = null);
             tile.Battleship = null;
             Battleships.Remove(ship);
+        }
+
+        public object Clone()
+        {
+            var boardClone = new Board(MaxRow + 1, MaxCol + 1, CanTouch);
+            
+            Tiles.ForEach(row => row.ForEach(tile =>
+            {
+                var tileClone = (Tile) tile.Clone();
+                tileClone.Board = boardClone;
+                //add battleships as well
+                
+                boardClone.Tiles[tile.Row][tile.Col] = tileClone;
+            }));
+            
+            Battleships.ForEach(battleship =>
+            {
+                var shipClone = new Battleship(battleship.Size);
+                shipClone.LivesLeft = battleship.LivesLeft;
+                battleship.Locations.ForEach(tile =>
+                {
+                    shipClone.Locations.Add(boardClone.Tiles[tile.Row][tile.Col]);
+                    boardClone.Tiles[tile.Row][tile.Col].Battleship = shipClone;
+                });
+                boardClone.Battleships.Add(shipClone);
+            });
+            return boardClone;
         }
     }
 }

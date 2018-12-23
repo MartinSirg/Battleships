@@ -50,8 +50,7 @@ namespace Initializers
                         Description = "Exit without saving",
                         CommandToExecute = () =>
                         {
-                            Game.Player1.Board = new Board(Game.Rules.BoardRows, Game.Rules.BoardCols, Game.Rules.CanShipsTouch);
-                            Game.Player2.Board = new Board(Game.Rules.BoardRows, Game.Rules.BoardCols, Game.Rules.CanShipsTouch);
+                            Game.ResetAll();
                             return "Q";
                         }
                     }

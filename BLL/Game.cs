@@ -9,6 +9,7 @@ using System.Threading;
 using DAL;
 using Domain;
 using MenuSystem;
+using Microsoft.EntityFrameworkCore;
 
 namespace BLL
 {
@@ -61,7 +62,8 @@ namespace BLL
 
             if (TargetPlayer.Board.AnyShipsLeft() == false)
             {
-                UI.Alert($"Game over. {CurrentPlayer.Name} has won!", 5000);
+                UI.Alert($"Game over. {CurrentPlayer.Name} has won!", 0);
+                UI.Continue();
                 SaveFinishedGame();
                 return "Q";
             }
@@ -90,7 +92,8 @@ namespace BLL
             
             if (CurrentPlayer.Board.AnyShipsLeft() == false)
             {
-                UI.Alert($"Game over. {TargetPlayer.Name} has won!", 5000);
+                UI.Alert($"Game over. {TargetPlayer.Name} has won!", 0);
+                UI.Continue();
                 SaveFinishedGame();
                 return "Q";
             }
@@ -101,44 +104,31 @@ namespace BLL
         private void SaveFinishedGame()
         {
             string name = UI.GetSaveGameName();
-            while (_appDbContext.FinishedGamesOld.Exists(tuple => tuple.name.Equals(name)))
+            while (Ctx.SaveGames.ToList().Any(game => game.Name.Equals(name)))
             {
                 UI.Alert($"Enter a different name {name} is already taken.", 0);
                 name = UI.GetSaveGameName();
             }
-            
-            var saveGame = new SaveGame();
-            saveGame.Rules = Rules;
-            saveGame.Player1 = Player1;
-            saveGame.Player2 = Player2;
-            saveGame.GameMoves = GameMoves;
-            saveGame.Name = name;
+
+            var saveGame = new SaveGame
+            {
+                IsFinished = true,
+                Rules = Rules,
+                Player1 = Player1,
+                Player2 = Player2,
+                GameMoves = GameMoves,
+                Name = name
+            };
             Ctx.SaveGames.Add(saveGame);
             Ctx.SaveChanges();
-            
-            _appDbContext.RulesOld.Add(Rules);
-            _appDbContext.PlayersOld.Add(Player1);
-            _appDbContext.PlayersOld.Add(Player2);
-            _appDbContext.GameMovesOld.Add(GameMoves);
-            
-            
-            _appDbContext.FinishedGamesOld.Add((
-                name,
-                _appDbContext.GameMovesOld.FindIndex(moves => moves == GameMoves),
-                _appDbContext.PlayersOld.FindIndex(player => player == Player1),
-                _appDbContext.PlayersOld.FindIndex(player => player == Player2),
-                _appDbContext.RulesOld.FindIndex(rules => rules == Rules)
-            ));
+
+
+            Rules = Rules.GetDefaultRules();
             CurrentPlayer = new Player(new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch), "Player 1" );
             TargetPlayer = new Player(new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch), "Player 2" );
             Player1 = CurrentPlayer;
             Player2 = TargetPlayer;
-            
-//            Player1.Board.Tiles.ForEach(list => list.ForEach(tile => Player1.Board.DbTiles.Add(tile)));
-//            Player2.Board.Tiles.ForEach(list => list.ForEach(tile => Player1.Board.DbTiles.Add(tile)));
-
-            
-
+            GameMoves = new List<GameMove>();
         }
 
         public string RunMenu(Menu menu)
@@ -217,41 +207,32 @@ namespace BLL
             string name = UI.GetSaveGameName();
             if (name.ToUpper().Equals("X")) return "";
             
-            while (_appDbContext.TotalGameOld.Exists(tuple => tuple.name.Equals(name)))
+            while (Ctx.SaveGames.ToList().Any(game => game.Name.Equals(name)))
             {
                 UI.Alert($"Enter a different name {name} is already taken.", 0);
                 name = UI.GetSaveGameName();
                 if (name.ToUpper().Equals("X")) return "";
             }
-            
-            var saveGame = new SaveGame();
-            saveGame.Rules = Rules;
-            saveGame.Player1 = Player1;
-            saveGame.Player2 = Player2;
-            saveGame.GameMoves = GameMoves;
-            saveGame.Name = name;
+
+            var saveGame = new SaveGame
+            {
+                IsFinished = false,
+                Rules = Rules,
+                Player1 = Player1,
+                Player2 = Player2,
+                GameMoves = GameMoves,
+                Name = name
+            };
             Ctx.SaveGames.Add(saveGame);
             Ctx.SaveChanges();
 
-            
-            
-            _appDbContext.RulesOld.Add(Rules);
-            _appDbContext.PlayersOld.Add(Player1);
-            _appDbContext.PlayersOld.Add(Player2);
-            _appDbContext.GameMovesOld.Add(GameMoves);
-            
-            
-            _appDbContext.TotalGameOld.Add((
-                name,
-                _appDbContext.GameMovesOld.FindIndex(moves => moves == GameMoves),
-                _appDbContext.PlayersOld.FindIndex(player => player == Player1),
-                _appDbContext.PlayersOld.FindIndex(player => player == Player2),
-                _appDbContext.RulesOld.FindIndex(rules => rules == Rules)
-                ));
-            CurrentPlayer = new Player(new Board(10,10,1), "Player 1" );
-            TargetPlayer = new Player(new Board(10,10,1), "Player 2" );
+
+            Rules = Rules.GetDefaultRules();
+            CurrentPlayer = new Player(new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch ), "Player 1" );
+            TargetPlayer = new Player(new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch ), "Player 2" );
             Player1 = CurrentPlayer;
             Player2 = TargetPlayer;
+            GameMoves = new List<GameMove>();
             return "Q";
         }
 
@@ -711,10 +692,8 @@ namespace BLL
 
         public string LoadGame()
         {
-            List<string> names = new List<string>();
-//            _appDbContext.TotalGameOld.ForEach(tuple => names.Add(tuple.name));
-            Ctx.SaveGames.ToList().ForEach(saveGame => names.Add(saveGame.Name));
-            UI.DisplaySavedGames(names);
+            
+            UI.DisplaySavedGames(Ctx.SaveGames.Where(game => game.IsFinished == false).OrderBy(game => game.SaveGameId).ToList());
             int num;
             while (true)
             {
@@ -726,8 +705,12 @@ namespace BLL
                     UI.Alert("Not a number", 0);
                     continue;
                 }
+                
+                bool isIdPresent = Ctx.SaveGames
+                    .Where(game => game.IsFinished == false).ToList()
+                    .Any(game => game.SaveGameId == num);
 
-                if (int.Parse(saveGameNumber) <= 0 || int.Parse(saveGameNumber) > names.Count)
+                if (int.Parse(saveGameNumber) <= 0 || isIdPresent == false)
                 {
                     UI.Alert("No such save game number", 0);
                     continue;
@@ -736,11 +719,38 @@ namespace BLL
             }
 
 
-            SaveGame save = Ctx.SaveGames.Find(num);
-            Player1 = save.Player1;
-            Player2 = save.Player2;
-            Rules = save.Rules;
-            GameMoves = save.GameMoves;
+            SaveGame s = Ctx.SaveGames
+                .Include(saveGame => saveGame.Rules)
+                .ThenInclude(rules => rules.BoatRules)
+                .Include(saveGame => saveGame.Player1)
+                .ThenInclude(player => player.Board)
+                .Include(saveGame => saveGame.Player2)
+                .ThenInclude(player => player.Board)
+                .Include(saveGame => saveGame.GameMoves)
+                .First(saveGame => saveGame.SaveGameId == num);
+            
+
+            var tempRules = s.Rules;
+            var tempPlayer1 = s.Player1;
+            var tempPlayer2 = s.Player2;
+            Rules = (Rules) tempRules.Clone();
+            RestorePlayerBoardTiles(tempPlayer1, s);
+            RestorePlayerBoardTiles(tempPlayer2, s);
+
+            var tempGameMoves = s.GameMoves;
+            Player1 = (Player) tempPlayer1.Clone();
+            Player2 = (Player) tempPlayer2.Clone();
+            
+            GameMoves = new List<GameMove>();
+            tempGameMoves.ForEach(move =>
+            {
+                var targetPlayer = Player1.Name == move.Target.Name ? Player1 : Player2; //TODO: use better solution than name comparison
+                var targetTile = targetPlayer.Board.Tiles[move.Tile.Row][move.Tile.Col];
+                GameMoves.Add(new GameMove(targetPlayer, targetTile));
+            });
+            
+            
+
             if (GameMoves.Count == 0)
             {
                 TargetPlayer = Player2;
@@ -778,9 +788,7 @@ namespace BLL
 
         public string ReplayGame()
         {
-            List<string> names = new List<string>();
-            _appDbContext.FinishedGamesOld.ForEach(tuple => names.Add(tuple.name));
-            UI.DisplaySavedGames(names);
+            UI.DisplaySavedGames(Ctx.SaveGames.Where(game => game.IsFinished).OrderBy(game => game.SaveGameId).ToList());
 
             int num;
             while (true)
@@ -794,7 +802,11 @@ namespace BLL
                     continue;
                 }
 
-                if (int.Parse(saveGameNumber) <= 0 || int.Parse(saveGameNumber) > names.Count)
+                bool isIdPresent = Ctx.SaveGames
+                    .Where(game => game.IsFinished).ToList()
+                    .Any(game => game.SaveGameId == num);
+                
+                if (int.Parse(saveGameNumber) <= 0 || isIdPresent == false)
                 {
                     UI.Alert("No such save game number", 0);
                     continue;
@@ -802,13 +814,35 @@ namespace BLL
                 break;
             }
             
-            (string name, int gameMoves, int player1, int player2, int rules) finishedGame = _appDbContext.FinishedGamesOld[num - 1];
-            Player1 = _appDbContext.PlayersOld[finishedGame.player1];
-            Player2 = _appDbContext.PlayersOld[finishedGame.player2];
-            Rules = _appDbContext.RulesOld[finishedGame.rules];
-            GameMoves = _appDbContext.GameMovesOld[finishedGame.gameMoves];
-            Console.WriteLine(GameMoves.Count);
-            Thread.Sleep(1000);
+            SaveGame s = Ctx.SaveGames
+                .Include(saveGame => saveGame.Rules)
+                .ThenInclude(rules => rules.BoatRules)
+                .Include(saveGame => saveGame.Player1)
+                .ThenInclude(player => player.Board)
+                .Include(saveGame => saveGame.Player2)
+                .ThenInclude(player => player.Board)
+                .Include(saveGame => saveGame.GameMoves)
+                .First(saveGame => saveGame.SaveGameId == num);
+            
+
+            var tempRules = s.Rules;
+            var tempPlayer1 = s.Player1;
+            var tempPlayer2 = s.Player2;
+            Rules = (Rules) tempRules.Clone();
+            RestorePlayerBoardTiles(tempPlayer1, s);
+            RestorePlayerBoardTiles(tempPlayer2, s);
+
+            var tempGameMoves = s.GameMoves;
+            Player1 = (Player) tempPlayer1.Clone();
+            Player2 = (Player) tempPlayer2.Clone();
+            
+            GameMoves = new List<GameMove>();
+            tempGameMoves.ForEach(move =>
+            {
+                var targetPlayer = Player1.Name == move.Target.Name ? Player1 : Player2; //TODO: use better solution than name comparison
+                var targetTile = targetPlayer.Board.Tiles[move.Tile.Row][move.Tile.Col];
+                GameMoves.Add(new GameMove(targetPlayer, targetTile));
+            });
             
             GameMoves.ForEach(move => move.Target.Board.UnBomb(move.Tile));
             Player lastMoveBy = Player1;
@@ -824,6 +858,8 @@ namespace BLL
             });
             UI.Alert($"{lastMoveBy.Name} has won the game!", 0);
             UI.Continue();
+            
+            ResetAll();
             return "";
         }
 
@@ -936,9 +972,47 @@ namespace BLL
 
         public void ResetTargetPlayer(String name)
         {
-            TargetPlayer.Board = new Board(10,10,1);
+            TargetPlayer.Board = new Board(Rules.BoardRows,Rules.BoardCols,Rules.CanShipsTouch);
             TargetPlayer.Name = name;
         }
 
+        public void RestorePlayerBoardTiles(Player player, SaveGame s)
+        {
+            //TODO:Before using this method load player WITH! board and rules from db
+            
+            
+            List<List<Tile>> boardTiles = new List<List<Tile>>(s.Rules.BoardRows);
+            List<Tile> tilesFromDb = Ctx.Tiles
+                .Include(tile => tile.Board)
+                .Include(tile => tile.Battleship)
+                .Where(tile => tile.Board == player.Board).ToList();
+            
+            Console.WriteLine($"DbTilesCount: {tilesFromDb.Count}");
+            for (int i = 0; i < s.Rules.BoardRows; i++)
+            {
+                boardTiles.Add(new List<Tile>(s.Rules.BoardCols));
+                
+                for (int j = 0; j < s.Rules.BoardCols; j++)
+                {
+                    if (tilesFromDb.Any(tile => tile.Row == i && tile.Col == j))
+                        boardTiles[i].Add(tilesFromDb.Find(tile => tile.Row == i && tile.Col == j));
+                    else
+                        boardTiles[i].Add(new Tile(i, j, player.Board));
+                }
+            }
+            player.Board.Tiles = boardTiles;
+//            player.Board.Tiles.ForEach(row => row.ForEach(Console.WriteLine)); TODO: Remove this
+        }
+
+        public void ResetAll()
+        {
+            Ctx = new NewDbContext();
+            Rules = Rules.GetDefaultRules();
+            CurrentPlayer = new Player(new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch ), "Player 1" );
+            TargetPlayer = new Player(new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch ), "Player 2" );
+            Player1 = CurrentPlayer;
+            Player2 = TargetPlayer;
+            GameMoves = new List<GameMove>();
+        }
     }
 }

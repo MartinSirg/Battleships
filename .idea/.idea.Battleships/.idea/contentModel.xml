@@ -32,12 +32,12 @@
         <e p="bin" t="ExcludeRecursive" />
         <e p="DAL.csproj" t="IncludeRecursive" />
         <e p="Migrations" t="Include">
-          <e p="20181222234415_InitialDbSetup.cs" t="Include" />
-          <e p="20181222234415_InitialDbSetup.Designer.cs" t="Include" />
-          <e p="20181222234624_addCanTouchToBoard.cs" t="Include" />
-          <e p="20181222234624_addCanTouchToBoard.Designer.cs" t="Include" />
-          <e p="20181223001944_addIsBombedConversion.cs" t="Include" />
-          <e p="20181223001944_addIsBombedConversion.Designer.cs" t="Include" />
+          <e p="20181223131213_InitialDbSetup.cs" t="Include" />
+          <e p="20181223131213_InitialDbSetup.Designer.cs" t="Include" />
+          <e p="20181223153952_addIsFinishedInSaveGame.cs" t="Include" />
+          <e p="20181223153952_addIsFinishedInSaveGame.Designer.cs" t="Include" />
+          <e p="20181223155402_defaultValueIsBombed.cs" t="Include" />
+          <e p="20181223155402_defaultValueIsBombed.Designer.cs" t="Include" />
           <e p="NewDbContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="NewDbContext.cs" t="Include" />

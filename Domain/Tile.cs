@@ -1,9 +1,10 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain
 {
-    public class Tile
+    public class Tile : ICloneable
     {
         [Key]
         public int TileId { get; set; }
@@ -40,11 +41,27 @@ namespace Domain
             Col = col;
         }
 
+        private Tile(int row, int col)
+        {
+            Row = row;
+            Col = col;
+        }
+
         public bool IsEmpty()
         {
             return Battleship == null;
         }
-        
-        
+
+        public override string ToString()
+        {
+            return $"Row: {Row}\tCol: {Col}\tHasShip: {!IsEmpty()}\tIsBombed: {IsBombed}\tBoard Hashcode: {Board.GetHashCode()}";
+        }
+
+        public object Clone()
+        {
+            var tileClone = new Tile(Row, Col);
+            tileClone.IsBombed = IsBombed;
+            return tileClone;
+        }
     }
 }

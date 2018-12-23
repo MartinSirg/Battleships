@@ -25,7 +25,7 @@ namespace DAL
         {
             base.OnConfiguring(optionsBuilder);
             optionsBuilder
-                .UseLoggerFactory(MyLoggerFactory)
+//                .UseLoggerFactory(MyLoggerFactory)
                 .UseMySQL(
                 "server=alpha.akaver.com;" +
                 "database=student2018_179563;" +
@@ -41,21 +41,25 @@ namespace DAL
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-//            modelBuilder.Entity<SaveGame>(game => game.Name).IsUnique(); // Save game ie saa olla siis sama nimega
-            
-            //remove cascade delete
-            foreach (var mutableForeignKey in modelBuilder
-                .Model
-                .GetEntityTypes()
-                .Where(e => !e.IsOwned())
-                .SelectMany(e => e.GetForeignKeys()))
-            {
-                mutableForeignKey.DeleteBehavior = DeleteBehavior.Restrict;
-            }
-
             var converter = new BoolToStringConverter("N","Y");
-            modelBuilder.Entity<Tile>().Property(tile => tile.IsBombed).HasConversion(converter);
+            
+            modelBuilder
+                .Entity<SaveGame>()
+                .HasIndex(game => game.Name)
+                .IsUnique(); // Save game ie saa olla siis sama nimega
 
+            modelBuilder
+                .Entity<SaveGame>()
+                .Property(game => game.IsFinished)
+                .HasConversion(converter);
+
+            modelBuilder
+                .Entity<Tile>()
+                .Property(tile => tile.IsBombed)
+                .HasDefaultValue(false)
+                .HasConversion(converter);
+                
+            
             base.OnModelCreating(modelBuilder);
                   
         }

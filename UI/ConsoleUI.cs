@@ -377,11 +377,10 @@ namespace UI
             return Console.ReadLine();
         }
 
-        public void DisplaySavedGames(List<string> names)
+        public void DisplaySavedGames(List<SaveGame> saves)
         {
             Console.Clear();
-            int counter = 1;
-            names.ForEach(s => Console.WriteLine($"{counter++}. {s}"));
+            saves.ForEach(s => Console.WriteLine($"{s.SaveGameId}) {s.Name}"));
         }
 
         public string GetDeletableShipTile()

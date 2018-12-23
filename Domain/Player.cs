@@ -1,9 +1,10 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain
 {
-    public class Player
+    public class Player : ICloneable
     {
         public int PlayerId { get; set; }
         
@@ -24,6 +25,11 @@ namespace Domain
 
         private Player()
         {
+        }
+
+        public object Clone()
+        {
+            return new Player((Board) Board.Clone(), Name);
         }
     }
 }

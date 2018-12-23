@@ -6,6 +6,7 @@ using DAL;
 using Domain;
 using Initializers;
 using MenuSystem;
+using Microsoft.EntityFrameworkCore;
 using UI;
 
 
@@ -15,19 +16,6 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
-//            var board = new Board(totalCols: 25, totalRows:25);
-//            var ship = new Battleship(5);
-//            var ship2 = new Battleship(4);
-//            var ui = new ConsoleUI();
-//            board.AddBattleship((0,0), (0,3), ship2);
-//            board.AddBattleship((4,4), (4,8), ship);
-//            board.BombLocation(4, 4);
-//            board.BombLocation(4, 5);
-//            board.BombLocation(4, 3);
-//            ui.PrintFriendlyShips(board);
-//            ui.PrintBombedLocations(board);
-//            ui.PrintBombedLocationsAndFriendlyShips(board, board);
-//            Console.ReadLine();
             IUserInterface ui = new ConsoleUI();
             
             NewDbContext ctx = new NewDbContext();
@@ -45,23 +33,49 @@ namespace ConsoleApp
             
             Game game = new Game(ui, appDbContext);
             game.Ctx = ctx;
-//            game.DisplayCurrentRuleset();
-//            Console.ReadLine();
+
+
+            //RULES OK
+//            SaveGame s = ctx.SaveGames
+//                .Include(saveGame => saveGame.Rules)
+//                .ThenInclude(rules => rules.BoatRules)
+//                .Include(saveGame => saveGame.Player1)
+//                .ThenInclude(player => player.Board)
+//                .Include(saveGame => saveGame.Player2)
+//                .ThenInclude(player => player.Board)
+//                .Include(saveGame => saveGame.GameMoves)
+//                .First(saveGame => saveGame.SaveGameId == 1);
+//            
+//            Console.WriteLine($"Rows: {s.Rules.BoardRows} \nCols :{s.Rules.BoardCols}");
+//            
+//            Player p1 = s.Player1;
+//            List<List<Tile>> player1BoardTiles = new List<List<Tile>>(s.Rules.BoardRows);
+//            List<Tile> tilesFromDb = ctx.Tiles.Include(tile => tile.Board).Include(tile => tile.Battleship).Where(tile => tile.Board == s.Player1.Board).ToList();
+//            
+//            for (int i = 0; i < s.Rules.BoardRows; i++)
+//            {
+//                player1BoardTiles.Add(new List<Tile>(s.Rules.BoardCols));
+//                
+//                for (int j = 0; j < s.Rules.BoardCols; j++)
+//                {
+//                    if (tilesFromDb.Any(tile => tile.Row == i && tile.Col == j)){
+//                        player1BoardTiles[i].Add(tilesFromDb.Find(tile => tile.Row == i && tile.Col == j));}
+//                    else
+//                        player1BoardTiles[i].Add(new Tile(i, j, p1.Board));
+//                }
+//            }
+//            p1.Board.Tiles = player1BoardTiles;
+//            p1.Board.Tiles.ForEach(row => row.ForEach(Console.WriteLine));
+            
+            //TODO: give clone existing objects?
+            
 
 
             ApplicationMenu applicationMenu = new ApplicationMenu(game);
             Menu main = applicationMenu.GetMain();
             game.RunMenu(menu: main);
-            
-//            var board = new Board(10,10,0);
-//            ctx.Boards.Update(board);
-//            ctx.SaveChanges();
-//            ctx.Rules.Add(new Rules(0, 10, 10, new List<(int, int)> {(1, 1), (2, 1), (3, 1), (4, 1)}));
-//            ctx.Boards.Add(new Board(10, 10, 1));
-//            ctx.SaveChanges();
-            
-//            Player p = new Player(board, "Matu");
-//            ctx.Players.Add(p);
+
+
         }
     }
 }
