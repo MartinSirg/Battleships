@@ -23,6 +23,7 @@ namespace BLL
         private LetterNumberSystem Converter = new LetterNumberSystem();
         private IUserInterface UI;
         private AppDbContext _appDbContext;
+        public NewDbContext Ctx;
         public string SelectedMode { get; set; } = "";
         public const int MAX_ROWS = 24, MIN_ROWS = 10, MIN_COLS = 10, MAX_COLS = 24;
 
@@ -74,8 +75,11 @@ namespace BLL
             
             //Generating random bombing location for computer
             List<Tile> tiles = new List<Tile>();                
-            CurrentPlayer.Board.Tiles.ForEach(row => row.ForEach(tile => tiles.Add(tile))); //Adds all tiles to list
-            CurrentPlayer.Board.Bombings.ForEach(tile => tiles.Remove(tile)); //Removes bombed tiles from list
+            CurrentPlayer.Board.Tiles.ForEach(row => row.ForEach(tile =>
+            {
+                if (!tile.IsBombed) tiles.Add(tile);
+            })); //Adds all not bombed tiles to list
+            
             
             Tile computerTarget = tiles[new Random().Next(0, tiles.Count - 1)];
             bool computerResultbool = CurrentPlayer.Board.BombLocation(computerTarget.Row, computerTarget.Col);
@@ -103,6 +107,15 @@ namespace BLL
                 name = UI.GetSaveGameName();
             }
             
+            var saveGame = new SaveGame();
+            saveGame.Rules = Rules;
+            saveGame.Player1 = Player1;
+            saveGame.Player2 = Player2;
+            saveGame.GameMoves = GameMoves;
+            saveGame.Name = name;
+            Ctx.SaveGames.Add(saveGame);
+            Ctx.SaveChanges();
+            
             _appDbContext.RulesOld.Add(Rules);
             _appDbContext.PlayersOld.Add(Player1);
             _appDbContext.PlayersOld.Add(Player2);
@@ -120,6 +133,12 @@ namespace BLL
             TargetPlayer = new Player(new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch), "Player 2" );
             Player1 = CurrentPlayer;
             Player2 = TargetPlayer;
+            
+//            Player1.Board.Tiles.ForEach(list => list.ForEach(tile => Player1.Board.DbTiles.Add(tile)));
+//            Player2.Board.Tiles.ForEach(list => list.ForEach(tile => Player1.Board.DbTiles.Add(tile)));
+
+            
+
         }
 
         public string RunMenu(Menu menu)
@@ -205,6 +224,16 @@ namespace BLL
                 if (name.ToUpper().Equals("X")) return "";
             }
             
+            var saveGame = new SaveGame();
+            saveGame.Rules = Rules;
+            saveGame.Player1 = Player1;
+            saveGame.Player2 = Player2;
+            saveGame.GameMoves = GameMoves;
+            saveGame.Name = name;
+            Ctx.SaveGames.Add(saveGame);
+            Ctx.SaveChanges();
+
+            
             
             _appDbContext.RulesOld.Add(Rules);
             _appDbContext.PlayersOld.Add(Player1);
@@ -219,8 +248,8 @@ namespace BLL
                 _appDbContext.PlayersOld.FindIndex(player => player == Player2),
                 _appDbContext.RulesOld.FindIndex(rules => rules == Rules)
                 ));
-            CurrentPlayer = new Player(new Board(10,10,true), "Player 1" );
-            TargetPlayer = new Player(new Board(10,10,true), "Player 2" );
+            CurrentPlayer = new Player(new Board(10,10,1), "Player 1" );
+            TargetPlayer = new Player(new Board(10,10,1), "Player 2" );
             Player1 = CurrentPlayer;
             Player2 = TargetPlayer;
             return "Q";
@@ -327,10 +356,10 @@ namespace BLL
                     continue;
                 }
 
-                if (userInput.Equals("YES") && !Rules.CanShipsTouch || //User input and current are different
-                    userInput.Equals("NO") && Rules.CanShipsTouch)
+                if (userInput.Equals("YES") && Rules.CanShipsTouch == 0 || //User input and current are different
+                    userInput.Equals("NO") && Rules.CanShipsTouch == 1)
                 {
-                    Rules.CanShipsTouch = userInput.Equals("YES");
+                    Rules.CanShipsTouch = userInput.Equals("YES") ? 1 : 0;
                     CurrentPlayer.Board = new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch);
                     TargetPlayer.Board = new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch);
                 }
@@ -683,7 +712,8 @@ namespace BLL
         public string LoadGame()
         {
             List<string> names = new List<string>();
-            _appDbContext.TotalGameOld.ForEach(tuple => names.Add(tuple.name));
+//            _appDbContext.TotalGameOld.ForEach(tuple => names.Add(tuple.name));
+            Ctx.SaveGames.ToList().ForEach(saveGame => names.Add(saveGame.Name));
             UI.DisplaySavedGames(names);
             int num;
             while (true)
@@ -705,12 +735,12 @@ namespace BLL
                 break;
             }
 
-            (string name, int gameMoves, int player1, int player2, int rules) totalGame =
-                _appDbContext.TotalGameOld[num - 1];
-            Player1 = _appDbContext.PlayersOld[totalGame.player1];
-            Player2 = _appDbContext.PlayersOld[totalGame.player2];
-            Rules = _appDbContext.RulesOld[totalGame.rules];
-            GameMoves = _appDbContext.GameMovesOld[totalGame.gameMoves];
+
+            SaveGame save = Ctx.SaveGames.Find(num);
+            Player1 = save.Player1;
+            Player2 = save.Player2;
+            Rules = save.Rules;
+            GameMoves = save.GameMoves;
             if (GameMoves.Count == 0)
             {
                 TargetPlayer = Player2;
@@ -721,6 +751,27 @@ namespace BLL
                 CurrentPlayer = GameMoves[GameMoves.Count - 1].Target;
                 TargetPlayer = CurrentPlayer == Player1 ? Player2 : Player1;
             }
+            
+            
+            
+            
+
+//            (string name, int gameMoves, int player1, int player2, int rules) totalGame =
+//                _appDbContext.TotalGameOld[num - 1];
+//            Player1 = _appDbContext.PlayersOld[totalGame.player1];
+//            Player2 = _appDbContext.PlayersOld[totalGame.player2];
+//            Rules = _appDbContext.RulesOld[totalGame.rules];
+//            GameMoves = _appDbContext.GameMovesOld[totalGame.gameMoves];
+//            if (GameMoves.Count == 0)
+//            {
+//                TargetPlayer = Player2;
+//                CurrentPlayer = Player1;
+//            }
+//            else
+//            {
+//                CurrentPlayer = GameMoves[GameMoves.Count - 1].Target;
+//                TargetPlayer = CurrentPlayer == Player1 ? Player2 : Player1;
+//            }
 
             return "";
         }
@@ -756,8 +807,6 @@ namespace BLL
             Player2 = _appDbContext.PlayersOld[finishedGame.player2];
             Rules = _appDbContext.RulesOld[finishedGame.rules];
             GameMoves = _appDbContext.GameMovesOld[finishedGame.gameMoves];
-            Player1.Board.Bombings = new List<Tile>();
-            Player2.Board.Bombings = new List<Tile>();
             Console.WriteLine(GameMoves.Count);
             Thread.Sleep(1000);
             
@@ -887,7 +936,7 @@ namespace BLL
 
         public void ResetTargetPlayer(String name)
         {
-            TargetPlayer.Board = new Board(10,10,true);
+            TargetPlayer.Board = new Board(10,10,1);
             TargetPlayer.Name = name;
         }
 

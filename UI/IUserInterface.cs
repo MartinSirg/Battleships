@@ -62,7 +62,7 @@ namespace MenuSystem
         
         string ConfirmBoatsOverride();
         
-        string GetShipsCanTouch(bool current);
+        string GetShipsCanTouch(int current);
         
         string GetNewBoardHeight(int currentRows);
         

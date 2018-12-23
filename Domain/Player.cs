@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain
 {
@@ -12,8 +13,8 @@ namespace Domain
         
         [MaxLength(64)]
         public string Name { get; set; }
+        [NotMapped]
         public bool IsReady { get; set; }
-        public bool IsComputer { get; set; }
 
         public Player(Board board, string name)
         {

@@ -1,23 +1,26 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain
 {
     public class Rules: ICloneable
     {
         public int RulesId { get; set; }
+
+        public int CanShipsTouch { get; set; }
         
-        public bool CanShipsTouch { get; set; }
         public int BoardRows { get; set; }
+
         public int BoardCols { get; set; }
-        
+
         [MaxLength(64)]
         public string Name { get; set; }
 
         public List<BoatRule> BoatRules { get; set; } = new List<BoatRule>();
 
-        public Rules(bool canShipsTouch, int boardRows, int boardCols, List<(int, int)> boatRules)
+        public Rules(int canShipsTouch, int boardRows, int boardCols, List<(int, int)> boatRules)
         {
             CanShipsTouch = canShipsTouch;
             BoardRows = boardRows;
@@ -38,7 +41,7 @@ namespace Domain
             boats.Add((3,1));
             boats.Add((4,1));
             boats.Add((5,1));
-            Rules rules = new Rules(true, 10, 10, boats);
+            Rules rules = new Rules(1, 10, 10, boats);
             rules.Name = "Standard rules";
             return rules;
         }

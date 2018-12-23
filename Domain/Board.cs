@@ -9,15 +9,21 @@ namespace Domain
     {
         public int BoardId { get; set; }
         
+        [NotMapped]
         public List<List<Tile>> Tiles { get; set; }
+        
         public List<Battleship> Battleships { get; set; } = new List<Battleship>();
-        public List<Tile> Bombings { get; set; } = new List<Tile>();
-        private bool CanTouch { get; set; }
-        private int MaxCol, MaxRow;
-//        [NotMapped]
+//        public List<Tile> Bombings { get; set; } = new List<Tile>();
+        
+
+        public int CanTouch { get; set; }
+        public int MaxCol { get; set; }
+        public int MaxRow { get; set; }
+        
+        [NotMapped]
         public Tile HighlightedStart, HighLightedEnd;
 
-        public Board(int totalRows, int totalCols, bool canTouch)
+        public Board(int totalRows, int totalCols, int canTouch)
         {
             MaxRow = totalRows - 1;
             MaxCol = totalCols - 1;
@@ -74,7 +80,7 @@ namespace Domain
             }
 
             //Check that ship is not too close to other ships
-            if (!CanTouch)
+            if (CanTouch == 0)
             {
                 var neighbourTiles = new List<Tile>();
                 foreach (var coord in GetAllCoords((start.row, start.col), (end.row, end.col)))
@@ -148,13 +154,8 @@ namespace Domain
             targetTile.IsBombed = true;
             if (targetTile.IsEmpty())
             {
-//                Bombings.Add((targetTile, BombingResult.Miss));
-                Bombings.Add(targetTile);
                 return false;
             }
-
-//            Bombings.Add((targetTile, BombingResult.Hit));
-            Bombings.Add(targetTile);
             targetTile.Battleship.LivesLeft--;            
             return true;
         }

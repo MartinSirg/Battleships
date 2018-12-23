@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain
 {
     public class Tile
     {
+        [Key]
         public int TileId { get; set; }
         
         public Battleship Battleship { get; set; }
@@ -11,11 +13,12 @@ namespace Domain
         public int Row { get; set; }
         public int Col { get; set; }
 
-//        public int BoardId { get; set; }
-        [Required]
+        
         public Board Board { get; set; }
         
+        [NotMapped]
         public bool IsHighlightedStart { get; set; }
+        [NotMapped]
         public bool IsHighlightedEnd { get; set; }
 
         public Tile(int row, int col, Board board)

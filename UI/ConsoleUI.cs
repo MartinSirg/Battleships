@@ -406,10 +406,10 @@ namespace UI
             return Console.ReadLine();
         }
 
-        public string GetShipsCanTouch(bool current)
+        public string GetShipsCanTouch(int current)
         {
             Console.Clear();
-            Console.WriteLine($"Current ships can touch: {current}");
+            Console.WriteLine($"Current ships can touch: {current == 1}");
             Console.Write("Enter whether ships can touch(YES/NO or x): ");
             return Console.ReadLine();
         }

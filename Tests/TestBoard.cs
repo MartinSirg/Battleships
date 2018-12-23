@@ -15,7 +15,7 @@ namespace Tests
         [Test]
         public void CreateDefaultBoard()
         {
-            var board = new Board(10,10,true);
+            var board = new Board(10,10,1);
             Assert.AreEqual(10, board.Tiles.Capacity);
             foreach (var col in board.Tiles)
             {
@@ -26,7 +26,7 @@ namespace Tests
         [Test]
         public void CreateCustomBoard()
         {
-            var customBoard = new Board(totalRows: 21, totalCols: 13, canTouch: false);
+            var customBoard = new Board(totalRows: 21, totalCols: 13, canTouch: 0);
             Assert.AreEqual(expected: 21, actual: customBoard.Tiles.Capacity);
             foreach (var col in customBoard.Tiles)
             {
@@ -37,7 +37,7 @@ namespace Tests
         [Test]
         public void TestAddBattleshipNormal()
         {
-            var board = new Board(10,10,true);
+            var board = new Board(10,10,1);
             var battleship = new Battleship(3);
             board.AddBattleship((0, 0), (0, 2), battleship);
             Assert.AreSame(battleship, board.GetData(0,0));
@@ -47,7 +47,7 @@ namespace Tests
         [Test]
         public void TestAddBattleshipDiagonal()
         {
-            var board = new Board(10,10,true);
+            var board = new Board(10,10,1);
             var battleship = new Battleship(2);
             Assert.That(() => board.AddBattleship((0,0),(1,1),battleship), Throws.ArgumentException);
         }
@@ -55,7 +55,7 @@ namespace Tests
         [Test]
         public void TestAddBattleshipOnAnotherShip()
         {
-            var board = new Board(10,10,true);
+            var board = new Board(10,10,1);
             Battleship ship1 = new Battleship(1), ship2 = new Battleship(3);
             board.AddBattleship((0,0),(0,2),ship2);
             Assert.That(() => board.AddBattleship((0,1),(0,1),ship1), Throws.ArgumentException);
@@ -64,7 +64,7 @@ namespace Tests
         [Test]
         public void TestAddBattleshipOutOfBounds()
         {
-            var board = new Board(10,10,true);
+            var board = new Board(10,10,1);
             var ship = new Battleship(1);
             Assert.That(() => board.AddBattleship((10,10),(10,10),ship), Throws.ArgumentException);
         }
@@ -72,7 +72,7 @@ namespace Tests
         [Test]
         public void TestAddBattleshipPointsDistanceNotSameLengthAsShip()
         {
-            var board = new Board(10,10,true);
+            var board = new Board(10,10,1);
             Battleship ship1 = new Battleship(3), ship2 = new Battleship(1);
             
             Assert.That(() => board.AddBattleship((0,0),(0,1),ship1), Throws.ArgumentException);
@@ -130,14 +130,14 @@ namespace Tests
         [Test]
         public void TestGetData()
         {
-            var board = new Board(10,10,true);
+            var board = new Board(10,10,1);
             Assert.IsNull(board.GetData(0,0));
         }
 
         [Test]
         public void TestBombLocationContainingShip()
         {
-            var board = new Board(10,10,true);
+            var board = new Board(10,10,1);
             var ship = new Battleship(3);
             board.AddBattleship((0,0), (0,2), ship);
             Assert.True(board.BombLocation(0,0));
@@ -148,14 +148,14 @@ namespace Tests
         [Test]
         public void TestBombLocationEmptyTile()
         {
-            var board = new Board(10,10,true);
+            var board = new Board(10,10,1);
             Assert.False(board.BombLocation(0,0));
         }
 
         [Test]
         public void TestBombLocationTwice()
         {
-            var board = new Board(10,10,true);
+            var board = new Board(10,10,1);
             var battleship = new Battleship(3);
             board.AddBattleship((0,0), (2,0), battleship);
             
@@ -171,7 +171,7 @@ namespace Tests
         [Test]
         public void TestGetBattleshipLocations()
         {
-            var board = new Board(10,10,true);
+            var board = new Board(10,10,1);
             Battleship ship1 = new Battleship(2), ship2 = new Battleship(2);
             board.AddBattleship((0,0), (0,1), ship1);
             board.AddBattleship((1,0), (1,1), ship2);
