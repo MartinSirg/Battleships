@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Drawing;
-using System.Globalization;
 using System.Linq;
-using System.Threading;
 using DAL;
 using Domain;
 using MenuSystem;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using WebApp;
 
 namespace BLL
 {
@@ -23,16 +20,15 @@ namespace BLL
         public List<GameMove> GameMoves = new List<GameMove>();
         private LetterNumberSystem Converter = new LetterNumberSystem();
         private IUserInterface UI;
-        private AppDbContext _appDbContext;
         public NewDbContext Ctx;
         public string SelectedMode { get; set; } = "";
         public const int MAX_ROWS = 24, MIN_ROWS = 10, MIN_COLS = 10, MAX_COLS = 24;
 
-        public Game(IUserInterface ui, AppDbContext appDbContext)
+        public Game(IUserInterface ui, NewDbContext dbContext)
         {
             Rules = Rules.GetDefaultRules();
             UI = ui;
-            _appDbContext = appDbContext;
+            Ctx = dbContext;
             var board1 = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
             var board2 = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
             
@@ -978,8 +974,6 @@ namespace BLL
 
         public void RestorePlayerBoardTiles(Player player, SaveGame s)
         {
-            //TODO:Before using this method load player WITH! board and rules from db
-            
             
             List<List<Tile>> boardTiles = new List<List<Tile>>(s.Rules.BoardRows);
             List<Tile> tilesFromDb = Ctx.Tiles
@@ -1001,7 +995,6 @@ namespace BLL
                 }
             }
             player.Board.Tiles = boardTiles;
-//            player.Board.Tiles.ForEach(row => row.ForEach(Console.WriteLine)); TODO: Remove this
         }
 
         public void ResetAll()

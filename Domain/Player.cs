@@ -13,6 +13,8 @@ namespace Domain
         public Board Board { get; set; }
         
         [MaxLength(64)]
+        [MinLength(2)]
+        [Required]
         public string Name { get; set; }
         [NotMapped]
         public bool IsReady { get; set; }
@@ -23,7 +25,7 @@ namespace Domain
             Board = board;
         }
 
-        private Player()
+        public Player()
         {
         }
 

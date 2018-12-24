@@ -12,4 +12,10 @@
       <ProjectReference Include="..\UI\UI.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="Microsoft.AspNetCore.Mvc.RazorPages, Version=2.1.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+        <HintPath>..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.aspnetcore.mvc.razorpages\2.1.1\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.RazorPages.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

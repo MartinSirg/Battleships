@@ -9,9 +9,15 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.2.0" />
-      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
+      <Reference Include="Microsoft.EntityFrameworkCore, Version=2.1.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+        <HintPath>..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.entityframeworkcore\2.1.1\lib\netstandard2.0\Microsoft.EntityFrameworkCore.dll</HintPath>
+      </Reference>
+      <Reference Include="Microsoft.EntityFrameworkCore.Relational, Version=2.1.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+        <HintPath>..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.entityframeworkcore.relational\2.1.1\lib\netstandard2.0\Microsoft.EntityFrameworkCore.Relational.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
       <PackageReference Include="MySql.Data.EntityFrameworkCore" Version="8.0.13" />
     </ItemGroup>
 

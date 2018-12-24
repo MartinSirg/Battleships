@@ -6,8 +6,6 @@ using Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
 
 namespace DAL
 {
@@ -20,6 +18,15 @@ namespace DAL
         public DbSet<Tile> Tiles { get; set; }
         public DbSet<Player> Players { get; set; }
         public DbSet<Board> Boards { get; set; }
+
+        public NewDbContext(DbContextOptions options) : base(options)
+        {  
+        }
+
+        public NewDbContext()
+        {
+            
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -38,7 +45,7 @@ namespace DAL
 //                Trusted_Connection=True;
 //                MultipleActiveResultSets=true");
         }
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             var converter = new BoolToStringConverter("N","Y");
@@ -78,12 +85,12 @@ namespace DAL
             return result;
         }
         
-        public static readonly LoggerFactory MyLoggerFactory
-            = new LoggerFactory(new[] {
-                new ConsoleLoggerProvider((category, level)
-                    => category == DbLoggerCategory.Database.Command.Name
-                       && level == LogLevel.Information, true)
-            });
+//        public static readonly LoggerFactory MyLoggerFactory
+//            = new LoggerFactory(new[] {
+//                new ConsoleLoggerProvider((category, level)
+//                    => category == DbLoggerCategory.Database.Command.Name
+//                       && level == LogLevel.Information, true)
+//            });
 
     }
 }
