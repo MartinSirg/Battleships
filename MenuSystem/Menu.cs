@@ -9,7 +9,7 @@ namespace MenuSystem
     {
         public string Title { get; set; }
         public string TitleWithName;
-        public Action DisplayBefore;
+        public Display DisplayBefore;
         public List<MenuItem> MenuItems { get; set; }
         public MenuItem Previous { get; set; } = new MenuItem()
         {

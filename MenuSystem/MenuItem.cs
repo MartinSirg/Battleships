@@ -6,7 +6,6 @@ namespace MenuSystem
     {
         public string Shortcut { get; set; }
         public string Description { get; set; }
-
-        public Func<string> CommandToExecute { get; set; }
+        public Func<string, Result> CommandToExecute { get; set; }
     }
 }

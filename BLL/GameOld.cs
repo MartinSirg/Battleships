@@ -9,7 +9,7 @@ using WebApp;
 
 namespace BLL
 {
-    public class Game
+    public class GameOld
     {
         public Rules Rules { get; set; }
         public Player Player1 { get; set; }
@@ -23,7 +23,7 @@ namespace BLL
         public string SelectedMode { get; set; } = "";
         public const int MAX_ROWS = 24, MIN_ROWS = 10, MIN_COLS = 10, MAX_COLS = 24;
 
-        public Game(IUserInterface ui, NewDbContext dbContext)
+        public GameOld(IUserInterface ui, NewDbContext dbContext)
         {
             Rules = Rules.GetDefaultRules();
             UI = ui;

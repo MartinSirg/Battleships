@@ -4,7 +4,6 @@ using System.Linq;
 using BLL;
 using DAL;
 using Domain;
-using Initializers;
 using MenuSystem;
 using Microsoft.EntityFrameworkCore;
 using UI;
@@ -30,11 +29,11 @@ namespace ConsoleApp
 //            appDbContext.TotalGameOld.Add((name: "sample1", gameMoves: 0, player1: 0, player2: 1, rules: 0));
             
             
-            Game game = new Game(ui, ctx);
+            GameOld gameOld = new GameOld(ui, ctx);
 
-            ApplicationMenu applicationMenu = new ApplicationMenu(game);
+            ApplicationMenu applicationMenu = new ApplicationMenu(gameOld);
             Menu main = applicationMenu.GetMain();
-            game.RunMenu(menu: main);
+            gameOld.RunMenu(menu: main);
 
 
         }

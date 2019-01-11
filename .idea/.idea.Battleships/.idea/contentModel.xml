@@ -4,9 +4,11 @@
     <e p="C:\Projects Repositories\C#" t="IncludeFlat">
       <e p="Battleships.sln" t="IncludeFlat" />
       <e p="BLL" t="IncludeRecursive">
+        <e p="ApplicationMenu.cs" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="BLL.csproj" t="IncludeRecursive" />
-        <e p="Game.cs" t="Include" />
+        <e p="GameNew.cs" t="Include" />
+        <e p="GameOld.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
             <e p="netstandard2.0" t="Include">
@@ -72,7 +74,6 @@
         <e p="Tile.cs" t="Include" />
       </e>
       <e p="Initializers" t="IncludeRecursive">
-        <e p="ApplicationMenu.cs" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="Initializers.csproj" t="IncludeRecursive" />
         <e p="obj" t="ExcludeRecursive">
@@ -85,6 +86,7 @@
       </e>
       <e p="MenuSystem" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
+        <e p="Display.cs" t="Include" />
         <e p="Menu.cs" t="Include" />
         <e p="MenuItem.cs" t="Include" />
         <e p="MenuSystem.csproj" t="IncludeRecursive" />
@@ -95,6 +97,7 @@
             </e>
           </e>
         </e>
+        <e p="Result.cs" t="Include" />
       </e>
       <e p="packages" t="ExcludeRecursive" />
       <e p="Tests" t="IncludeRecursive">
@@ -112,7 +115,8 @@
       </e>
       <e p="UI" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
-        <e p="ConsoleUI.cs" t="Include" />
+        <e p="ConsoleUINew.cs" t="Include" />
+        <e p="ConsoleUIOld.cs" t="Include" />
         <e p="IUserInterface.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
