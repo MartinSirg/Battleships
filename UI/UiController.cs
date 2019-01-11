@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using Domain;
 using MenuSystem;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace WebApp
 {
@@ -13,7 +12,6 @@ namespace WebApp
         public string ShipEndPoint { get; set; }
         public int MaxWidth { get; set; }
         public int MaxHeight { get; set; }
-        public PageModel CurrentPageModel { get; set; }
         
         public int GetInteger(string message)
         {
@@ -102,8 +100,7 @@ namespace WebApp
 
         public void DisplayNewMenu(Menu menu)
         {
-            CurrentPageModel.ViewData["CurrentMenu"] = menu;
-            var x  = CurrentPageModel.RedirectToPage("/UiPages/Start");
+            throw new NotImplementedException();
         }
 
         public void WaitForUser()
