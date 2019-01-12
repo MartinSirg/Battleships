@@ -15,7 +15,7 @@ namespace MenuSystem
         {
             Shortcut = "X",
             Description = "Previous menu",
-            CommandToExecute = s => Result.NoPreviousMenuFound
+            CommandToExecute = Command.Previous
         };
     }
 }

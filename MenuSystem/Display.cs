@@ -9,6 +9,7 @@ namespace MenuSystem
         CurrentAndAvailableShips,
         CurrentShipsDeleting,
         FinishedGames,
-        UnfinishedGames
+        UnfinishedGames,
+        Bombings
     }
 }

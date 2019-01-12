@@ -55,9 +55,9 @@ namespace BLL
          * If SelectedMode == "SP" also bombs current players board
          * When CurrentPlayer has bombed all enemies tiles Result.GameOver is returned 
          * When Computer has won Result.ComputerWon is returned
-         * 
-         * If locationString is invalid Result.NoSuchTile is returned
-         * If location is already bombed Result.TileAlreadyBombed is returned
+         *
+         * @param locationString: a string to be parsed into a Tile object. Format example: "B7"
+         * @returns Result: enum Result of the method call 
          */
         public Result BombShip(string locationString)
         {
@@ -99,7 +99,8 @@ namespace BLL
          * Calls PreviousMenu() until there are no previous menus
          * @param isFinished: select between finished and unfinished game save mode
          * @param saveName: save game's name
-         * @param dbContext: Database connection class thingamajig 
+         * @param dbContext: Database connection class thingamajig
+         * @returns Result: enum Result of the method call 
          */
         public Result SaveGame(AppDbContext dbContext, string saveName, bool isFinished)
         {
@@ -134,174 +135,138 @@ namespace BLL
 
         /**
          * Adds a ship to current rules
-         * @param userInput: 
+         * @param size: ship size to be added (can't be existing size, less than 1 or more than 10)
+         * @param quantity: quantity of the ship to be added (can't be less than 1 or more than 5)
+         * @returns Result: enum Result of the method call
          */
-        public Result AddShipToRules(string userInput)
+        public Result AddShipToRules(int size, int quantity)
         {
-            while (true)
-            {
-                string userInputSize = UI.GetShipSize(Rules);
-                if (userInputSize.ToUpper().Equals("X")) return "";
-                List<int> currentSizes = new List<int>();
-                Rules.BoatRules.ForEach(rule => currentSizes.Add(rule.Size));
-                if (!int.TryParse(userInputSize, out var size) || size < 1 || size > 10 || currentSizes.Contains(size))
-                {
-                    UI.Alert("Invalid input", 500);
-                    continue;
-                }
+            List<int> currentSizes = new List<int>();
+            Rules.BoatRules.ForEach(rule => currentSizes.Add(rule.Size));
+            if (size < 1 || size > 10 || currentSizes.Contains(size)) return Result.InvalidSize;
+            if (quantity < 1 || quantity > 5) return Result.InvalidQuantity;
+            Rules.BoatRules.Add(new BoatRule(size, quantity));
+            Rules.BoatRules.Sort((rule, boatRule) =>
+            {   //This is a comparable thingamajig
+                if(rule.Size > boatRule.Size) return 1;
+                if(rule.Size < boatRule.Size) return -1;
+                return 0;
+            });
+            return Result.ShipRuleAdded;
 
-                int quantity;
-                while (true)
-                {
-                    string userInputQuantity = UI.GetShipQuantity(size);
-                    if (userInputQuantity.ToUpper().Equals("X")) return "";
-                    if (!int.TryParse(userInputQuantity, out quantity) || quantity < 1 || quantity > 5)
-                    {
-                        UI.Alert("Invalid input", 500);
-                        continue;
-                    }
-                    break;
-                }
-                Rules.BoatRules.Add(new BoatRule(size, quantity));
-                Rules.BoatRules.Sort((rule, boatRule) =>
-                {
-                    if(rule.Size > boatRule.Size) return 1;
-                    if(rule.Size < boatRule.Size) return -1;
-                    return 0;
-                });
-                return "";
-            }
         }
 
-        public Result EditShipInRules(string userInput)
+        /**
+         * Edits existing ship size in current rules.
+         * Also resets player's boards, due to possible conflicts
+         *
+         * @param size: ship size to be edited (has to exist in current rules)
+         * @param quantity: new quantity of the editable ship (can't be less than 1 or more than 5)
+         * @returns Result: enum Result of the method call
+         */
+        public Result EditShipInRules(int size, int quantity)
         {
-            while (true)
-            {
-                string userInputSize = UI.GetExistingShipSize(Rules);
-                if (userInputSize.ToUpper().Equals("X")) return "";
-                if (!int.TryParse(userInputSize, out var size) || Rules.BoatRules.All(rule => rule.Size != size))
-                {
-                    UI.Alert("Invalid input", 500);
-                    continue;
-                }
-
-                int quantity;
-                while (true)
-                {
-                    string userInputQuantity = UI.GetShipQuantity(size);
-                    if (userInputQuantity.ToUpper().Equals("X")) return "";
-                    if (!int.TryParse(userInputQuantity, out quantity) || quantity < 1 || quantity > 5)
-                    {
-                        UI.Alert("Invalid input", 500);
-                        continue;
-                    }
-                    break;
-                }
-
-                int index = 0;
-                Rules.BoatRules.Find(rule => rule.Size == size).Quantity = quantity;
+            if (Rules.BoatRules.All(rule => rule.Size != size)) return Result.InvalidSize;
+            if (quantity < 1 || quantity > 5) return Result.InvalidQuantity;
+            
+            Rules.BoatRules.Find(rule => rule.Size == size).Quantity = quantity;
      
-                CurrentPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
-                TargetPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
-                return "";
-            }
+            CurrentPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
+            TargetPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
+            return Result.ShipRuleEdited;
         }
 
-        public Result DeleteShipInRules(string userInput)
+        /**
+         * Removes existing ship size from current rules.
+         * Also resets player's boards, due to possible conflicts
+         *
+         * @param shipSize: ship size to be deleted (has to exist in current rules)
+         * @returns Result: enum Result of the method call
+         */
+        public Result DeleteShipInRules(int shipSize)
         {
-            while (true)
-            {
-                string userInputSize = UI.GetExistingShipSize(Rules);
-                if (userInputSize.ToUpper().Equals("X")) return "";
-                if (!int.TryParse(userInputSize, out var size) || Rules.BoatRules.All(rule => rule.Size != size))
-                {
-                    UI.Alert("Invalid input", 500);
-                    continue;
-                }
-                Rules.BoatRules.Remove(Rules.BoatRules.Find(rule => rule.Size == size));
-                CurrentPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
-                TargetPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
-                return "";
-            }
+            if (Rules.BoatRules.All(rule => rule.Size != shipSize)) return Result.InvalidSize;
+            
+            Rules.BoatRules.Remove(Rules.BoatRules.Find(rule => rule.Size == shipSize));
+            CurrentPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
+            TargetPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
+
+            return Result.ShipRuleDeleted;
         }
 
+        /**
+         * Changes the Ships can touch rule.
+         * If user input is different from current rule, then player's boards are reset.
+         *
+         * @param userInput: has to be either "YES" or "NO". Not case sensitive.
+         * @returns Result: enum Result of the method call
+         */
         public Result EditShipsCanTouchRule(string userInput)
         {
-            while (true)
+            userInput = userInput.ToUpper();
+            if (!userInput.Equals("YES") && !userInput.Equals("NO")) return Result.InvalidInput;
+            
+            if (userInput.Equals("YES") && Rules.CanShipsTouch == 0 || //current rule and new rule are different
+                userInput.Equals("NO") && Rules.CanShipsTouch == 1)
             {
-                string userInput = UI.GetShipsCanTouch(Rules.CanShipsTouch).ToUpper();
-                if (userInput.Equals("X")) return "";
-                if (!userInput.Equals("YES") && !userInput.Equals("NO"))
-                {
-                    UI.Alert("Invalid input", 1000);
-                    continue;
-                }
-
-                if (userInput.Equals("YES") && Rules.CanShipsTouch == 0 || //User input and current are different
-                    userInput.Equals("NO") && Rules.CanShipsTouch == 1)
-                {
-                    Rules.CanShipsTouch = userInput.Equals("YES") ? 1 : 0;
-                    CurrentPlayer.Board = new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch);
-                    TargetPlayer.Board = new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch);
-                }
-
-                return "";
+                Rules.CanShipsTouch = userInput.Equals("YES") ? 1 : 0;
+                CurrentPlayer.Board = new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch);
+                TargetPlayer.Board = new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch);
+                return Result.ShipsTouchRuleChanged;
             }
+
+            return Result.None;
         }
 
-        public Result EditBoardHeight(string userInput)
+        
+        /**
+         * Changes the board height(rows) rule.
+         * If user input is different from current rule, then player's boards are reset.
+         *
+         * @param newHeight: new height of the board
+         * @returns Result: enum Result of the method call
+         */
+        public Result EditBoardHeight(int newHeight)
         {
-            while (true)
-            {
-                string userInput = UI.GetNewBoardHeight(Rules.BoardRows);
-                if (userInput.ToUpper().Equals("X")) return "";
-                if (!int.TryParse(userInput, out var rows) || rows < MIN_ROWS || rows > MAX_ROWS)
-                {
-                    UI.Alert("Invalid input, enter a number or X", 2000);
-                    continue;
-                }
-                if (Rules.BoardRows == rows) return "";        //current is new, else reset boards
-                CurrentPlayer.Board = new Board(rows, Rules.BoardCols, Rules.CanShipsTouch);
-                TargetPlayer.Board = new Board(rows, Rules.BoardCols, Rules.CanShipsTouch);
-                Rules.BoardRows = rows;
-                return "";
-            }
+            if (newHeight < MIN_ROWS || newHeight > MAX_ROWS) return Result.InvalidInput;
+            if (Rules.BoardRows == newHeight) return Result.None;     //current rule == new rule. Do nothing
+            
+            CurrentPlayer.Board = new Board(newHeight, Rules.BoardCols, Rules.CanShipsTouch);
+            TargetPlayer.Board = new Board(newHeight, Rules.BoardCols, Rules.CanShipsTouch);
+            Rules.BoardRows = newHeight;
+            return Result.BoardHeightChnaged;
+            
         }
 
-        public Result EditBoardWidth(string userInput)
+        /**
+         * Changes the board width(columns) rule.
+         * If user input is different from current rule, then player's boards are reset.
+         *
+         * @param newHeight: new width of the board
+         * @returns Result: enum Result of the method call
+         */
+        public Result EditBoardWidth(int newWidth)
         {
-            while (true)
-            {
-                string userInput = UI.GetNewBoardWidth(Rules.BoardCols);
-                if (userInput.ToUpper().Equals("X")) return "";
-                if (!int.TryParse(userInput, out var cols) || cols < MIN_COLS || cols > MAX_COLS)
-                {
-                    UI.Alert("Invalid input, enter a number or X", 2000);
-                    continue;
-                }
-                if (Rules.BoardCols == cols) return "";        //current is new, else reset boards
-                
-                CurrentPlayer.Board = new Board(Rules.BoardRows, cols, Rules.CanShipsTouch);
-                TargetPlayer.Board = new Board(Rules.BoardRows, cols, Rules.CanShipsTouch);
-                Rules.BoardCols = cols;
-                return "";
-            }
+            if (newWidth < MIN_COLS || newWidth > MAX_COLS) return Result.InvalidInput;
+            if (Rules.BoardCols == newWidth) return Result.None;        //current rule == new rule. Do nothing
+            
+            CurrentPlayer.Board = new Board(Rules.BoardRows, newWidth, Rules.CanShipsTouch);
+            TargetPlayer.Board = new Board(Rules.BoardRows, newWidth, Rules.CanShipsTouch);
+            Rules.BoardCols = newWidth;
+            return Result.BoardWidthChnaged;
         }
 
-        public Result SetRulesetName(string userInput)
+        /**
+         * Changes current custom rule's name.
+         *
+         * @param newRulesetName: new name for the rules. Can't be "standard rules" (not case sensitive)
+         * @returns Result: enum Result of the method call
+         */
+        public Result SetRulesetName(string newRulesetName)
         {
-            while (true)
-            {
-                string userInput = UI.GetRulesetName();
-                if (userInput.ToUpper().Equals("X")) return "";
-                if (userInput.ToUpper().Equals("STANDARD RULES"))
-                {
-                    UI.Alert("Name can't be Standard rules", 2000);
-                    continue;
-                }
-                Rules.Name = userInput;
-                return "";
-            }
+            if (newRulesetName.ToUpper().Equals("STANDARD RULES")) return Result.InvalidInput;
+            Rules.Name = newRulesetName;
+            return Result.RulesNameChanged;
         }
 
         public Result SetStandardRules(string userInput)
@@ -910,6 +875,25 @@ namespace BLL
 
             CurrentMenu = MenuStack.Pop();
             return Result.ReturnToPreviousMenu;
+        }
+
+        public Result PopulateLoadsMenu(Menu menu, bool isFinished, AppDbContext dbContext)
+        {
+            menu.MenuItems.Clear();
+            List<SaveGame> saveGames = dbContext.SaveGames
+                .Where(game => game.IsFinished == isFinished)
+                .OrderBy(game => game.SaveGameId)
+                .ToList();
+
+            foreach (var saveGame in saveGames)
+            {
+                menu.MenuItems.Add(new MenuItem
+                {
+                    Shortcut = saveGame.SaveGameId.ToString(),
+                    Description = saveGame.Name,
+                    CommandToExecute = () => isFinished? Command.ReplayGame : Command.LoadGame
+                });
+            }
         }
     }
 }

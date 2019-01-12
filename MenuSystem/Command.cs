@@ -1,0 +1,29 @@
+namespace MenuSystem
+{
+    public enum Command
+    {
+        Previous,
+        BombLocation,
+        None,
+        SaveUnfinishedGame,
+        EditShipInRules,
+        AddShipToRules,
+        DeleteShipInRules,
+        EditShipsCanTouchRule,
+        EditBoardWidth,
+        EditBoardHeight,
+        SetRulesetName,
+        SetStandardRules,
+        GetShipStartTile,
+        PlaceShipOnBoard,
+        GetShipEndTile,
+        GetTileOfDeleteableShip,
+        DeleteShipFromBoard,
+        ChangePlayersName,
+        PlayerNotReady,
+        FillReplayMenu,
+        FillLoadMenu,
+        LoadGame,
+        ReplayGame
+    }
+}

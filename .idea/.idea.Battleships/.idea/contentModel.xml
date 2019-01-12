@@ -85,6 +85,7 @@
       </e>
       <e p="MenuSystem" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
+        <e p="Command.cs" t="Include" />
         <e p="Display.cs" t="Include" />
         <e p="Menu.cs" t="Include" />
         <e p="MenuItem.cs" t="Include" />

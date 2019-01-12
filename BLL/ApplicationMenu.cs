@@ -24,32 +24,36 @@ namespace BLL
                 TitleWithName = "PLAYER_NAME's ships",
                 DisplayBefore = Display.ShipsAndBombings
             };
-            AddPreviousCommand(shipsAndbombings);
             
             var inGameMenu = new Menu
             {
                 Title = "CHANGE ME!!!",
                 Previous = null,
                 TitleWithName = "PLAYER_NAME's turn",
+                DisplayBefore = Display.Bombings,
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem
                     {
                         Shortcut = "1", 
                         Description = "Bomb location",
-                        CommandToExecute = Game.BombShip
+                        CommandToExecute = () => Command.BombLocation
                     },
                     new MenuItem
                     {
                         Shortcut = "2", 
                         Description = "Show my ships and bombings",
-                        CommandToExecute = s => Game.ChangeMenu(shipsAndbombings)
+                        CommandToExecute = () =>
+                        {
+                            Game.ChangeMenu(shipsAndbombings);
+                            return Command.None;
+                        }
                     },
                     new MenuItem
                     {
                         Shortcut = "9",
                         Description = "Save and Exit",
-                        CommandToExecute = s => Result.SaveUnfinishedGame
+                        CommandToExecute = () => Command.SaveUnfinishedGame
                     },
                     new MenuItem
                     {
@@ -72,24 +76,23 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Add ships to rules",
-                        CommandToExecute = Game.AddShipToRules
+                        CommandToExecute = () => Command.AddShipToRules
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Edit ship",
-                        CommandToExecute = Game.EditShipInRules
+                        CommandToExecute = () => Command.EditShipInRules
                     },
                     new MenuItem
                     {
                         Shortcut = "3",
                         Description = "Delete ship",
-                        CommandToExecute = Game.DeleteShipInRules
+                        CommandToExecute = () => Command.DeleteShipInRules
                     }
                     
                 }
             };
-            AddPreviousCommand(customShipsMenu);
 
             var customBoardMenu = new Menu
             {
@@ -101,23 +104,22 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Set ships can touch rule.",
-                        CommandToExecute = Game.EditShipsCanTouchRule
+                        CommandToExecute = () => Command.EditShipsCanTouchRule
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Set board cols",
-                        CommandToExecute = Game.EditBoardWidth
+                        CommandToExecute = () => Command.EditBoardWidth
                     },
                     new MenuItem
                     {
                         Shortcut = "3",
                         Description = "Set board rows",
-                        CommandToExecute = Game.EditBoardHeight
+                        CommandToExecute = () => Command.EditBoardHeight
                     }
                 }
             };
-            AddPreviousCommand(customBoardMenu);
             
             var customRulesMenu = new Menu
             {
@@ -129,23 +131,30 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Ships",
-                        CommandToExecute = s => Game.ChangeMenu(customShipsMenu)
+                        CommandToExecute = () =>
+                        {
+                            Game.ChangeMenu(customShipsMenu);
+                            return Command.None;
+                        }
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Board",
-                        CommandToExecute = s => Game.ChangeMenu(customBoardMenu)
+                        CommandToExecute = () =>
+                        {
+                            Game.ChangeMenu(customBoardMenu);
+                            return Command.None;
+                        }
                     },
                     new MenuItem
                     {
                         Shortcut = "3",
                         Description = "Set name",
-                        CommandToExecute = Game.SetRulesetName
+                        CommandToExecute = () => Command.SetRulesetName
                     }
                 }
             };
-            AddPreviousCommand(customRulesMenu);
             
             var rulesMenu = new Menu
             {
@@ -157,25 +166,25 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Set custom rules",
-                        CommandToExecute = s =>
+                        CommandToExecute = () =>
                         {
                             if (Game.Rules.Name.Equals("Standard rules"))
                             {
                                 Game.Rules = (Rules) Game.Rules.Clone();
                                 Game.Rules.Name = "Custom rules";
                             }
-                            return Game.ChangeMenu(customRulesMenu);
+                            Game.ChangeMenu(customRulesMenu);
+                            return Command.None;
                         }
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Set standard Rules",
-                        CommandToExecute = Game.SetStandardRules
+                        CommandToExecute = () => Command.SetStandardRules
                     }
                 }
             };
-            AddPreviousCommand(rulesMenu);
             
             var addShipsToBoardMenu = new Menu
             {
@@ -188,30 +197,33 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Select ship start point(example: D6)",
-                        CommandToExecute = Game.GetShipStartTile
+                        CommandToExecute = () => Command.GetShipStartTile
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Select ship end point(example: D7)",
-                        CommandToExecute = Game.GetShipEndTile
+                        CommandToExecute = () => Command.GetShipEndTile
                     },
                     new MenuItem
                     {
                         Shortcut = "3",
                         Description = "Confirm ship placement",
-                        CommandToExecute = Game.PlaceShipOnBoard
+                        CommandToExecute = () => Command.PlaceShipOnBoard
                     },
                     new MenuItem
                     {
                         Shortcut = "9",
                         Description = "Generate random board",
-                        CommandToExecute = s => Game.GenerateRandomBoard(Game.CurrentPlayer)
+                        CommandToExecute = () =>
+                        {
+                            Game.GenerateRandomBoard(Game.CurrentPlayer);
+                            return Command.Previous;
+                        }
                     }
                     
                 }
             };
-            AddPreviousCommand(addShipsToBoardMenu);
             
             var deleteShipFromBoardMenu = new Menu
             {
@@ -223,28 +235,27 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Select occupying tile(example: D6)",
-                        CommandToExecute = Game.GetTileOfDeleteableShip
+                        CommandToExecute = () => Command.GetTileOfDeleteableShip
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Confirm ship deletion",
-                        CommandToExecute = Game.DeleteShipFromBoard
+                        CommandToExecute = () => Command.DeleteShipFromBoard
                     },
                     new MenuItem
                     {
                         Shortcut = "9",
                         Description = "Delete all ships",
-                        CommandToExecute = s =>
+                        CommandToExecute = ()=>
                         {
                             Game.CurrentPlayer.Board = new Board(Game.Rules.BoardRows, Game.Rules.BoardCols,
                                     Game.Rules.CanShipsTouch);
-                            return Result.AllShipsDeleted;
+                            return Command.Previous;
                         }
                     }
                 }
             };
-            AddPreviousCommand(deleteShipFromBoardMenu);
 
             var playerMenu = new Menu
             {
@@ -256,44 +267,44 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Add ships menu",
-                        CommandToExecute = s =>
+                        CommandToExecute = () =>
                         {
                             Game.ClearCurrentHighlights();
                             addShipsToBoardMenu.Title = $"{Game.CurrentPlayer.Name}'s add ships menu";
-                            return Game.ChangeMenu(addShipsToBoardMenu);
+                            Game.ChangeMenu(addShipsToBoardMenu);
+                            return Command.None;
                         }
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Delete ships menu",
-                        CommandToExecute = s =>
+                        CommandToExecute = () =>
                         {
                             Game.ClearCurrentHighlights();
                             deleteShipFromBoardMenu.Title = $"{Game.CurrentPlayer.Name}'s delete ship menu";
-                            return Game.ChangeMenu(deleteShipFromBoardMenu);
+                            Game.ChangeMenu(deleteShipFromBoardMenu);
+                            return Command.None;
                         }
                     },
                     new MenuItem
                     {
                         Shortcut = "3",
                         Description = "Change your name",
-                        CommandToExecute = Game.ChangePlayersName
+                        CommandToExecute = () => Command.ChangePlayersName
                     },
                     new MenuItem
                     {
                         Shortcut = "4",
                         Description = "Finished!",
-                        CommandToExecute = s =>
+                        CommandToExecute = () =>
                         {
                             Game.SetPlayerReady();
-                            //TODO: Change to previous menu, implement stack menu system in GAME
-                            return Result.PlayerReady;
+                            return Command.Previous;
                         }
                     }
                 }
             };
-            AddPreviousCommand(playerMenu);
             
             var multiPlayerMenu = new Menu
             {
@@ -304,29 +315,30 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Player 1 menu",
-                        CommandToExecute = s =>
+                        CommandToExecute = () =>
                         {
                             Game.CurrentPlayer = Game.Player1;
                             Game.TargetPlayer = Game.Player2;
                             playerMenu.Title = $"{Game.CurrentPlayer.Name}'s menu";
-                            return Game.ChangeMenu(playerMenu);
+                            Game.ChangeMenu(playerMenu);
+                            return Command.None;
                         }
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Player 2 menu",
-                        CommandToExecute = s =>
+                        CommandToExecute = () =>
                         {
                             Game.CurrentPlayer = Game.Player2;
                             Game.TargetPlayer = Game.Player1;
                             playerMenu.Title = $"{Game.CurrentPlayer.Name}'s menu";
-                            return Game.ChangeMenu(playerMenu);
+                            Game.ChangeMenu(playerMenu);
+                            return Command.None;
                         }
                     }
                 }
             };
-            AddPreviousCommand(multiPlayerMenu);
             
             var newGameMenu = new Menu
             {
@@ -337,13 +349,17 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Set game rules",
-                        CommandToExecute = s => Game.ChangeMenu(rulesMenu)
+                        CommandToExecute = () =>
+                        {
+                            Game.ChangeMenu(rulesMenu);
+                            return Command.None;
+                        }
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Single player",
-                        CommandToExecute = s =>
+                        CommandToExecute = () =>
                         {
                             if (Game.SelectedMode.Equals("MP"))
                             {
@@ -353,14 +369,15 @@ namespace BLL
                             Game.SetPlayerNotReady();
                             Game.SetSelectedMode("SP");    //TODO: Enumiks teha parameeter
                             Game.GenerateOpponent();
-                            return Game.ChangeMenu(playerMenu);
+                            Game.ChangeMenu(playerMenu);
+                            return Command.None;
                         }
                     },
                     new MenuItem
                     {
                         Shortcut = "3",
                         Description = "Multi player",
-                        CommandToExecute = s =>
+                        CommandToExecute = () =>
                         {
                             if (Game.SelectedMode.Equals("SP"))
                             {
@@ -368,19 +385,20 @@ namespace BLL
                             }
                             Game.SetSelectedMode("MP");
                             Game.SetPlayerNotReady();
-                            return Game.ChangeMenu(multiPlayerMenu);                          
-                         }
+                            Game.ChangeMenu(multiPlayerMenu);
+                            return Command.None;
+                        }
                     },
                     new MenuItem
                     {
                         Shortcut = "4",
                         Description = "Start game",
-                        CommandToExecute = s =>
+                        CommandToExecute = () =>
                         {
                             var ready = Game.CheckIfCanStartGame();
                             if (!ready)
                             {
-                                return Result.PlayerNotReady;
+                                return Command.PlayerNotReady;
                             }
 
                             Game.CurrentPlayer = Game.Player1;
@@ -388,12 +406,11 @@ namespace BLL
                             
                             inGameMenu.Title = $"{Game.CurrentPlayer.Name}'s turn";
                             Game.ChangeMenu(inGameMenu);  //Game starts and ends here,
-                            return Result.GameStarted;
+                            return Command.None;
                         }
                     }
                 }
             };
-            AddPreviousCommand(newGameMenu);
             
             var loadMenu = new Menu
             {
@@ -402,28 +419,14 @@ namespace BLL
                 //This list is filled after selecting it from the main menu
                 MenuItems = new List<MenuItem>()
             };
-            AddPreviousCommand(loadMenu);
             
             var replayMenu= new Menu
             {
                 Title = "Replay finished game menu",
                 DisplayBefore = Display.FinishedGames,
                 //This list is filled after selecting it from the main menu
-                MenuItems = new List<MenuItem>
-                {
-                    new MenuItem
-                    {
-                        Shortcut = "1",
-                        Description = "Start game",
-                        CommandToExecute = s =>
-                        {
-                            Game.NewGame();
-                            return Game.ChangeMenu(newGameMenu);
-                        }
-                    }
-                }
+                MenuItems = new List<MenuItem>()
             };
-            AddPreviousCommand(replayMenu);
 
             var mainMenu = new Menu
             {
@@ -435,30 +438,31 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "New game",
-                        CommandToExecute = s =>
+                        CommandToExecute = () =>
                         {
                             Game.NewGame();
-                            return Game.ChangeMenu(newGameMenu);
+                            Game.ChangeMenu(newGameMenu);
+                            return Command.None;
                         }
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Load game",
-                        CommandToExecute = s =>
+                        CommandToExecute = () =>
                         {
                             Game.ChangeMenu(loadMenu);
-                            return Result.FillLoadGame;
+                            return Command.FillLoadMenu;
                         }
                     },
                     new MenuItem
                     {
                         Shortcut = "3",
                         Description = "Replay finished game",
-                        CommandToExecute = s =>
+                        CommandToExecute = () =>
                         {
                             Game.ChangeMenu(replayMenu);
-                            return Result.FillReplayGame;
+                            return Command.FillReplayMenu;
                         }
                     }
                 }
@@ -467,29 +471,18 @@ namespace BLL
             
             inGameMenu.MenuItems
                 .Find(item => item.Shortcut.Equals("8"))
-                .CommandToExecute = s =>
+                .CommandToExecute = () =>
             {
                 Game.ResetAll();
                 Game.MenuStack.Clear();
                 Game.CurrentMenu = mainMenu;
                 
-                return Result.QuitToMain;
+                return Command.None;
             };
             
             
             return mainMenu;
         }
-
-        private void AddPreviousCommand(Menu menu)
-        {
-            menu.Previous = new MenuItem
-            {
-                Shortcut = "X",
-                Description = "Previous menu",
-                CommandToExecute = s => Game.PreviousMenu()
-            };
-        }
-
 
     }
 }
