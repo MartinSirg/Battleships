@@ -7,7 +7,7 @@
         <e p="ApplicationMenu.cs" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="BLL.csproj" t="IncludeRecursive" />
-        <e p="GameNew.cs" t="Include" />
+        <e p="Game.cs" t="Include" />
         <e p="GameOld.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
@@ -42,7 +42,6 @@
           <e p="20181223155402_defaultValueIsBombed.Designer.cs" t="Include" />
           <e p="NewDbContextModelSnapshot.cs" t="Include" />
         </e>
-        <e p="NewDbContext.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
             <e p="netstandard2.0" t="Include">

@@ -1499,6 +1499,7 @@
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
         "dependencies": {
+          "DAL": "1.0.0",
           "Domain": "1.0.0"
         },
         "compile": {

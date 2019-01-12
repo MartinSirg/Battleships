@@ -11,10 +11,11 @@ namespace MenuSystem
         public string TitleWithName;
         public Display DisplayBefore;
         public List<MenuItem> MenuItems { get; set; }
-        public MenuItem Previous { get; set; } = new MenuItem()
+        public MenuItem Previous { get; set; } = new MenuItem
         {
             Shortcut = "X",
-            Description = "Previous menu"
+            Description = "Previous menu",
+            CommandToExecute = s => Result.NoPreviousMenuFound
         };
     }
 }

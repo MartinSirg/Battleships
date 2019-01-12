@@ -17,7 +17,7 @@ namespace ConsoleApp
         {
             IUserInterface ui = new ConsoleUI();
             
-            NewDbContext ctx = new NewDbContext();
+            AppDbContext ctx = new AppDbContext();
 //            
 //            appDbContext.BoardsOld.Add(new Board(10,10,true));
 //            appDbContext.BoardsOld[0].AddBattleship((0, 0), (0, 2), new Battleship(3));

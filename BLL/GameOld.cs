@@ -19,11 +19,11 @@ namespace BLL
         public List<GameMove> GameMoves = new List<GameMove>();
         private LetterNumberSystem Converter = new LetterNumberSystem();
         private IUserInterface UI;
-        public NewDbContext Ctx;
+        public AppDbContext Ctx;
         public string SelectedMode { get; set; } = "";
         public const int MAX_ROWS = 24, MIN_ROWS = 10, MIN_COLS = 10, MAX_COLS = 24;
 
-        public GameOld(IUserInterface ui, NewDbContext dbContext)
+        public GameOld(IUserInterface ui, AppDbContext dbContext)
         {
             Rules = Rules.GetDefaultRules();
             UI = ui;
@@ -998,7 +998,7 @@ namespace BLL
 
         public void ResetAll()
         {
-            Ctx = new NewDbContext();
+            Ctx = new AppDbContext();
             Rules = Rules.GetDefaultRules();
             CurrentPlayer = new Player(new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch ), "Player 1" );
             TargetPlayer = new Player(new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch ), "Player 2" );

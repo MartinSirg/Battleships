@@ -10,6 +10,16 @@ namespace MenuSystem
         FillLoadGame,
         FillReplayGame,
         ChangedMenu,
-        QuitToMain
+        QuitToMain,
+        NoPreviousMenuFound,
+        ReturnToPreviousMenu,
+        GameOver,
+        SuccessfulBombing,
+        SuccessfulBombings,
+        ComputerWon,
+        NoSuchTile,
+        TileAlreadyBombed,
+        GameSaved,
+        SaveUnfinishedGame
     }
 }

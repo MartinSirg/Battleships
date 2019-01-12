@@ -6,10 +6,10 @@ namespace BLL
 {
     public class ApplicationMenu
     {
-        public GameNew Game { get; set; }
+        public Game Game { get; set; }
         public Menu MainMenu { get; set; }
 
-        public ApplicationMenu(GameNew game)
+        public ApplicationMenu(Game game)
         {
             Game = game;
             
@@ -24,7 +24,7 @@ namespace BLL
                 TitleWithName = "PLAYER_NAME's ships",
                 DisplayBefore = Display.ShipsAndBombings
             };
-            
+            AddPreviousCommand(shipsAndbombings);
             
             var inGameMenu = new Menu
             {
@@ -49,7 +49,7 @@ namespace BLL
                     {
                         Shortcut = "9",
                         Description = "Save and Exit",
-                        CommandToExecute = Game.SaveGame
+                        CommandToExecute = s => Result.SaveUnfinishedGame
                     },
                     new MenuItem
                     {
@@ -59,6 +59,7 @@ namespace BLL
                     }
                 }
             };
+            //NO previous menu item here
             
             var customShipsMenu = new Menu
             {
@@ -88,12 +89,12 @@ namespace BLL
                     
                 }
             };
-
+            AddPreviousCommand(customShipsMenu);
 
             var customBoardMenu = new Menu
             {
                 Title = "Customize the game board",
-                DisplayBefore = Display.BoardRules,    //TODO: ItemDisplayEnum
+                DisplayBefore = Display.BoardRules,
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem
@@ -116,6 +117,8 @@ namespace BLL
                     }
                 }
             };
+            AddPreviousCommand(customBoardMenu);
+            
             var customRulesMenu = new Menu
             {
                 Title = "Custom rules",
@@ -142,6 +145,8 @@ namespace BLL
                     }
                 }
             };
+            AddPreviousCommand(customRulesMenu);
+            
             var rulesMenu = new Menu
             {
                 Title ="Rules",
@@ -170,6 +175,7 @@ namespace BLL
                     }
                 }
             };
+            AddPreviousCommand(rulesMenu);
             
             var addShipsToBoardMenu = new Menu
             {
@@ -205,6 +211,7 @@ namespace BLL
                     
                 }
             };
+            AddPreviousCommand(addShipsToBoardMenu);
             
             var deleteShipFromBoardMenu = new Menu
             {
@@ -237,6 +244,7 @@ namespace BLL
                     }
                 }
             };
+            AddPreviousCommand(deleteShipFromBoardMenu);
 
             var playerMenu = new Menu
             {
@@ -285,6 +293,7 @@ namespace BLL
                     }
                 }
             };
+            AddPreviousCommand(playerMenu);
             
             var multiPlayerMenu = new Menu
             {
@@ -317,6 +326,7 @@ namespace BLL
                     }
                 }
             };
+            AddPreviousCommand(multiPlayerMenu);
             
             var newGameMenu = new Menu
             {
@@ -383,6 +393,7 @@ namespace BLL
                     }
                 }
             };
+            AddPreviousCommand(newGameMenu);
             
             var loadMenu = new Menu
             {
@@ -391,15 +402,28 @@ namespace BLL
                 //This list is filled after selecting it from the main menu
                 MenuItems = new List<MenuItem>()
             };
+            AddPreviousCommand(loadMenu);
             
             var replayMenu= new Menu
             {
                 Title = "Replay finished game menu",
                 DisplayBefore = Display.FinishedGames,
                 //This list is filled after selecting it from the main menu
-                MenuItems = new List<MenuItem>()
+                MenuItems = new List<MenuItem>
+                {
+                    new MenuItem
+                    {
+                        Shortcut = "1",
+                        Description = "Start game",
+                        CommandToExecute = s =>
+                        {
+                            Game.NewGame();
+                            return Game.ChangeMenu(newGameMenu);
+                        }
+                    }
+                }
             };
-
+            AddPreviousCommand(replayMenu);
 
             var mainMenu = new Menu
             {
@@ -438,23 +462,34 @@ namespace BLL
                         }
                     }
                 }
-                
             };
+            //No previous command here
             
             inGameMenu.MenuItems
                 .Find(item => item.Shortcut.Equals("8"))
                 .CommandToExecute = s =>
             {
                 Game.ResetAll();
-                //TODO: Game.MenuStack empty, push main menu
+                Game.MenuStack.Clear();
                 Game.CurrentMenu = mainMenu;
                 
                 return Result.QuitToMain;
             };
             
+            
             return mainMenu;
         }
-        
-        
+
+        private void AddPreviousCommand(Menu menu)
+        {
+            menu.Previous = new MenuItem
+            {
+                Shortcut = "X",
+                Description = "Previous menu",
+                CommandToExecute = s => Game.PreviousMenu()
+            };
+        }
+
+
     }
 }

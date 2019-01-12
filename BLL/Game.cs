@@ -7,17 +7,17 @@ using MenuSystem;
 
 namespace BLL
 {
-    public class GameNew
+    public class Game
     {
         //Singleton
-        private static GameNew _instance = null;
-        public static GameNew Instance
+        private static Game _instance = null;
+        public static Game Instance
         {
             get
             {
                 if (_instance==null)
                 {
-                    _instance = new GameNew();
+                    _instance = new Game();
                 }
                 return _instance;
             }
@@ -32,9 +32,11 @@ namespace BLL
         private readonly LetterNumberSystem _converter = new LetterNumberSystem();
         public string SelectedMode { get; set; } = "";
         public const int MAX_ROWS = 24, MIN_ROWS = 10, MIN_COLS = 10, MAX_COLS = 24;
+        
         public Menu CurrentMenu { get; set; }
+        public Stack<Menu> MenuStack { get; set; } = new Stack<Menu>();
 
-        private GameNew()
+        private Game()
         {
             Rules = Rules.GetDefaultRules();
             
@@ -48,38 +50,32 @@ namespace BLL
             CurrentMenu = new ApplicationMenu(this).GetMain();
         }
 
+        /**
+         * Bombs a tile on the Target player board
+         * If SelectedMode == "SP" also bombs current players board
+         * When CurrentPlayer has bombed all enemies tiles Result.GameOver is returned 
+         * When Computer has won Result.ComputerWon is returned
+         * 
+         * If locationString is invalid Result.NoSuchTile is returned
+         * If location is already bombed Result.TileAlreadyBombed is returned
+         */
         public Result BombShip(string locationString)
         {
-            Tile targetTile;
-            while (true)
-            {
-                if (locationString.Equals("X")) return "";
-                targetTile = GetTile(locationString, TargetPlayer.Board);
-                if (targetTile == null) UI.Alert("Invalid location", 1000);
-                else if(targetTile.IsBombed) UI.Alert("Target already bombed", 1000);
-                else break;
-            }
+            Tile targetTile = GetTile(locationString, TargetPlayer.Board);
+            if (targetTile == null) return Result.NoSuchTile;
+            if(targetTile.IsBombed) return Result.TileAlreadyBombed;
+
             bool result = TargetPlayer.Board.BombLocation(targetTile.Row, targetTile.Col);
             BombingResult b = result ? BombingResult.Hit : BombingResult.Miss;
             GameMoves.Add(new GameMove(TargetPlayer, targetTile));
-            UI.DisplayBombingResult(b, TargetPlayer.Board, CurrentPlayer);
-            UI.Continue();
 
-            if (TargetPlayer.Board.AnyShipsLeft() == false)
-            {
-                UI.Alert($"Game over. {CurrentPlayer.Name} has won!", 0);
-                UI.Continue();
-                SaveFinishedGame();
-                return "Q";
-            }
+            if (TargetPlayer.Board.AnyShipsLeft() == false) return Result.GameOver;
             if (SelectedMode.Equals("MP"))
             {
-                Player temp = TargetPlayer;
-                TargetPlayer = CurrentPlayer;
-                CurrentPlayer = temp;
-                return "CHANGE NAME";
+                SwitchCurrentPlayer();
+                return Result.SuccessfulBombing;
             }
-            
+
             //Generating random bombing location for computer
             List<Tile> tiles = new List<Tile>();                
             CurrentPlayer.Board.Tiles.ForEach(row => row.ForEach(tile =>
@@ -92,103 +88,33 @@ namespace BLL
             bool computerResultbool = CurrentPlayer.Board.BombLocation(computerTarget.Row, computerTarget.Col);
             BombingResult computerResult = computerResultbool ? BombingResult.Hit : BombingResult.Miss;
             GameMoves.Add(new GameMove(CurrentPlayer, computerTarget));
-            UI.DisplayBombingResult(computerResult, CurrentPlayer.Board, TargetPlayer);
-            UI.Continue();
-            
-            if (CurrentPlayer.Board.AnyShipsLeft() == false)
-            {
-                UI.Alert($"Game over. {TargetPlayer.Name} has won!", 0);
-                UI.Continue();
-                SaveFinishedGame();
-                return "Q";
-            }
-            
-            return "";
+
+            if (CurrentPlayer.Board.AnyShipsLeft() == false) return Result.ComputerWon;
+            return Result.SuccessfulBombings;
         }
 
-        private Result SaveFinishedGame()
+        
+        /**
+         * Saves current game state to the database (player statuses, their boards, all game moves)
+         * Calls PreviousMenu() until there are no previous menus
+         * @param isFinished: select between finished and unfinished game save mode
+         * @param saveName: save game's name
+         * @param dbContext: Database connection class thingamajig 
+         */
+        public Result SaveGame(AppDbContext dbContext, string saveName, bool isFinished)
         {
-            string name = UI.GetSaveGameName();
-            while (Ctx.SaveGames.ToList().Any(game => game.Name.Equals(name)))
-            {
-                UI.Alert($"Enter a different name {name} is already taken.", 0);
-                name = UI.GetSaveGameName();
-            }
-
+            
             var saveGame = new SaveGame
             {
-                IsFinished = true,
+                IsFinished = isFinished,
                 Rules = Rules,
                 Player1 = Player1,
                 Player2 = Player2,
                 GameMoves = GameMoves,
-                Name = name
+                Name = saveName
             };
-            Ctx.SaveGames.Add(saveGame);
-            Ctx.SaveChanges();
-
-
-            Rules = Rules.GetDefaultRules();
-            CurrentPlayer = new Player(new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch), "Player 1" );
-            TargetPlayer = new Player(new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch), "Player 2" );
-            Player1 = CurrentPlayer;
-            Player2 = TargetPlayer;
-            GameMoves = new List<GameMove>();
-        }
-
-        private void PostAction(Menu menu, string postActionCommand)
-        {
-            //Changes menu's title
-            if (postActionCommand.Equals("CHANGE NAME"))
-            {
-                String namedTitle = menu.TitleWithName;
-                menu.Title = namedTitle.Replace("PLAYER_NAME", CurrentPlayer.Name);
-            }
-            //Highlights spot on board
-            else if (postActionCommand.Contains("HIGHLIGHT_START"))
-            {
-                
-            } 
-            else if (postActionCommand.Contains("HIGHLIGHT_END"))
-            {
-                if (CurrentPlayer.Board.HighLightedEnd != null)
-                    CurrentPlayer.Board.HighLightedEnd.IsHighlightedEnd = false;
-                string stringRow = "", stringCol = "", tile = postActionCommand.Replace("HIGHLIGHT_END:", "");
-                foreach (var c in tile)
-                {
-                    if (stringCol.Length == 0 && Char.IsLetter(c)) stringRow += c;
-                    else if (stringRow.Length > 0 && char.IsDigit(c)) stringCol += c;
-                    else throw new ArgumentException("Invalid location");
-                }
-                int row = _converter.GetNumberFromLetters(stringRow) - 1, col = int.Parse(stringCol) - 1;
-                CurrentPlayer.Board.Tiles[row][col].IsHighlightedEnd = true;
-                CurrentPlayer.Board.HighLightedEnd = CurrentPlayer.Board.Tiles[row][col];
-            }
-        }
-
-        public Result SaveGame(string userInput)
-        {
-            string name = UI.GetSaveGameName();
-            if (name.ToUpper().Equals("X")) return "";
-            
-            while (Ctx.SaveGames.ToList().Any(game => game.Name.Equals(name)))
-            {
-                UI.Alert($"Enter a different name {name} is already taken.", 0);
-                name = UI.GetSaveGameName();
-                if (name.ToUpper().Equals("X")) return "";
-            }
-
-            var saveGame = new SaveGame
-            {
-                IsFinished = false,
-                Rules = Rules,
-                Player1 = Player1,
-                Player2 = Player2,
-                GameMoves = GameMoves,
-                Name = name
-            };
-            Ctx.SaveGames.Add(saveGame);
-            Ctx.SaveChanges();
+            dbContext.SaveGames.Add(saveGame);
+            dbContext.SaveChanges();
 
 
             Rules = Rules.GetDefaultRules();
@@ -197,9 +123,19 @@ namespace BLL
             Player1 = CurrentPlayer;
             Player2 = TargetPlayer;
             GameMoves = new List<GameMove>();
-            return "Q";
+            
+            while (PreviousMenu() != Result.NoPreviousMenuFound)
+            {
+                //Calls previousMenu until reaches bottom of the stack i.e, main menu
+            }
+
+            return Result.GameSaved;
         }
 
+        /**
+         * Adds a ship to current rules
+         * @param userInput: 
+         */
         public Result AddShipToRules(string userInput)
         {
             while (true)
@@ -485,27 +421,6 @@ namespace BLL
             return CurrentPlayer.IsReady && TargetPlayer.IsReady;
         }
 
-        public string DisplayShipsAndBombings()
-        {
-            UI.DisplayShipsAndBombings(TargetPlayer.Board, CurrentPlayer.Board);
-            return "";
-        }
-
-        public void DisplayRulesShips()
-        {
-            UI.DisplayRulesShips(Rules);
-        }
-
-        public void DisplayBoardRules()
-        {
-            UI.DisplayBoardRules(Rules);
-        }
-
-        public void DisplayCurrentShipsRegular()
-        {
-            UI.DisplayCurrentShips(CurrentPlayer.Board, "REGULAR");
-        }
-
         public Result GetTileOfDeleteableShip(string userInput)
         {
             if (CurrentPlayer.Board.HighlightedStart != null)
@@ -526,21 +441,6 @@ namespace BLL
             return "";
         }
 
-        public void DisplayCurrentRuleset()
-        {
-            UI.DisplayCurrentRules(Rules);
-        }
-
-        public void DisplayCurrentAndAvailableShips()
-        {
-            UI.DisplayCurrentShips(CurrentPlayer.Board, "ADDING");
-            
-            Dictionary<int, int>  ships = new Dictionary<int, int>();
-            Rules.BoatRules.ForEach(rule => ships.Add(rule.Size, rule.Quantity));
-            CurrentPlayer.Board.Battleships.ForEach(battleship => ships[battleship.Size]--);
-            
-            UI.DisplayAvailableShips(ships.ToList());
-        }
 
         public Result GetShipStartTile(string userInput)
         {
@@ -654,7 +554,15 @@ namespace BLL
             UI.Alert(message, waitTime);
         }
 
-        public string LoadGame()
+        public List<SaveGame> GetSaveGames(AppDbContext ctx, bool isFinished)
+        {
+            return ctx.SaveGames
+                .Where(game => game.IsFinished == isFinished)
+                .OrderBy(game => game.SaveGameId)
+                .ToList();
+        }
+
+        public Result LoadGame(AppDbContext dbContext)
         {
             
             UI.DisplaySavedGames(Ctx.SaveGames.Where(game => game.IsFinished == false).OrderBy(game => game.SaveGameId).ToList());
@@ -966,9 +874,11 @@ namespace BLL
             player.Board.Tiles = boardTiles;
         }
 
+        /**
+         * Rules, Players, And GameMoves are reset to their default values.
+         */
         public void ResetAll()
         {
-            Ctx = new NewDbContext();
             Rules = Rules.GetDefaultRules();
             CurrentPlayer = new Player(new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch ), "Player 1" );
             TargetPlayer = new Player(new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch ), "Player 2" );
@@ -977,11 +887,29 @@ namespace BLL
             GameMoves = new List<GameMove>();
         }
 
+        /**
+         * Current menu is pushed to the MenuStack and then new menu is marked as current menu 
+         */
         public Result ChangeMenu(Menu menu)
         {
-            //TODO: add current menu to stack
+            MenuStack.Push(CurrentMenu);
             CurrentMenu = menu;
             return Result.ChangedMenu;
+        }
+        
+        /**
+         * Changes current menu to the previous one.
+         * Last menu is kept in MenuStack object on the top of the stack
+         */
+        public Result PreviousMenu()
+        {
+            if (MenuStack.Count == 0)
+            {
+                return Result.NoPreviousMenuFound;
+            }
+
+            CurrentMenu = MenuStack.Pop();
+            return Result.ReturnToPreviousMenu;
         }
     }
 }
