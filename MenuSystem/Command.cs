@@ -2,9 +2,9 @@ namespace MenuSystem
 {
     public enum Command
     {
-        Previous,
-        BombLocation,
-        None,
+        Previous,                //Call Game.Previous()
+        BombLocation,            //Call Game.BombLocation()
+        None,                    //Just continue
         SaveUnfinishedGame,
         EditShipInRules,
         AddShipToRules,
@@ -20,10 +20,10 @@ namespace MenuSystem
         GetTileOfDeleteableShip,
         DeleteShipFromBoard,
         ChangePlayersName,
-        PlayerNotReady,
         FillReplayMenu,
         FillLoadMenu,
         LoadGame,
-        ReplayGame
+        ReplayGame,
+        CantStartGame
     }
 }

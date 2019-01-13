@@ -4,6 +4,7 @@ using System.Linq;
 using DAL;
 using Domain;
 using MenuSystem;
+using Microsoft.EntityFrameworkCore;
 
 namespace BLL
 {
@@ -57,23 +58,23 @@ namespace BLL
          * When Computer has won Result.ComputerWon is returned
          *
          * @param locationString: a string to be parsed into a Tile object. Format example: "B7"
-         * @returns Result: enum Result of the method call 
+         *                      If tile can't be pares then Result.NoSuchTile is returned
+         * @returns Result: enum Result of the method call (NoSuchTile, TileAlreadyBombed, GameOver, ComputerWon, SuccessfulBombing)
          */
-        public Result BombShip(string locationString)
+        public Result BombLocation(string locationString)
         {
             Tile targetTile = GetTile(locationString, TargetPlayer.Board);
             if (targetTile == null) return Result.NoSuchTile;
             if(targetTile.IsBombed) return Result.TileAlreadyBombed;
 
-            bool result = TargetPlayer.Board.BombLocation(targetTile.Row, targetTile.Col);
-            BombingResult b = result ? BombingResult.Hit : BombingResult.Miss;
+            var isHit = TargetPlayer.Board.BombLocation(targetTile.Row, targetTile.Col);
             GameMoves.Add(new GameMove(TargetPlayer, targetTile));
 
             if (TargetPlayer.Board.AnyShipsLeft() == false) return Result.GameOver;
             if (SelectedMode.Equals("MP"))
             {
                 SwitchCurrentPlayer();
-                return Result.SuccessfulBombing;
+                return Result.OneBombing;
             }
 
             //Generating random bombing location for computer
@@ -90,19 +91,20 @@ namespace BLL
             GameMoves.Add(new GameMove(CurrentPlayer, computerTarget));
 
             if (CurrentPlayer.Board.AnyShipsLeft() == false) return Result.ComputerWon;
-            return Result.SuccessfulBombings;
+            return Result.TwoBombings;
         }
 
         
         /**
          * Saves current game state to the database (player statuses, their boards, all game moves)
-         * Calls PreviousMenu() until there are no previous menus
+         * Calls PreviousMenu() until there are no previous menus (Goes back to main)
+         * 
          * @param isFinished: select between finished and unfinished game save mode
          * @param saveName: save game's name
          * @param dbContext: Database connection class thingamajig
          * @returns Result: enum Result of the method call 
          */
-        public Result SaveGame(AppDbContext dbContext, string saveName, bool isFinished)
+        public void SaveGame(AppDbContext dbContext, string saveName, bool isFinished)
         {
             
             var saveGame = new SaveGame
@@ -129,8 +131,6 @@ namespace BLL
             {
                 //Calls previousMenu until reaches bottom of the stack i.e, main menu
             }
-
-            return Result.GameSaved;
         }
 
         /**
@@ -152,7 +152,7 @@ namespace BLL
                 if(rule.Size < boatRule.Size) return -1;
                 return 0;
             });
-            return Result.ShipRuleAdded;
+            return Result.RulesChanged;
 
         }
 
@@ -173,7 +173,7 @@ namespace BLL
      
             CurrentPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
             TargetPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
-            return Result.ShipRuleEdited;
+            return Result.RulesChanged;
         }
 
         /**
@@ -191,7 +191,7 @@ namespace BLL
             CurrentPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
             TargetPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
 
-            return Result.ShipRuleDeleted;
+            return Result.RulesChanged;
         }
 
         /**
@@ -212,7 +212,7 @@ namespace BLL
                 Rules.CanShipsTouch = userInput.Equals("YES") ? 1 : 0;
                 CurrentPlayer.Board = new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch);
                 TargetPlayer.Board = new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch);
-                return Result.ShipsTouchRuleChanged;
+                return Result.RulesChanged;
             }
 
             return Result.None;
@@ -234,7 +234,7 @@ namespace BLL
             CurrentPlayer.Board = new Board(newHeight, Rules.BoardCols, Rules.CanShipsTouch);
             TargetPlayer.Board = new Board(newHeight, Rules.BoardCols, Rules.CanShipsTouch);
             Rules.BoardRows = newHeight;
-            return Result.BoardHeightChnaged;
+            return Result.RulesChanged;
             
         }
 
@@ -253,7 +253,7 @@ namespace BLL
             CurrentPlayer.Board = new Board(Rules.BoardRows, newWidth, Rules.CanShipsTouch);
             TargetPlayer.Board = new Board(Rules.BoardRows, newWidth, Rules.CanShipsTouch);
             Rules.BoardCols = newWidth;
-            return Result.BoardWidthChnaged;
+            return Result.RulesChanged;
         }
 
         /**
@@ -266,89 +266,98 @@ namespace BLL
         {
             if (newRulesetName.ToUpper().Equals("STANDARD RULES")) return Result.InvalidInput;
             Rules.Name = newRulesetName;
-            return Result.RulesNameChanged;
+            return Result.RulesChanged;
         }
 
-        public Result SetStandardRules(string userInput)
+        /**
+         * Changes current ruleset to Default rules (obtained from a static Rules class method).
+         *
+         * @returns Result: enum Result of the method call
+         */
+        public Result SetStandardRules()
         {
             Rules = Rules.GetDefaultRules();
-            UI.Alert("Standard rules set", 500);
-            return "";
+            return Result.RulesChanged;
         }
 
-        public Result PlaceShipOnBoard(string userInput)
+        
+        /**
+         * Places ship on current player's board, using highlighted tiles assigned previously.
+         * Will not place if:
+         * 1) both end and start tiles are not highlighted
+         * 2) end and start tiles do not share a common axis
+         * 3) ship size does not exist in rules
+         * 4) all determined sized ships have been placed
+         * 5) overlaps other ships/ violates can touch rules (this is checked in Board.AddBattleship() method)
+         *
+         * @returns Result: enum Result of the method call
+         */
+        public Result PlaceShipOnBoard()
         {
             //Key size, Value Quantity;
             Dictionary<int, int>  boats = new Dictionary<int, int>();
-            Rules.BoatRules.ForEach(rule => boats.Add(rule.Size, rule.Quantity));
-            CurrentPlayer.Board.Battleships.ForEach(battleship => boats[battleship.Size]--);
+            Rules.BoatRules.ForEach(rule => boats.Add(rule.Size, rule.Quantity));              //Add rules to dict
+            CurrentPlayer.Board.Battleships.ForEach(battleship => boats[battleship.Size]--);   //Reduce count with placed ships 
             Tile start = CurrentPlayer.Board.HighlightedStart, end = CurrentPlayer.Board.HighLightedEnd;
-            if (start == null || end == null)
-            {
-                UI.Alert("Start and End not specified", 1000);
-                return "";
-            }
-
+            
+            if (start == null || end == null) return Result.ShipNotPlaced;
             bool hasCommonAxis = start.Row - end.Row == 0 || start.Col - end.Col == 0;
-            if (!hasCommonAxis)
-            {
-                UI.Alert("Cant place ship. Start and end tile must have one common axis", 4000);
-                return "";
-            }
+            if (!hasCommonAxis) return Result.ShipNotPlaced;
 
             var length = start.Row - end.Row == 0 ? Math.Abs(start.Col - end.Col) + 1: Math.Abs(start.Row - end.Row) + 1;
-            if (!boats.ContainsKey(length))
-            {
-                UI.Alert($"size {length} ship is not allowed.", 2000);
-                return "";
-            }
-            if (boats[length] <= 0)
-            {
-                UI.Alert($"You can't place more size {length} ships", 2000);
-                return "";
-            }
+
+            if (!boats.ContainsKey(length)) return Result.ShipNotPlaced;
+            if (boats[length] <= 0) return Result.ShipNotPlaced;
 
             try
             {
                 CurrentPlayer.Board.AddBattleship((start.Row, start.Col), (end.Row, end.Col), new Battleship(length));
-                start.IsHighlightedStart = false;
-                end.IsHighlightedEnd = false;
-                CurrentPlayer.Board.HighLightedEnd = null;
-                CurrentPlayer.Board.HighlightedStart = null;
-                return "";
+                ResetHighlightedTiles();
+                return Result.ShipPlaced;
             }
             catch (Exception e)
             {
-                UI.Alert(e.Message, 5000);
-                return "";
+                return Result.ShipNotPlaced;
             }
         }
-
+        
+        /**
+         * Deletes a ship from the board using Highlighted start tile
+         *
+         * @returns Result: enum Result of the method call  
+         */
         public Result DeleteShipFromBoard(string userInput)
         {
             Tile deletable = CurrentPlayer.Board.HighlightedStart;
-            if (deletable == null)
-            {
-                UI.Alert("Tile of occupying ship not specified", 1500);
-                return "";
-            }
-
-            if (deletable.IsEmpty())
-            {
-                UI.Alert("Selected tile does not contain a ship", 1000);
-                return "";
-            }
+            
+            if (deletable == null) return Result.ShipNotDeleted;
+            if (deletable.IsEmpty()) return Result.ShipNotDeleted;
+            
             CurrentPlayer.Board.DeleteShipFromBoard(deletable);
-            deletable.IsHighlightedStart = false;
-            return "";
+            ResetHighlightedTiles();
+            return Result.ShipDeleted;
         }
 
-        public Result ChangePlayersName(string userInput)
+        /**
+         * Changes current players name
+         * Has to be case sensitively different from other player's name
+         * Can't be "Computer"
+         * 
+         * @param name: new name for the player
+         * @returns Result: enum Result of the method call  
+         */
+        public Result ChangePlayersName(string name)
         {
-            CurrentPlayer.Name = UI.GetString("Enter your name");
-            return "CHANGE NAME";
+            if (TargetPlayer.Name.Equals(name)) return Result.PlayerNameNotChanged;
+            if (name.Equals("Computer")) return Result.PlayerNameNotChanged;
+            
+            CurrentPlayer.Name = name;
+            return Result.PlayerNameChanged;
         }
 
+        /**
+         * Switches current player  
+         */
         public void SwitchCurrentPlayer()
         {
             Player temp = CurrentPlayer;
@@ -356,79 +365,103 @@ namespace BLL
             TargetPlayer = temp;
         }
 
+        /**
+         * Checks whether all requirements are met to start the game
+         * 1) both players have placed all their ships
+         * 2.1) Multiplayer: both player's property Player.IsReady is true
+         * 2.2) Singleplayer: current player's Player.IsReady property is true
+         * 
+         *
+         * @returns bool: true if all conditions are met, 
+         */
         public bool CheckIfCanStartGame()
         {
-            if (SelectedMode == null)
-            {
-                UI.Alert("Game mode is not selected", 1000);
-                return false;
-            }
+            if (SelectedMode == null) return false;
             
-            Dictionary<int, int>  ships = new Dictionary<int, int>();
-            Rules.BoatRules.ForEach(rule => ships.Add(rule.Size, rule.Quantity));
-            CurrentPlayer.Board.Battleships.ForEach(battleship => ships[battleship.Size]--);
-            if (ships.Any(pair => pair.Value > 0))
-            {
-                UI.Alert($"All {CurrentPlayer.Name}'s ships have not been placed", 1000);
-                return false;
-            }
+            Dictionary<int,int> ships = AvailableShips(CurrentPlayer);
+            if (ships.Any(pair => pair.Value > 0)) return false; // all current player's ships haven't been placed
             
-            ships = new Dictionary<int, int>();
-            Rules.BoatRules.ForEach(rule => ships.Add(rule.Size, rule.Quantity));
-            TargetPlayer.Board.Battleships.ForEach(battleship => ships[battleship.Size]--);
-            if (ships.Any(pair => pair.Value > 0))
-            {
-                UI.Alert($"All {TargetPlayer.Name}'s ships have not been placed", 1000);
-                return false;
-            }
+            ships = AvailableShips(TargetPlayer);
+            if (ships.Any(pair => pair.Value > 0)) return false; // all target player's ships haven't been placed
 
-            if (SelectedMode.Equals("SP")) return CurrentPlayer.IsReady;
-            return CurrentPlayer.IsReady && TargetPlayer.IsReady;
+            if (SelectedMode.Equals("SP")) return CurrentPlayer.IsReady; // SP: true if current player is ready
+            return CurrentPlayer.IsReady && TargetPlayer.IsReady;        // MP: true if both players are read
         }
 
-        public Result GetTileOfDeleteableShip(string userInput)
+        /**
+         * Highlights a tile, where a desired deletable ship is located
+         * Has to contain a ship
+         *
+         * @param locationString: a string to be parsed into a Tile object. Format example: "B7"
+         *                      If tile can't be pares then Result.NoSuchTile is returned
+         * @returns Result: enum Result of the method call 
+         */
+        public Result GetTileOfDeleteableShip(string locationString)
         {
-            if (CurrentPlayer.Board.HighlightedStart != null)
+            if (CurrentPlayer.Board.HighlightedStart != null) // resets current highlight if there is one
                 CurrentPlayer.Board.HighlightedStart.IsHighlightedStart = false;
-            Tile startTile;
-            while (true)
-            {
-                string userInput = UI.GetDeletableShipTile().ToUpper();
-                if (userInput.Equals("X")) return "";
-                startTile = GetTile(userInput, CurrentPlayer.Board);
-                if (startTile == null) UI.Alert("Invalid location", 0);
-                else if (startTile.IsEmpty()) UI.Alert("Tile doesn't contain a ship", 0);
-                else break;
-            }
-
+            
+            Tile startTile = GetTile(locationString, CurrentPlayer.Board);
+            
+            if (startTile == null) return Result.NoSuchTile;
+            if (startTile.IsEmpty()) return Result.TileNotHighlighted;
+        
             startTile.IsHighlightedStart = true;
             CurrentPlayer.Board.HighlightedStart = startTile;
-            return "";
+            return Result.TileHighlighted;
         }
 
-
-        public Result GetShipStartTile(string userInput)
+        /**
+         * Highlights a tile, where a new battleships start point should reside.
+         * Tile has to be empty
+         *
+         * @param locationString: a string to be parsed into a Tile object. Format example: "B7"
+         *                      If tile can't be pares then Result.NoSuchTile is returned
+         * @returns Result: enum Result of the method call 
+         */
+        public Result GetShipStartTile(string locationString)
         {
-            if (CurrentPlayer.Board.HighlightedStart != null)
+            if (CurrentPlayer.Board.HighlightedStart != null)    // resets current highlight if there is one
                 CurrentPlayer.Board.HighlightedStart.IsHighlightedStart = false;
-            Tile startTile;
-            while (true)
-            {
-                DisplayCurrentAndAvailableShips();
-                string userInput = UI.GetShipStartPoint(CurrentPlayer.Board, AvailableShipsList(CurrentPlayer).ToList()).ToUpper();
-                if (userInput.Equals("X")) return "";
-                startTile = GetTile(userInput, CurrentPlayer.Board);
-                if (startTile == null) UI.Alert("Invalid location", 0);
-                else if (startTile.IsEmpty() == false) UI.Alert("This tile already contains a ship", 0);
-                else break;
-            }
-
+            Tile startTile = GetTile(locationString, CurrentPlayer.Board);
+            
+            if (startTile == null) return Result.NoSuchTile;
+            if (startTile.IsEmpty() == false) return Result.TileNotHighlighted;
+            
             startTile.IsHighlightedStart = true;
             CurrentPlayer.Board.HighlightedStart = startTile;
-            return "";
+            return Result.TileHighlighted;
+        }
+        
+        /**
+         * Highlights a tile on current players board, where a new battleships end point should reside.
+         * Tile has to be empty
+         *
+         * @param locationString: a string to be parsed into a Tile object. Format example: "B7"
+         *                      If tile can't be pares then Result.NoSuchTile is returned
+         * @returns Result: enum Result of the method call 
+         */
+        public Result GetShipEndTile(string locationString)
+        {
+            if (CurrentPlayer.Board.HighLightedEnd != null)    // resets current highlight if there is one
+                CurrentPlayer.Board.HighLightedEnd.IsHighlightedEnd = false;
+            Tile endTile = GetTile(locationString, CurrentPlayer.Board);
+            
+            if (endTile == null) return Result.NoSuchTile;
+            if (endTile.IsEmpty() == false) return Result.TileNotHighlighted;
+            
+            endTile.IsHighlightedEnd = true;
+            CurrentPlayer.Board.HighLightedEnd = endTile;
+            return Result.TileHighlighted;
         }
 
-        private Dictionary<int, int> AvailableShipsList(Player player)
+        /**
+         * Returns a dictionary of a specified player's available ships
+         * Key: ship size (int)
+         * Value: available ships quantity(int)
+         * @param player: Desired players Player object
+         */
+        public Dictionary<int, int> AvailableShips(Player player)
         {
             Dictionary<int, int>  availableShips = new Dictionary<int, int>();
             Rules.BoatRules.ForEach(rule => availableShips.Add(rule.Size, rule.Quantity));
@@ -436,10 +469,17 @@ namespace BLL
             return availableShips;
         }
 
+        /**
+         * Pares a locationString to get a Tile from the specified board
+         *
+         * @param location: string to be parsed. Format example: "B7"
+         * @param board: Board object where the tile will be searched from
+         * @returns Tile: if string is successfully parsed returns a Tile object, otherwise returns a null
+         */
         private Tile GetTile(string location, Board board)
         {
             string stringRow = "", stringCol = "";
-            foreach (var c in location)
+            foreach (var c in location)    //separates column and row parts in location
             {
                 if (stringCol.Length == 0 && Char.IsLetter(c)) stringRow += c;
                 else if (stringRow.Length > 0 && char.IsDigit(c)) stringCol += c;
@@ -449,51 +489,36 @@ namespace BLL
                 }
             }
 
-            try
+            try // tries to convert row int from row string(i.e "B"). Returns tile if successful
             {
                 int row = _converter.GetNumberFromLetters(stringRow) - 1, col = int.Parse(stringCol) - 1;
                 return board.Tiles[row]?[col];
             }
-            catch (IndexOutOfRangeException e)
-            {
-                return null;
-            }
-            catch (ArgumentException e)
-            {
-                return null;
-            }
-            catch (FormatException e)
-            {
-                return null;
-            }
+            catch (IndexOutOfRangeException e) {return null;}
+            catch (ArgumentException e)        {return null;}
+            catch (FormatException e)          {return null;}
         }
 
-        public Result GetShipEndTile(string userInput)
-        {
-            if (CurrentPlayer.Board.HighLightedEnd != null)
-                CurrentPlayer.Board.HighLightedEnd.IsHighlightedEnd = false;
-            Tile endTile;
-            while (true)
-            {
-                string userInput = UI.GetShipEndPoint(CurrentPlayer.Board, AvailableShipsList(CurrentPlayer).ToList()).ToUpper();
-                if (userInput.Equals("X")) return "";
-
-                endTile = GetTile(userInput, CurrentPlayer.Board);
-                if (endTile == null) UI.Alert("Invalid location", 0);
-                else if(endTile.IsEmpty() == false) UI.Alert("This tile already contains a ship", 0);
-                else break;
-            }
-            
-            endTile.IsHighlightedEnd = true;
-            CurrentPlayer.Board.HighLightedEnd = endTile;
-            return "";
-        }
-
-        public void SetPlayerNotReady() //Current player.ready = true vms
+        /**
+         * Current player's IsReady parameter is set to false
+         */
+        public void SetCurrentPlayerNotReady()
         {
             CurrentPlayer.IsReady = false;
         }
 
+        /**
+         * Current player's IsReady parameter is set to true
+         */
+        public void SetCurrentPlayerReady()
+        {
+            CurrentPlayer.IsReady = true;
+        }
+        
+        /**
+         * Sets gameMode
+         * @param modeName: a string which has to be either "SP"(singleplayer) or "MP"(multiplayer)
+         */
         public void SetSelectedMode(string modeName)
         {
             switch (modeName)
@@ -505,83 +530,66 @@ namespace BLL
                         SelectedMode = "SP";
                         break;
                     default:
-                        throw new Exception("Unknown exception at Game.SetSelectedMode");
+                        throw new Exception("Unknown modeName: " + modeName);
             }
         }
-
-        public void SetPlayerReady()
+        
+        /**
+         * Returns a list of saved games
+         *
+         * @param dbContext: AppDbContext object for database connection and data
+         * @param isFinished: changes whether returned save games are in finished state or not
+         * @returns List<SaveGame>: list of SaveGame objects
+         */
+        public List<SaveGame> GetSaveGames(AppDbContext dbContext, bool isFinished)
         {
-            CurrentPlayer.IsReady = true;
-        }
-
-        public void Alert(string message, int waitTime)
-        {
-            UI.Alert(message, waitTime);
-        }
-
-        public List<SaveGame> GetSaveGames(AppDbContext ctx, bool isFinished)
-        {
-            return ctx.SaveGames
+            return dbContext.SaveGames
                 .Where(game => game.IsFinished == isFinished)
                 .OrderBy(game => game.SaveGameId)
                 .ToList();
         }
 
-        public Result LoadGame(AppDbContext dbContext)
+        /**
+         * Changes current Game properties to align with the saved games properties (gamestate)
+         *
+         * @param dbContext: AppDbContext object for database connection and data
+         * @param saveGameId: loadable save game's id (can be received from selecting one from GetSaveGames() method)
+         * @returns Result: enum Result of the method call (NoSuchSaveGameId, GameParametersLoaded) 
+         */
+        public Result LoadGame(AppDbContext dbContext, int saveGameId)
         {
-            
-            UI.DisplaySavedGames(Ctx.SaveGames.Where(game => game.IsFinished == false).OrderBy(game => game.SaveGameId).ToList());
-            int num;
-            while (true)
-            {
-                string saveGameNumber = UI.GetString("Enter saved game number or Q to go back");
+            bool isIdPresent = dbContext.SaveGames
+                .Where(game => game.IsFinished == false).ToList()
+                .Any(game => game.SaveGameId == saveGameId);
+            if (isIdPresent == false) return Result.NoSuchSaveGameId;
 
-                if (saveGameNumber.ToUpper().Equals("Q")) return "Q";
-                if (!int.TryParse(saveGameNumber, out num))
-                {
-                    UI.Alert("Not a number", 0);
-                    continue;
-                }
-                
-                bool isIdPresent = Ctx.SaveGames
-                    .Where(game => game.IsFinished == false).ToList()
-                    .Any(game => game.SaveGameId == num);
-
-                if (int.Parse(saveGameNumber) <= 0 || isIdPresent == false)
-                {
-                    UI.Alert("No such save game number", 0);
-                    continue;
-                }
-                break;
-            }
-
-
-            SaveGame s = Ctx.SaveGames
+            SaveGame save = dbContext.SaveGames
                 .Include(saveGame => saveGame.Rules)
-                .ThenInclude(rules => rules.BoatRules)
+                    .ThenInclude(rules => rules.BoatRules)
                 .Include(saveGame => saveGame.Player1)
-                .ThenInclude(player => player.Board)
+                    .ThenInclude(player => player.Board)
                 .Include(saveGame => saveGame.Player2)
-                .ThenInclude(player => player.Board)
+                    .ThenInclude(player => player.Board)
                 .Include(saveGame => saveGame.GameMoves)
-                .First(saveGame => saveGame.SaveGameId == num);
+                .First(saveGame => saveGame.SaveGameId == saveGameId);
             
-
-            var tempRules = s.Rules;
-            var tempPlayer1 = s.Player1;
-            var tempPlayer2 = s.Player2;
+            //cloning is used to preserve database save entries
+            var tempRules = save.Rules;
+            var tempPlayer1 = save.Player1;
+            var tempPlayer2 = save.Player2;
             Rules = (Rules) tempRules.Clone();
-            RestorePlayerBoardTiles(tempPlayer1, s);
-            RestorePlayerBoardTiles(tempPlayer2, s);
+            RestorePlayerBoardTiles(tempPlayer1, save, dbContext); // clones tiles into player's boards
+            RestorePlayerBoardTiles(tempPlayer2, save, dbContext);
 
-            var tempGameMoves = s.GameMoves;
+            var tempGameMoves = save.GameMoves;
             Player1 = (Player) tempPlayer1.Clone();
             Player2 = (Player) tempPlayer2.Clone();
             
             GameMoves = new List<GameMove>();
+            //clones gameMoves parameter
             tempGameMoves.ForEach(move =>
             {
-                var targetPlayer = Player1.Name == move.Target.Name ? Player1 : Player2; //TODO: use better solution than name comparison
+                var targetPlayer = Player1.Name == move.Target.Name ? Player1 : Player2;
                 var targetTile = targetPlayer.Board.Tiles[move.Tile.Row][move.Tile.Col];
                 GameMoves.Add(new GameMove(targetPlayer, targetTile));
             });
@@ -598,76 +606,45 @@ namespace BLL
                 CurrentPlayer = GameMoves[GameMoves.Count - 1].Target;
                 TargetPlayer = CurrentPlayer == Player1 ? Player2 : Player1;
             }
-            
-            
-            
-            
 
-//            (string name, int gameMoves, int player1, int player2, int rules) totalGame =
-//                _appDbContext.TotalGameOld[num - 1];
-//            Player1 = _appDbContext.PlayersOld[totalGame.player1];
-//            Player2 = _appDbContext.PlayersOld[totalGame.player2];
-//            Rules = _appDbContext.RulesOld[totalGame.rules];
-//            GameMoves = _appDbContext.GameMovesOld[totalGame.gameMoves];
-//            if (GameMoves.Count == 0)
-//            {
-//                TargetPlayer = Player2;
-//                CurrentPlayer = Player1;
-//            }
-//            else
-//            {
-//                CurrentPlayer = GameMoves[GameMoves.Count - 1].Target;
-//                TargetPlayer = CurrentPlayer == Player1 ? Player2 : Player1;
-//            }
-
-            return "";
+            return Result.GameParametersLoaded;
         }
-
-        public string ReplayGame()
+        
+        /**
+         * Changes current Game properties to align with the saved games properties (gamestate)
+         * Bombed ships and tiles are reset to their state before the game
+         * IMPORTANT! When looping through GameMoves, BombLocationReplay should be used!
+         *
+         * @param dbContext: AppDbContext object for database connection and data
+         * @param saveGameId: loadable save game's id (can be received from selecting one from GetSaveGames() method)
+         * @returns Result: enum Result of the method call (NoSuchSaveGameId, GameParametersLoaded) 
+         */
+        public Result ReplayGame(AppDbContext dbContext, int saveGameId)
         {
-            UI.DisplaySavedGames(Ctx.SaveGames.Where(game => game.IsFinished).OrderBy(game => game.SaveGameId).ToList());
-
-            int num;
-            while (true)
-            {
-                string saveGameNumber = UI.GetString("Enter saved game number or Q to go back");
-
-                if (saveGameNumber.ToUpper().Equals("Q")) return "Q";
-                if (!int.TryParse(saveGameNumber, out num))
-                {
-                    UI.Alert("Not a number", 0);
-                    continue;
-                }
-
-                bool isIdPresent = Ctx.SaveGames
-                    .Where(game => game.IsFinished).ToList()
-                    .Any(game => game.SaveGameId == num);
-                
-                if (int.Parse(saveGameNumber) <= 0 || isIdPresent == false)
-                {
-                    UI.Alert("No such save game number", 0);
-                    continue;
-                }
-                break;
-            }
             
-            SaveGame s = Ctx.SaveGames
+            bool isIdPresent = dbContext.SaveGames
+                .Where(game => game.IsFinished).ToList()
+                .Any(game => game.SaveGameId == saveGameId);
+
+            if (isIdPresent == false) return Result.NoSuchSaveGameId;
+            
+            SaveGame s = dbContext.SaveGames
                 .Include(saveGame => saveGame.Rules)
-                .ThenInclude(rules => rules.BoatRules)
+                    .ThenInclude(rules => rules.BoatRules)
                 .Include(saveGame => saveGame.Player1)
-                .ThenInclude(player => player.Board)
+                    .ThenInclude(player => player.Board)
                 .Include(saveGame => saveGame.Player2)
-                .ThenInclude(player => player.Board)
+                    .ThenInclude(player => player.Board)
                 .Include(saveGame => saveGame.GameMoves)
-                .First(saveGame => saveGame.SaveGameId == num);
+                .First(saveGame => saveGame.SaveGameId == saveGameId);
             
-
+            //cloning is used to preserve database save entries
             var tempRules = s.Rules;
             var tempPlayer1 = s.Player1;
             var tempPlayer2 = s.Player2;
             Rules = (Rules) tempRules.Clone();
-            RestorePlayerBoardTiles(tempPlayer1, s);
-            RestorePlayerBoardTiles(tempPlayer2, s);
+            RestorePlayerBoardTiles(tempPlayer1, s, dbContext); // clones tiles into player's boards
+            RestorePlayerBoardTiles(tempPlayer2, s, dbContext);
 
             var tempGameMoves = s.GameMoves;
             Player1 = (Player) tempPlayer1.Clone();
@@ -681,29 +658,36 @@ namespace BLL
                 GameMoves.Add(new GameMove(targetPlayer, targetTile));
             });
             
-            GameMoves.ForEach(move => move.Target.Board.UnBomb(move.Tile));
-            Player lastMoveBy = Player1;
-            GameMoves.ForEach(move =>
-            {
-                Tile targetTile = move.Tile;
-                bool result = move.Target.Board.BombLocation(targetTile.Row, targetTile.Col);
-                BombingResult b = result ? BombingResult.Hit : BombingResult.Miss;
-                UI.DisplayBombingResult(b, move.Target.Board, Player1 == move.Target ? Player2 : Player1);
-                UI.Alert($"{move.Target.Name} is bombed at {_converter.GetLetter(move.Tile.Row + 1)}:{move.Tile.Col + 1} and it's a {(b == BombingResult.Hit ? "Hit" : "Miss")}", 0);
-                UI.Continue();
-                lastMoveBy = move.Target == Player1 ? Player2 : Player1;
-            });
-            UI.Alert($"{lastMoveBy.Name} has won the game!", 0);
-            UI.Continue();
+            GameMoves.ForEach(move => move.Target.Board.UnBomb(move.Tile)); // removes bombed tag and restore lives for ship
+            CurrentPlayer = Player1;                                        // Game moves are preserved
+            TargetPlayer = Player2;
             
-            ResetAll();
-            return "";
+            return Result.ReplayReadySaveLoaded;
+        }
+        
+        /**
+         * Bombs a ship location doesn't update GameMoves list.
+         * Upon bombing either Result.GameOver is returned
+         * Or CurrentPlayer is switched and returns SuccessfulReplayBombing
+         * @param locationString: locationString to be parsed into a Tile on a board (Example "B7")
+         */
+        public Result BombShipReplay(string locationString)
+        {
+            Tile targetTile = GetTile(locationString, TargetPlayer.Board);
+            if (targetTile == null) return Result.NoSuchTile;
+            if (targetTile.IsBombed) return Result.TileAlreadyBombed;
+
+            TargetPlayer.Board.BombLocation(targetTile.Row, targetTile.Col);
+            
+            if (TargetPlayer.Board.AnyShipsLeft() == false) return Result.GameOver;
+            
+            SwitchCurrentPlayer();
+            return Result.SuccessfulReplayBombing;
         }
 
-//        public void ChangeMenuTitle(MenuEnum menuEnum)
-//        {
-//            throw new NotImplementedException();
-//        }
+        /**
+         * Game properties are reset
+         */
         public void NewGame()
         {
             Board board1 = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch),
@@ -712,13 +696,13 @@ namespace BLL
             Player2 = new Player(board2, "Player 2");
             CurrentPlayer = Player1;
             TargetPlayer = Player2;
+            GameMoves = new List<GameMove>();
         }
 
-        public void DisplayCurrentShipsDeleting()
-        {
-            UI.DisplayCurrentShips(CurrentPlayer.Board, "DELETING");
-        }
-
+        /**
+         * Highlighted tiles that are specified in Game properties are reset (only two)
+         * Doesn't unhighlight tiles that are not specified in Game properties
+         */
         public void ClearCurrentHighlights()
         {
             if (CurrentPlayer.Board.HighlightedStart != null)
@@ -734,18 +718,23 @@ namespace BLL
             }
         }
 
-        public string GenerateOpponent()
+        /**
+         * TargetPlayer is set to generated computer player
+         */
+        public void GenerateOpponent()
         {
             TargetPlayer.Name = "Computer";
             GenerateRandomBoard(TargetPlayer);
-            return "";
-
         }
 
+        /**
+         * Generates a random board for the specified player
+         * Deletes previous ship placements
+         */
         public Result GenerateRandomBoard(Player player)
         {
             player.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
-            Dictionary<int, int> availableShips = AvailableShipsList(player);
+            Dictionary<int, int> availableShips = AvailableShips(player);
             var random = new Random();
 
             while (availableShips.Any(pair => pair.Value > 0)) // Loop til there are ships available
@@ -755,11 +744,7 @@ namespace BLL
                 var counter = 1;
                 while (true)
                 {
-                    if (++counter > 50000)
-                    {
-                        UI.Alert("Infinite loop", 5000);
-                        return "";
-                    }
+                    if (++counter > 50000) return Result.CouldntPlaceAllShips; 
                     Tile start = player.Board.Tiles[random.Next(Rules.BoardRows)][random.Next(Rules.BoardCols)];
                     bool isVertical = random.Next(0, 2) == 0;
                     int directionSign = random.Next(0, 2) == 0 ? -1 : 1;
@@ -771,17 +756,9 @@ namespace BLL
                             player.Board.AddBattleship((start.Row, start.Col), (end.Row, end.Col), ship);
                             availableShips[sizeKey]--;
                             break;
-
                         }
-                        catch (ArgumentException e)
-                        {
-                            
-                        }
-                        catch (IndexOutOfRangeException e)
-                        {
-                            
-                        }
-                        
+                        catch (ArgumentException e){}
+                        catch (IndexOutOfRangeException e){}
                     }
                     else
                     {
@@ -792,21 +769,19 @@ namespace BLL
                             availableShips[sizeKey]--;
                             break;
                         }
-                        catch (ArgumentException e)
-                        {
-                            
-                        }
-                        catch (IndexOutOfRangeException e)
-                        {
-                            
-                        }
+                        catch (ArgumentException e){}
+                        catch (IndexOutOfRangeException e){}
                     }
                 }
             }
 
-            return "";
+            return Result.None;
         }
 
+        /**
+         * Resets target players board, name and IsReady parameter
+         * @param newTargetName: new name for the player
+         */
         public void ResetTargetPlayer(String newTargetName)
         {
             TargetPlayer.Board = new Board(Rules.BoardRows,Rules.BoardCols,Rules.CanShipsTouch);
@@ -814,21 +789,27 @@ namespace BLL
             TargetPlayer.IsReady = false;
         }
 
-        public void RestorePlayerBoardTiles(Player player, SaveGame s)
+        /**
+         * Restores player's board tiles
+         * Needed because database only stores tiles with changed values
+         * @param player: Player object, whose board will be restored
+         * @param save: Save object. Needed for loading
+         * @param dbContext: database connection object 
+         */
+        private void RestorePlayerBoardTiles(Player player, SaveGame save, AppDbContext dbContext)
         {
-            
-            List<List<Tile>> boardTiles = new List<List<Tile>>(s.Rules.BoardRows);
-            List<Tile> tilesFromDb = Ctx.Tiles
+            List<List<Tile>> boardTiles = new List<List<Tile>>(save.Rules.BoardRows);
+            List<Tile> tilesFromDb = dbContext.Tiles
                 .Include(tile => tile.Board)
                 .Include(tile => tile.Battleship)
                 .Where(tile => tile.Board == player.Board).ToList();
             
             Console.WriteLine($"DbTilesCount: {tilesFromDb.Count}");
-            for (int i = 0; i < s.Rules.BoardRows; i++)
+            for (int i = 0; i < save.Rules.BoardRows; i++)
             {
-                boardTiles.Add(new List<Tile>(s.Rules.BoardCols));
+                boardTiles.Add(new List<Tile>(save.Rules.BoardCols));
                 
-                for (int j = 0; j < s.Rules.BoardCols; j++)
+                for (int j = 0; j < save.Rules.BoardCols; j++)
                 {
                     if (tilesFromDb.Any(tile => tile.Row == i && tile.Col == j))
                         boardTiles[i].Add(tilesFromDb.Find(tile => tile.Row == i && tile.Col == j));
@@ -877,6 +858,9 @@ namespace BLL
             return Result.ReturnToPreviousMenu;
         }
 
+        /**
+         * Fills the menu's menuItems with id-s and names
+         */
         public Result PopulateLoadsMenu(Menu menu, bool isFinished, AppDbContext dbContext)
         {
             menu.MenuItems.Clear();
@@ -891,8 +875,28 @@ namespace BLL
                 {
                     Shortcut = saveGame.SaveGameId.ToString(),
                     Description = saveGame.Name,
-                    CommandToExecute = () => isFinished? Command.ReplayGame : Command.LoadGame
+                    GetCommand = () => isFinished? Command.ReplayGame : Command.LoadGame
                 });
+            }
+
+            return Result.None;
+        }
+
+        /**
+         * Removes end and start highlights in board and max two tiles.
+         */
+        private void ResetHighlightedTiles()
+        {
+            if (CurrentPlayer.Board.HighlightedStart != null)
+            {
+                CurrentPlayer.Board.HighlightedStart.IsHighlightedStart = false;
+                CurrentPlayer.Board.HighlightedStart = null;
+            }
+            
+            if (CurrentPlayer.Board.HighLightedEnd != null)
+            {
+                CurrentPlayer.Board.HighLightedEnd.IsHighlightedEnd = false;
+                CurrentPlayer.Board.HighLightedEnd = null;
             }
         }
     }

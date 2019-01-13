@@ -4,39 +4,286 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using BLL;
+using DAL;
 using Domain;
 using MenuSystem;
+using Microsoft.EntityFrameworkCore;
 
 namespace UI
 {
-    public class ConsoleUINew
+    public class ConsoleUi
     {
-        private LetterNumberSystem Letters { get; } = new LetterNumberSystem();
-//        public Player CurrentPlayer { get; set; }
-//        public Player TargetPlayer { get; set; }
-        public string ShipStartPoint { get; set; }
-        public string ShipEndPoint { get; set; }
-        public int MaxWidth { get; set; }
-        public int MaxHeight { get; set; }
-        private string LeftPad { get; } = "            ";
-        private ConsoleColor DefaultBackground { get; }
-        private ConsoleColor DefaultForeground { get; }
-
-        public ConsoleUINew(ConsoleColor defaultBackground = ConsoleColor.White,
-                         ConsoleColor defaultForeground = ConsoleColor.Black)
+        enum PrintBoard
         {
-            DefaultBackground = defaultBackground;
-            DefaultForeground = defaultForeground;
-            Console.ForegroundColor = defaultForeground;
-            Console.BackgroundColor = defaultBackground;
+            Regular,
+            Adding,
+            Deleting
+        }
+        private LetterNumberSystem Letters { get; } = new LetterNumberSystem();
+        private string LeftPad { get; } = "            ";
+        private ConsoleColor Background { get; }
+        private ConsoleColor Foreground { get; }
+        private readonly Game _game = Game.Instance;
+        private AppDbContext _dbContext = new AppDbContext();
+        public ConsoleUi(ConsoleColor background = ConsoleColor.White, ConsoleColor foreground = ConsoleColor.Black)
+        {
+            Background = background;
+            Foreground = foreground;
+            Console.ForegroundColor = foreground;
+            Console.BackgroundColor = background;
             Console.Clear();
             Console.Title = "Battleships";
-            MaxWidth = (Console.LargestWindowWidth - LeftPad.Length * 2 - 12) / 8;
-//            Console.WindowWidth = width;
             Console.WindowHeight = 35;
         }
 
-        public void PrintBombedLocations(Board enemyBoard, Player current)
+        public void Loop()
+        {
+            outerloop:
+            while (true)
+            {
+                Console.Clear();
+                
+                // 1)Parse DisplayBefore
+                ParseDisplayBefore(_game.CurrentMenu.DisplayBefore);
+                
+                // 2)Print menu options + print previous + menu title
+                DisplayMenu(_game.CurrentMenu);
+                
+                // 3)Get Menu shortcut (Console.ReadLine())
+                var input = GetMenuShortcut(_game.CurrentMenu);
+                if (input.Equals("")) continue;
+                if (input.Equals("X"))
+                {
+                    _game.PreviousMenu();
+                    continue;
+                }
+                
+                // 4)Run and save Command
+                var command = _game.CurrentMenu.MenuItems
+                    .Find(item => item.Shortcut.ToLower().Equals(input.ToLower())).GetCommand();
+
+                // 5)Parse command
+                ParseCommand(command);
+            }
+        }
+
+        private void ParseDisplayBefore(Display display)
+        {
+            switch (display)
+            {
+                case Display.ShipsAndBombings:
+                    PrintBombedLocationsAndFriendlyShips(_game.TargetPlayer.Board, _game.CurrentPlayer.Board);
+                    break;
+                case Display.ShipRules:
+                    DisplayShipRules(_game.Rules);
+                    break;
+                case Display.BoardRules:
+                    DisplayBoardRules(_game.Rules);
+                    break;
+                case Display.CurrentRules:
+                    DisplayCurrentRules(_game.Rules);
+                    break;
+                case Display.CurrentAndAvailableShips:
+                    PrintFriendlyShips(_game.CurrentPlayer.Board);
+                    DisplayAvailableShips(_game.AvailableShips(_game.CurrentPlayer));
+                    break;
+                case Display.CurrentShipsDeleting:
+                    PrintFriendlyShipsDeleting(_game.CurrentPlayer.Board);
+                    break;
+                case Display.FinishedGames:
+                    //No printing needed
+                    break;
+                case Display.UnfinishedGames:
+                    //No printing needed
+                    break;
+                case Display.Bombings:
+                    PrintBombedLocations(_game.TargetPlayer.Board, _game.CurrentPlayer);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(display), display, null);
+            }
+        }
+
+        private void ParseCommand(Command command)
+        {
+            switch (command)
+            {
+                case Command.Previous:
+                    _game.PreviousMenu();
+                    break;
+                
+                case Command.BombLocation:
+                    var input = GetTargetLocation();
+                    if (input.ToUpper().Equals("X")) return;
+                    var result = _game.BombLocation(input);
+                    ParseResult(result, input);
+                    break;
+                
+                case Command.None:
+                    break;
+                
+                case Command.SaveUnfinishedGame:
+                    _game.SaveGame(_dbContext, GetSaveGameName(), false);
+                    break;
+                
+                case Command.EditShipInRules:
+                    break;
+                
+                case Command.AddShipToRules:
+                    break;
+                
+                case Command.DeleteShipInRules:
+                    break;
+                
+                case Command.EditShipsCanTouchRule:
+                    break;
+                    
+                case Command.EditBoardWidth:
+                    break;
+                    
+                case Command.EditBoardHeight:
+                    break;
+                    
+                case Command.SetRulesetName:
+                    break;
+                    
+                case Command.SetStandardRules:
+                    break;
+                    
+                case Command.GetShipStartTile:
+                    break;
+                    
+                case Command.PlaceShipOnBoard:
+                    break;
+                    
+                case Command.GetShipEndTile:
+                    break;
+                    
+                case Command.GetTileOfDeleteableShip:
+                    break;
+                    
+                case Command.DeleteShipFromBoard:
+                    break;
+                    
+                case Command.ChangePlayersName:
+                    break;
+                    
+                case Command.FillReplayMenu:
+                    break;
+                    
+                case Command.FillLoadMenu:
+                    break;
+                    
+                case Command.LoadGame:
+                    break;
+                    
+                case Command.ReplayGame:
+                    break;
+                    
+                case Command.CantStartGame:
+                    break;
+                    
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(command), command, null);
+            }
+        }
+
+        private void ParseResult<T>(Result result, T var1 = default, T var2 = default)
+        {
+            GameMove move;
+            switch (result)
+            {
+                case Result.None:            //No further action needed
+                    break;
+                
+                case Result.ChangedMenu:     //No further action needed
+                    break;
+                
+                case Result.NoPreviousMenuFound:
+                    Alert("No previous menu found!", ConsoleColor.Red);
+                    break;
+                
+                case Result.ReturnToPreviousMenu: //No further action needed
+                    break;
+                
+                case Result.GameOver:
+                    Alert($"{_game.CurrentPlayer.Name} has won!", ConsoleColor.Green);
+                    _game.SaveGame(_dbContext, GetSaveGameName(), true);
+                    break;
+                
+                case Result.OneBombing:
+                    move = _game.GameMoves[_game.GameMoves.Count - 1];
+                    Console.WriteLine($"{move.Target.Name} is bombed at {move.Tile}.");
+                    if (move.Tile.IsEmpty()) Alert("Its a MISS!", ConsoleColor.DarkRed);
+                    else Alert("Its a HIT!", ConsoleColor.DarkGreen);
+                    break;
+                
+                case Result.TwoBombings:
+                    move = _game.GameMoves[_game.GameMoves.Count - 2];
+                    Console.WriteLine($"{move.Target.Name} is bombed at {move.Tile}.");
+                    if (move.Tile.IsEmpty()) Alert("Its a MISS!", ConsoleColor.DarkRed);
+                    else Alert("Its a HIT!", ConsoleColor.DarkGreen);
+                    
+                    move = _game.GameMoves[_game.GameMoves.Count - 1];
+                    Console.WriteLine($"{move.Target.Name} is bombed at {move.Tile}.");
+                    if (move.Tile.IsEmpty()) Alert("Its a MISS!", ConsoleColor.DarkGreen);
+                    else Alert("Its a HIT!", ConsoleColor.DarkRed);
+                    break;
+                   
+                case Result.ComputerWon:
+                    Alert("Computer has won!", ConsoleColor.Green);
+                    _game.SaveGame(_dbContext, GetSaveGameName(), true);
+                    break;
+                
+                case Result.NoSuchTile:
+                    Alert($"{var1} is not a valid location!", ConsoleColor.Red);
+                    break;
+                
+                case Result.TileAlreadyBombed:
+                    Alert($"{var1} is already bombed!", ConsoleColor.Red);
+                    break;
+                
+                case Result.InvalidSize:
+                    break;
+                case Result.InvalidQuantity:
+                    break;
+                case Result.InvalidInput:
+                    break;
+                case Result.RulesChanged:
+                    break;
+                case Result.ShipPlaced:
+                    break;
+                case Result.ShipNotPlaced:
+                    break;
+                case Result.ShipNotDeleted:
+                    break;
+                case Result.ShipDeleted:
+                    break;
+                case Result.PlayerNameChanged:
+                    break;
+                case Result.TileNotHighlighted:
+                    break;
+                case Result.TileHighlighted:
+                    break;
+                case Result.NoSuchSaveGameId:
+                    break;
+                case Result.PlayerNameNotChanged:
+                    break;
+                case Result.GameParametersLoaded:
+                    break;
+                case Result.ReplayReadySaveLoaded:
+                    break;
+                case Result.SuccessfulReplayBombing:
+                    break;
+                case Result.CouldntPlaceAllShips:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(result), result, null);
+            }
+        }
+
+       //--------------------------OLD METHODS-----------------------------------------
+        private void PrintBombedLocations(Board enemyBoard, Player current)
         {
             var sb = new StringBuilder();
             var line = GetTableLine(enemyBoard.Tiles[0].Count);
@@ -66,7 +313,7 @@ namespace UI
             Console.WriteLine(sb.ToString());
         }
 
-        public void PrintBombedLocationsAndFriendlyShips(Board enemyBoard, Board playerBoard)
+        private void PrintBombedLocationsAndFriendlyShips(Board enemyBoard, Board playerBoard)
         {
             var sb = new StringBuilder();
             var line = GetTableLine(enemyBoard.Tiles[0].Count);
@@ -115,7 +362,7 @@ namespace UI
             Console.Write(sb.ToString());
         }
 
-        public void PrintFriendlyShipsAdding(Board currentBoard)
+        private void PrintFriendlyShipsAdding(Board currentBoard)
         {
             var sb = new StringBuilder();
             var line = GetTableLine(currentBoard.Tiles[0].Count);
@@ -167,10 +414,8 @@ namespace UI
             return Console.ReadLine();
         }
 
-        public string GetTargetLocation(Board enemyBoard, Player currentPlayer)
+        public string GetTargetLocation()
         {
-            Console.Clear();
-            PrintBombedLocations(enemyBoard, currentPlayer);
             Console.Write("Select target(or \"x\"): ");
             return Console.ReadLine().ToUpper();
         }
@@ -220,19 +465,19 @@ namespace UI
             return Console.ReadLine();
         }
 
-        public void DisplayRulesShips(Rules rules)
+        private void DisplayShipRules(Rules rules)
         {
             rules.BoatRules.ForEach(rule => Console.WriteLine($"Size: {rule.Size} - {rule.Quantity}"));
         }
 
-        public void DisplayBoardRules(Rules rules)
+        private void DisplayBoardRules(Rules rules)
         {
             Console.WriteLine($"Number of rows: {rules.BoardRows}");
             Console.WriteLine($"Number of cols: {rules.BoardCols}");
             Console.WriteLine($"Ships can touch: {rules.CanShipsTouch}");
         }
 
-        public void DisplayCurrentRules(Rules rules)
+        private void DisplayCurrentRules(Rules rules)
         {
             Console.WriteLine($"Ruleset name: {rules.Name}");
             Console.WriteLine($"Number of rows: {rules.BoardRows}");
@@ -241,29 +486,13 @@ namespace UI
             rules.BoatRules.ForEach(rule => Console.WriteLine($"Size: {rule.Size} - {rule.Quantity}"));
         }
 
-
-        public void DisplayAvailableShips(List<KeyValuePair<int,int>> availableShips)
+        private void DisplayAvailableShips(Dictionary<int, int> availableShips)
         {
-            availableShips.ForEach(pair => Console.WriteLine($"Size: {pair.Key} - {pair.Value} available"));
-        }
-
-        public void DisplayCurrentShips(Board currentPlayerBoard, string type)
-        {
-            switch (type)
-            {
-                    case "REGULAR":
-                        PrintFriendlyShips(currentPlayerBoard);
-                        break;
-                    case "ADDING":
-                        PrintFriendlyShipsAdding(currentPlayerBoard);
-                        break;
-                    case "DELETING":
-                        PrintFriendlyShipsDeleting(currentPlayerBoard);
-                        break;
-                    default:
-                        Alert("UNKNOWN ERROR in DisplayCurrentShips in ConsoleUI", 5000);
-                        break;
-            }
+            availableShips
+                .ToList()
+                .OrderBy(pair => pair.Key)
+                .ToList()
+                .ForEach(pair => Console.WriteLine($"Size: {pair.Key} - {pair.Value} available"));
         }
 
         private void PrintFriendlyShipsDeleting(Board currentBoard)
@@ -325,41 +554,48 @@ namespace UI
             Console.WriteLine(sb.ToString());
         }
 
-        public string GetShipStartPoint(Board currentPlayerBoard, List<KeyValuePair<int,int>> availableShips)
+        public string GetShipStartPoint()
         {
             Console.Clear();
-            DisplayCurrentShips(currentPlayerBoard, "ADDING");
-            DisplayAvailableShips(availableShips);
             Console.Write("Enter ship start tile(or \"x\"): ");
             return Console.ReadLine().ToUpper();
         }
 
-        public string GetShipEndPoint(Board currentPlayerBoard, List<KeyValuePair<int,int>> availableShips)
+        public string GetShipEndPoint()
         {
             Console.Clear();
-            DisplayCurrentShips(currentPlayerBoard, "ADDING");
-            DisplayAvailableShips(availableShips);
             Console.Write("Enter ship end tile(or \"x\"): ");
             return Console.ReadLine().ToUpper();
         }
 
-        public void Alert(string alert, int waitTime)
+        private void Alert(string alert, ConsoleColor color)
         {
+            var temp = Console.ForegroundColor;
+            Console.ForegroundColor = color;
             Console.WriteLine(alert);
-            Thread.Sleep(waitTime);
+            Console.ForegroundColor = temp;
+            Continue();
         }
 
-        public string GetMenuShortcut()
+        private string GetMenuShortcut(Menu menu)
         {
             Console.Write("Enter command: ");
-            return Console.ReadLine().ToUpper();
+            var input = Console.ReadLine();
+
+            if (input == null) return "";
+            if (menu.Previous?.Shortcut.ToLower().Equals(input.ToLower()) ?? false) return "X";
+            if (menu.MenuItems.All(item => item.Shortcut.ToUpper() != input.ToUpper()))
+            {
+                Alert("No such shortcut!", ConsoleColor.Red);
+                return "";
+            }
+
+            return input;
         }
 
-        public void DisplayNewMenu(Menu menu)
+        private void DisplayMenu(Menu menu)
         {
-            Console.Clear();
             Console.WriteLine(menu.Title);
-            menu.DisplayBefore?.Invoke();
             for (int i = 0; i < menu.Title.Length; i++) Console.Write("-");
             Console.WriteLine();
             menu.MenuItems.ForEach(item => Console.WriteLine($"{item.Shortcut}) {item.Description}"));
@@ -371,10 +607,16 @@ namespace UI
             Thread.Sleep(1000);
         }
 
-        public string GetSaveGameName()
+        private string GetSaveGameName()
         {
-            Console.Write("Enter a name for the save game(or \"x\"): ");
-            return Console.ReadLine();
+            Console.Write("Enter a name for the save game: ");
+            var input = Console.ReadLine();
+            while (input == null || input.Equals(""))
+            {
+                Console.Write("Enter a name for the save game: ");
+                input = Console.ReadLine();
+            }
+            return input;
         }
 
         public void DisplaySavedGames(List<SaveGame> saves)
@@ -438,9 +680,9 @@ namespace UI
             return Console.ReadLine();
         }
 
-        public void Continue()
+        private void Continue()
         {
-            Console.WriteLine("Press any key to continue");
+            Console.WriteLine("Press enter to continue");
             Console.ReadLine();
         }
 

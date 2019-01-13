@@ -7,34 +7,31 @@ namespace MenuSystem
     public enum Result
     {
         None,
-        AllShipsDeleted,
-        PlayerReady,
-        PlayerNotReady,
-        GameStarted,
-        FillLoadGame,
-        FillReplayGame,
         ChangedMenu,
-        QuitToMain,
         NoPreviousMenuFound,
         ReturnToPreviousMenu,
         GameOver,
-        SuccessfulBombing,
-        SuccessfulBombings,
         ComputerWon,
-        NoSuchTile,
-        TileAlreadyBombed,
-        GameSaved,
-        SaveUnfinishedGame,
+        NoSuchTile,        // Returned when tile could not be parsed
+        TileAlreadyBombed, // Returned when tile has been already bombed when it shouldn't have been
         InvalidSize,
-        //TODO: maybe just add one for all rule changes i.e. RulesChanged
-        ShipRuleAdded,
         InvalidQuantity,
-        ShipRuleEdited,
-        ShipRuleDeleted,
         InvalidInput,
-        ShipsTouchRuleChanged,
-        BoardWidthChnaged,
-        BoardHeightChnaged,
-        RulesNameChanged
+        RulesChanged,
+        ShipPlaced,
+        ShipNotPlaced,
+        ShipNotDeleted,
+        ShipDeleted,
+        PlayerNameChanged,
+        TileNotHighlighted,
+        TileHighlighted,
+        NoSuchSaveGameId,
+        PlayerNameNotChanged,
+        GameParametersLoaded,
+        ReplayReadySaveLoaded,
+        SuccessfulReplayBombing,
+        CouldntPlaceAllShips,
+        TwoBombings,        // Returned when a player and computer have made bombings
+        OneBombing          // Returned when a player has made a bombing
     }
 }

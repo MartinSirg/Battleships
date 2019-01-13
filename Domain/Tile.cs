@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using BLL;
 
 namespace Domain
 {
@@ -54,7 +55,8 @@ namespace Domain
 
         public override string ToString()
         {
-            return $"Row: {Row}\tCol: {Col}\tHasShip: {!IsEmpty()}\tIsBombed: {IsBombed}\tBoard Hashcode: {Board.GetHashCode()}";
+//            return $"Row: {Row}\tCol: {Col}\tHasShip: {!IsEmpty()}\tIsBombed: {IsBombed}\tBoard Hashcode: {Board.GetHashCode()}";
+            return $"{new LetterNumberSystem().GetLetter(Row + 1)}{Col + 1}";
         }
 
         public object Clone()

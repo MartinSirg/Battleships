@@ -15,6 +15,9 @@
     "frameworks": {
       "netstandard2.0": {
         "projectReferences": {
+          "C:\\Projects Repositories\\C#\\BLL\\BLL.csproj": {
+            "projectPath": "C:\\Projects Repositories\\C#\\BLL\\BLL.csproj"
+          },
           "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj": {
             "projectPath": "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj"
           },

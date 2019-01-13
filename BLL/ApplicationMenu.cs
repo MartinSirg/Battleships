@@ -37,13 +37,13 @@ namespace BLL
                     {
                         Shortcut = "1", 
                         Description = "Bomb location",
-                        CommandToExecute = () => Command.BombLocation
+                        GetCommand = () => Command.BombLocation
                     },
                     new MenuItem
                     {
                         Shortcut = "2", 
                         Description = "Show my ships and bombings",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
                             Game.ChangeMenu(shipsAndbombings);
                             return Command.None;
@@ -53,7 +53,7 @@ namespace BLL
                     {
                         Shortcut = "9",
                         Description = "Save and Exit",
-                        CommandToExecute = () => Command.SaveUnfinishedGame
+                        GetCommand = () => Command.SaveUnfinishedGame
                     },
                     new MenuItem
                     {
@@ -76,19 +76,19 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Add ships to rules",
-                        CommandToExecute = () => Command.AddShipToRules
+                        GetCommand = () => Command.AddShipToRules
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Edit ship",
-                        CommandToExecute = () => Command.EditShipInRules
+                        GetCommand = () => Command.EditShipInRules
                     },
                     new MenuItem
                     {
                         Shortcut = "3",
                         Description = "Delete ship",
-                        CommandToExecute = () => Command.DeleteShipInRules
+                        GetCommand = () => Command.DeleteShipInRules
                     }
                     
                 }
@@ -104,19 +104,19 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Set ships can touch rule.",
-                        CommandToExecute = () => Command.EditShipsCanTouchRule
+                        GetCommand = () => Command.EditShipsCanTouchRule
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Set board cols",
-                        CommandToExecute = () => Command.EditBoardWidth
+                        GetCommand = () => Command.EditBoardWidth
                     },
                     new MenuItem
                     {
                         Shortcut = "3",
                         Description = "Set board rows",
-                        CommandToExecute = () => Command.EditBoardHeight
+                        GetCommand = () => Command.EditBoardHeight
                     }
                 }
             };
@@ -131,7 +131,7 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Ships",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
                             Game.ChangeMenu(customShipsMenu);
                             return Command.None;
@@ -141,7 +141,7 @@ namespace BLL
                     {
                         Shortcut = "2",
                         Description = "Board",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
                             Game.ChangeMenu(customBoardMenu);
                             return Command.None;
@@ -151,7 +151,7 @@ namespace BLL
                     {
                         Shortcut = "3",
                         Description = "Set name",
-                        CommandToExecute = () => Command.SetRulesetName
+                        GetCommand = () => Command.SetRulesetName
                     }
                 }
             };
@@ -166,7 +166,7 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Set custom rules",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
                             if (Game.Rules.Name.Equals("Standard rules"))
                             {
@@ -181,7 +181,7 @@ namespace BLL
                     {
                         Shortcut = "2",
                         Description = "Set standard Rules",
-                        CommandToExecute = () => Command.SetStandardRules
+                        GetCommand = () => Command.SetStandardRules
                     }
                 }
             };
@@ -197,25 +197,25 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Select ship start point(example: D6)",
-                        CommandToExecute = () => Command.GetShipStartTile
+                        GetCommand = () => Command.GetShipStartTile
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Select ship end point(example: D7)",
-                        CommandToExecute = () => Command.GetShipEndTile
+                        GetCommand = () => Command.GetShipEndTile
                     },
                     new MenuItem
                     {
                         Shortcut = "3",
                         Description = "Confirm ship placement",
-                        CommandToExecute = () => Command.PlaceShipOnBoard
+                        GetCommand = () => Command.PlaceShipOnBoard
                     },
                     new MenuItem
                     {
                         Shortcut = "9",
                         Description = "Generate random board",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
                             Game.GenerateRandomBoard(Game.CurrentPlayer);
                             return Command.Previous;
@@ -235,19 +235,19 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Select occupying tile(example: D6)",
-                        CommandToExecute = () => Command.GetTileOfDeleteableShip
+                        GetCommand = () => Command.GetTileOfDeleteableShip
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Confirm ship deletion",
-                        CommandToExecute = () => Command.DeleteShipFromBoard
+                        GetCommand = () => Command.DeleteShipFromBoard
                     },
                     new MenuItem
                     {
                         Shortcut = "9",
                         Description = "Delete all ships",
-                        CommandToExecute = ()=>
+                        GetCommand = ()=>
                         {
                             Game.CurrentPlayer.Board = new Board(Game.Rules.BoardRows, Game.Rules.BoardCols,
                                     Game.Rules.CanShipsTouch);
@@ -267,7 +267,7 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Add ships menu",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
                             Game.ClearCurrentHighlights();
                             addShipsToBoardMenu.Title = $"{Game.CurrentPlayer.Name}'s add ships menu";
@@ -279,7 +279,7 @@ namespace BLL
                     {
                         Shortcut = "2",
                         Description = "Delete ships menu",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
                             Game.ClearCurrentHighlights();
                             deleteShipFromBoardMenu.Title = $"{Game.CurrentPlayer.Name}'s delete ship menu";
@@ -291,15 +291,15 @@ namespace BLL
                     {
                         Shortcut = "3",
                         Description = "Change your name",
-                        CommandToExecute = () => Command.ChangePlayersName
+                        GetCommand = () => Command.ChangePlayersName
                     },
                     new MenuItem
                     {
                         Shortcut = "4",
                         Description = "Finished!",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
-                            Game.SetPlayerReady();
+                            Game.SetCurrentPlayerReady();
                             return Command.Previous;
                         }
                     }
@@ -315,7 +315,7 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Player 1 menu",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
                             Game.CurrentPlayer = Game.Player1;
                             Game.TargetPlayer = Game.Player2;
@@ -328,7 +328,7 @@ namespace BLL
                     {
                         Shortcut = "2",
                         Description = "Player 2 menu",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
                             Game.CurrentPlayer = Game.Player2;
                             Game.TargetPlayer = Game.Player1;
@@ -349,7 +349,7 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Set game rules",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
                             Game.ChangeMenu(rulesMenu);
                             return Command.None;
@@ -359,14 +359,14 @@ namespace BLL
                     {
                         Shortcut = "2",
                         Description = "Single player",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
                             if (Game.SelectedMode.Equals("MP"))
                             {
                                 Game.ResetTargetPlayer("Computer");
                             }
                             playerMenu.Title = $"{Game.CurrentPlayer.Name}'s menu";
-                            Game.SetPlayerNotReady();
+                            Game.SetCurrentPlayerNotReady();
                             Game.SetSelectedMode("SP");    //TODO: Enumiks teha parameeter
                             Game.GenerateOpponent();
                             Game.ChangeMenu(playerMenu);
@@ -377,14 +377,14 @@ namespace BLL
                     {
                         Shortcut = "3",
                         Description = "Multi player",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
                             if (Game.SelectedMode.Equals("SP"))
                             {
                                 Game.ResetTargetPlayer(newTargetName: "Player 2");
                             }
                             Game.SetSelectedMode("MP");
-                            Game.SetPlayerNotReady();
+                            Game.SetCurrentPlayerNotReady();
                             Game.ChangeMenu(multiPlayerMenu);
                             return Command.None;
                         }
@@ -393,12 +393,12 @@ namespace BLL
                     {
                         Shortcut = "4",
                         Description = "Start game",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
                             var ready = Game.CheckIfCanStartGame();
                             if (!ready)
                             {
-                                return Command.PlayerNotReady;
+                                return Command.CantStartGame;
                             }
 
                             Game.CurrentPlayer = Game.Player1;
@@ -431,14 +431,14 @@ namespace BLL
             var mainMenu = new Menu
             {
                 Title = "Main menu",
-                
+                Previous = null,
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem
                     {
                         Shortcut = "1",
                         Description = "New game",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
                             Game.NewGame();
                             Game.ChangeMenu(newGameMenu);
@@ -449,7 +449,7 @@ namespace BLL
                     {
                         Shortcut = "2",
                         Description = "Load game",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
                             Game.ChangeMenu(loadMenu);
                             return Command.FillLoadMenu;
@@ -459,7 +459,7 @@ namespace BLL
                     {
                         Shortcut = "3",
                         Description = "Replay finished game",
-                        CommandToExecute = () =>
+                        GetCommand = () =>
                         {
                             Game.ChangeMenu(replayMenu);
                             return Command.FillReplayMenu;
@@ -467,11 +467,10 @@ namespace BLL
                     }
                 }
             };
-            //No previous command here
             
             inGameMenu.MenuItems
                 .Find(item => item.Shortcut.Equals("8"))
-                .CommandToExecute = () =>
+                .GetCommand = () =>
             {
                 Game.ResetAll();
                 Game.MenuStack.Clear();

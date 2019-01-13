@@ -1637,8 +1637,7 @@
         "dependencies": {
           "DAL": "1.0.0",
           "Domain": "1.0.0",
-          "MenuSystem": "1.0.0",
-          "UI": "1.0.0"
+          "MenuSystem": "1.0.0"
         },
         "compile": {
           "bin/placeholder/BLL.dll": {}
@@ -1706,6 +1705,7 @@
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
         "dependencies": {
+          "BLL": "1.0.0",
           "Domain": "1.0.0",
           "MenuSystem": "1.0.0",
           "Microsoft.AspNetCore.Mvc.ViewFeatures": "2.1.1"
