@@ -10,6 +10,9 @@ namespace MenuSystem
         CurrentShipsDeleting,
         FinishedGames,
         UnfinishedGames,
-        Bombings
+        Bombings,
+        Nothing,
+        CurrentShipsAdding,
+        CurrentShips
     }
 }

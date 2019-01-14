@@ -15,9 +15,8 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
-//            IUserInterface ui = new ConsoleUI();
-            
-            AppDbContext ctx = new AppDbContext();
+            ConsoleUi ui = new ConsoleUi();
+            ui.Loop();
             
             
 //            GameOld gameOld = new GameOld(ui, ctx);

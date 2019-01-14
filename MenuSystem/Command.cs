@@ -14,16 +14,17 @@ namespace MenuSystem
         EditBoardHeight,
         SetRulesetName,
         SetStandardRules,
-        GetShipStartTile,
+        SetShipStartTile,
         PlaceShipOnBoard,
-        GetShipEndTile,
-        GetTileOfDeleteableShip,
+        SetShipEndTile,
+        SetTileOfDeleteableShip,
         DeleteShipFromBoard,
         ChangePlayersName,
         FillReplayMenu,
         FillLoadMenu,
         LoadGame,
-        ReplayGame,
-        CantStartGame
+        ShowGameReplay,
+        CantStartGame,
+        GenerateRandomBoard
     }
 }

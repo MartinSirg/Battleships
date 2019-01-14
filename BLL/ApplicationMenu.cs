@@ -8,21 +8,23 @@ namespace BLL
     {
         public Game Game { get; set; }
         public Menu MainMenu { get; set; }
+        public Menu InGameMenu { get; set; }
 
+        
         public ApplicationMenu(Game game)
         {
             Game = game;
-            
-            
+            MainMenu = GetMain();
         }
 
-        public Menu GetMain()
+        private Menu GetMain()
         {
             var shipsAndbombings = new Menu
             {
                 Title = "CHANGE ME!!!",
                 TitleWithName = "PLAYER_NAME's ships",
-                DisplayBefore = Display.ShipsAndBombings
+                DisplayBefore = Display.ShipsAndBombings,
+                MenuItems = new List<MenuItem>()
             };
             
             var inGameMenu = new Menu
@@ -63,6 +65,7 @@ namespace BLL
                     }
                 }
             };
+            InGameMenu = inGameMenu;
             //NO previous menu item here
             
             var customShipsMenu = new Menu
@@ -190,20 +193,20 @@ namespace BLL
             {
                 Title = "CHANGE ME!!!",
                 TitleWithName = "Add ship to PLAYER_NAME's board",
-                DisplayBefore = Display.CurrentAndAvailableShips,
+                DisplayBefore = Display.CurrentShipsAdding,
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem
                     {
                         Shortcut = "1",
                         Description = "Select ship start point(example: D6)",
-                        GetCommand = () => Command.GetShipStartTile
+                        GetCommand = () => Command.SetShipStartTile
                     },
                     new MenuItem
                     {
                         Shortcut = "2",
                         Description = "Select ship end point(example: D7)",
-                        GetCommand = () => Command.GetShipEndTile
+                        GetCommand = () => Command.SetShipEndTile
                     },
                     new MenuItem
                     {
@@ -218,7 +221,7 @@ namespace BLL
                         GetCommand = () =>
                         {
                             Game.GenerateRandomBoard(Game.CurrentPlayer);
-                            return Command.Previous;
+                            return Command.GenerateRandomBoard;
                         }
                     }
                     
@@ -235,7 +238,7 @@ namespace BLL
                     {
                         Shortcut = "1",
                         Description = "Select occupying tile(example: D6)",
-                        GetCommand = () => Command.GetTileOfDeleteableShip
+                        GetCommand = () => Command.SetTileOfDeleteableShip
                     },
                     new MenuItem
                     {
@@ -261,6 +264,7 @@ namespace BLL
             {
                 Title = "CHANGE ME!!!!",
                 TitleWithName = "PLAYER_NAME's menu",
+                DisplayBefore = Display.CurrentShips,
                 MenuItems = new List<MenuItem>
                 {
                     new MenuItem
@@ -337,6 +341,17 @@ namespace BLL
                             return Command.None;
                         }
                     }
+                }
+            };
+            multiPlayerMenu.Previous = new MenuItem
+            {
+                Shortcut = Menu.ExitString,
+                Description = "Previous menu",
+                GetCommand = () =>
+                {
+                    Game.CurrentPlayer = Game.Player1;
+                    Game.TargetPlayer = Game.Player2;
+                    return Command.Previous;
                 }
             };
             

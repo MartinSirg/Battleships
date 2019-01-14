@@ -18,13 +18,10 @@ namespace MenuSystem
         InvalidQuantity,
         InvalidInput,
         RulesChanged,
-        ShipPlaced,
-        ShipNotPlaced,
         ShipNotDeleted,
         ShipDeleted,
         PlayerNameChanged,
         TileNotHighlighted,
-        TileHighlighted,
         NoSuchSaveGameId,
         PlayerNameNotChanged,
         GameParametersLoaded,
@@ -33,5 +30,13 @@ namespace MenuSystem
         CouldntPlaceAllShips,
         TwoBombings,        // Returned when a player and computer have made bombings
         OneBombing          // Returned when a player has made a bombing
+        ,
+        Overlap,
+        NoCommonAxis,
+        HighlightMissing,
+        Continue,
+        Break,
+        TooLong,
+        TooShort
     }
 }

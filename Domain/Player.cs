@@ -11,9 +11,11 @@ namespace Domain
 //        public int BoardId { get; set; } // without annotations
         [Required]
         public Board Board { get; set; }
-        
-        [MaxLength(64)]
-        [MinLength(2)]
+
+        public const int MaxLength = 64;
+        public const int MinLength = 2;
+        [MaxLength(MaxLength)]
+        [MinLength(MinLength)]
         [Required]
         public string Name { get; set; }
         [NotMapped]

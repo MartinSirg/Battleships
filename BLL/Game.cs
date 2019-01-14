@@ -30,6 +30,7 @@ namespace BLL
         public Player CurrentPlayer { get; set; }
         public Player TargetPlayer { get; set; }
         public List<GameMove> GameMoves = new List<GameMove>();
+        public ApplicationMenu Menus;
         private readonly LetterNumberSystem _converter = new LetterNumberSystem();
         public string SelectedMode { get; set; } = "";
         public const int MAX_ROWS = 24, MIN_ROWS = 10, MIN_COLS = 10, MAX_COLS = 24;
@@ -48,7 +49,8 @@ namespace BLL
             Player2 = new Player(board2, "Player2");
             CurrentPlayer = Player1;
             TargetPlayer = Player2;
-            CurrentMenu = new ApplicationMenu(this).GetMain();
+            Menus = new ApplicationMenu(this);
+            CurrentMenu = Menus.MainMenu;
         }
 
         /**
@@ -59,13 +61,13 @@ namespace BLL
          *
          * @param locationString: a string to be parsed into a Tile object. Format example: "B7"
          *                      If tile can't be pares then Result.NoSuchTile is returned
-         * @returns Result: enum Result of the method call (NoSuchTile, TileAlreadyBombed, GameOver, ComputerWon, SuccessfulBombing)
+         * @returns Result: enum Result of the method call (NoSuchTile, TileAlreadyBombed, GameOver, ComputerWon, TwoBombings, OneBombing)
          */
         public Result BombLocation(string locationString)
         {
             Tile targetTile = GetTile(locationString, TargetPlayer.Board);
             if (targetTile == null) return Result.NoSuchTile;
-            if(targetTile.IsBombed) return Result.TileAlreadyBombed;
+            if (targetTile.IsBombed) return Result.TileAlreadyBombed;
 
             var isHit = TargetPlayer.Board.BombLocation(targetTile.Row, targetTile.Col);
             GameMoves.Add(new GameMove(TargetPlayer, targetTile));
@@ -104,9 +106,9 @@ namespace BLL
          * @param dbContext: Database connection class thingamajig
          * @returns Result: enum Result of the method call 
          */
-        public void SaveGame(AppDbContext dbContext, string saveName, bool isFinished)
+        public Result SaveGame(AppDbContext dbContext, string saveName, bool isFinished)
         {
-            
+            if (saveName.Length > Domain.SaveGame.MaxLength) return Result.TooLong;
             var saveGame = new SaveGame
             {
                 IsFinished = isFinished,
@@ -114,7 +116,8 @@ namespace BLL
                 Player1 = Player1,
                 Player2 = Player2,
                 GameMoves = GameMoves,
-                Name = saveName
+                Name = saveName,
+                Mode = SelectedMode
             };
             dbContext.SaveGames.Add(saveGame);
             dbContext.SaveChanges();
@@ -131,6 +134,8 @@ namespace BLL
             {
                 //Calls previousMenu until reaches bottom of the stack i.e, main menu
             }
+
+            return Result.None;
         }
 
         /**
@@ -181,9 +186,9 @@ namespace BLL
          * Also resets player's boards, due to possible conflicts
          *
          * @param shipSize: ship size to be deleted (has to exist in current rules)
-         * @returns Result: enum Result of the method call
+         * @returns Result: enum Result of the method call (InvalidSize, RulesChanged)
          */
-        public Result DeleteShipInRules(int shipSize)
+        public Result DeleteShipFromRules(int shipSize)
         {
             if (Rules.BoatRules.All(rule => rule.Size != shipSize)) return Result.InvalidSize;
             
@@ -191,7 +196,7 @@ namespace BLL
             CurrentPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
             TargetPlayer.Board = new Board(Rules.BoardRows, Rules.BoardCols, Rules.CanShipsTouch);
 
-            return Result.RulesChanged;
+            return Result.None;
         }
 
         /**
@@ -218,7 +223,6 @@ namespace BLL
             return Result.None;
         }
 
-        
         /**
          * Changes the board height(rows) rule.
          * If user input is different from current rule, then player's boards are reset.
@@ -280,7 +284,6 @@ namespace BLL
             return Result.RulesChanged;
         }
 
-        
         /**
          * Places ship on current player's board, using highlighted tiles assigned previously.
          * Will not place if:
@@ -290,7 +293,7 @@ namespace BLL
          * 4) all determined sized ships have been placed
          * 5) overlaps other ships/ violates can touch rules (this is checked in Board.AddBattleship() method)
          *
-         * @returns Result: enum Result of the method call
+         * @returns Result: enum Result of the method call (HighlightMissing, NoCommonAxis, InvalidSize, Invalid Quantity, Overlap)
          */
         public Result PlaceShipOnBoard()
         {
@@ -300,24 +303,24 @@ namespace BLL
             CurrentPlayer.Board.Battleships.ForEach(battleship => boats[battleship.Size]--);   //Reduce count with placed ships 
             Tile start = CurrentPlayer.Board.HighlightedStart, end = CurrentPlayer.Board.HighLightedEnd;
             
-            if (start == null || end == null) return Result.ShipNotPlaced;
+            if (start == null || end == null) return Result.HighlightMissing;
             bool hasCommonAxis = start.Row - end.Row == 0 || start.Col - end.Col == 0;
-            if (!hasCommonAxis) return Result.ShipNotPlaced;
+            if (!hasCommonAxis) return Result.NoCommonAxis;
 
-            var length = start.Row - end.Row == 0 ? Math.Abs(start.Col - end.Col) + 1: Math.Abs(start.Row - end.Row) + 1;
+            var length = GetHighlightedSize();
 
-            if (!boats.ContainsKey(length)) return Result.ShipNotPlaced;
-            if (boats[length] <= 0) return Result.ShipNotPlaced;
+            if (!boats.ContainsKey(length)) return Result.InvalidSize;         // Invalid size
+            if (boats[length] <= 0)         return Result.InvalidQuantity;     // No ships left
 
             try
             {
                 CurrentPlayer.Board.AddBattleship((start.Row, start.Col), (end.Row, end.Col), new Battleship(length));
                 ResetHighlightedTiles();
-                return Result.ShipPlaced;
+                return Result.None;
             }
             catch (Exception e)
             {
-                return Result.ShipNotPlaced;
+                return Result.Overlap;
             }
         }
         
@@ -326,11 +329,11 @@ namespace BLL
          *
          * @returns Result: enum Result of the method call  
          */
-        public Result DeleteShipFromBoard(string userInput)
+        public Result DeleteShipFromBoard()
         {
             Tile deletable = CurrentPlayer.Board.HighlightedStart;
             
-            if (deletable == null) return Result.ShipNotDeleted;
+            if (deletable == null) return Result.TileNotHighlighted;
             if (deletable.IsEmpty()) return Result.ShipNotDeleted;
             
             CurrentPlayer.Board.DeleteShipFromBoard(deletable);
@@ -350,6 +353,8 @@ namespace BLL
         {
             if (TargetPlayer.Name.Equals(name)) return Result.PlayerNameNotChanged;
             if (name.Equals("Computer")) return Result.PlayerNameNotChanged;
+            if (name.Length > Player.MaxLength) return Result.TooLong;
+            if (name.Length < Player.MinLength) return Result.TooShort;
             
             CurrentPlayer.Name = name;
             return Result.PlayerNameChanged;
@@ -396,19 +401,19 @@ namespace BLL
          *                      If tile can't be pares then Result.NoSuchTile is returned
          * @returns Result: enum Result of the method call 
          */
-        public Result GetTileOfDeleteableShip(string locationString)
+        public Result SetTileContainingDeletableShip(string locationString)
         {
             if (CurrentPlayer.Board.HighlightedStart != null) // resets current highlight if there is one
                 CurrentPlayer.Board.HighlightedStart.IsHighlightedStart = false;
             
             Tile startTile = GetTile(locationString, CurrentPlayer.Board);
             
-            if (startTile == null) return Result.NoSuchTile;
+            if (startTile == null)   return Result.NoSuchTile;
             if (startTile.IsEmpty()) return Result.TileNotHighlighted;
         
             startTile.IsHighlightedStart = true;
             CurrentPlayer.Board.HighlightedStart = startTile;
-            return Result.TileHighlighted;
+            return Result.None;
         }
 
         /**
@@ -417,20 +422,20 @@ namespace BLL
          *
          * @param locationString: a string to be parsed into a Tile object. Format example: "B7"
          *                      If tile can't be pares then Result.NoSuchTile is returned
-         * @returns Result: enum Result of the method call 
+         * @returns Result: enum Result of the method call (NoSuchTile, TileNotHighlighted, None)
          */
-        public Result GetShipStartTile(string locationString)
+        public Result SetShipStartTile(string locationString)
         {
             if (CurrentPlayer.Board.HighlightedStart != null)    // resets current highlight if there is one
                 CurrentPlayer.Board.HighlightedStart.IsHighlightedStart = false;
             Tile startTile = GetTile(locationString, CurrentPlayer.Board);
             
-            if (startTile == null) return Result.NoSuchTile;
+            if (startTile == null)            return Result.NoSuchTile;
             if (startTile.IsEmpty() == false) return Result.TileNotHighlighted;
             
             startTile.IsHighlightedStart = true;
             CurrentPlayer.Board.HighlightedStart = startTile;
-            return Result.TileHighlighted;
+            return Result.None;
         }
         
         /**
@@ -441,18 +446,18 @@ namespace BLL
          *                      If tile can't be pares then Result.NoSuchTile is returned
          * @returns Result: enum Result of the method call 
          */
-        public Result GetShipEndTile(string locationString)
+        public Result SetShipEndTile(string locationString)
         {
             if (CurrentPlayer.Board.HighLightedEnd != null)    // resets current highlight if there is one
                 CurrentPlayer.Board.HighLightedEnd.IsHighlightedEnd = false;
             Tile endTile = GetTile(locationString, CurrentPlayer.Board);
             
-            if (endTile == null) return Result.NoSuchTile;
+            if (endTile == null)            return Result.NoSuchTile;
             if (endTile.IsEmpty() == false) return Result.TileNotHighlighted;
             
             endTile.IsHighlightedEnd = true;
             CurrentPlayer.Board.HighLightedEnd = endTile;
-            return Result.TileHighlighted;
+            return Result.None;
         }
 
         /**
@@ -491,7 +496,7 @@ namespace BLL
 
             try // tries to convert row int from row string(i.e "B"). Returns tile if successful
             {
-                int row = _converter.GetNumberFromLetters(stringRow) - 1, col = int.Parse(stringCol) - 1;
+                int row = _converter.GetNumberFromLetters(stringRow.ToUpper()) - 1, col = int.Parse(stringCol) - 1;
                 return board.Tiles[row]?[col];
             }
             catch (IndexOutOfRangeException e) {return null;}
@@ -556,12 +561,12 @@ namespace BLL
          * @param saveGameId: loadable save game's id (can be received from selecting one from GetSaveGames() method)
          * @returns Result: enum Result of the method call (NoSuchSaveGameId, GameParametersLoaded) 
          */
-        public Result LoadGame(AppDbContext dbContext, int saveGameId)
+        private void LoadGame(AppDbContext dbContext, int saveGameId)
         {
             bool isIdPresent = dbContext.SaveGames
                 .Where(game => game.IsFinished == false).ToList()
                 .Any(game => game.SaveGameId == saveGameId);
-            if (isIdPresent == false) return Result.NoSuchSaveGameId;
+            if (isIdPresent == false) throw new Exception("Invalid saveGameId: " + saveGameId);
 
             SaveGame save = dbContext.SaveGames
                 .Include(saveGame => saveGame.Rules)
@@ -579,9 +584,10 @@ namespace BLL
             var tempPlayer2 = save.Player2;
             Rules = (Rules) tempRules.Clone();
             RestorePlayerBoardTiles(tempPlayer1, save, dbContext); // clones tiles into player's boards
+            SelectedMode = new string(save.Mode.ToCharArray());
             RestorePlayerBoardTiles(tempPlayer2, save, dbContext);
 
-            var tempGameMoves = save.GameMoves;
+            List<GameMove> tempGameMoves = save.GameMoves.OrderBy(move => move.GameMoveId).ToList();
             Player1 = (Player) tempPlayer1.Clone();
             Player2 = (Player) tempPlayer2.Clone();
             
@@ -607,7 +613,6 @@ namespace BLL
                 TargetPlayer = CurrentPlayer == Player1 ? Player2 : Player1;
             }
 
-            return Result.GameParametersLoaded;
         }
         
         /**
@@ -619,14 +624,14 @@ namespace BLL
          * @param saveGameId: loadable save game's id (can be received from selecting one from GetSaveGames() method)
          * @returns Result: enum Result of the method call (NoSuchSaveGameId, GameParametersLoaded) 
          */
-        public Result ReplayGame(AppDbContext dbContext, int saveGameId)
+        private void LoadReplayGame(AppDbContext dbContext, int saveGameId)
         {
             
             bool isIdPresent = dbContext.SaveGames
                 .Where(game => game.IsFinished).ToList()
                 .Any(game => game.SaveGameId == saveGameId);
 
-            if (isIdPresent == false) return Result.NoSuchSaveGameId;
+            if (isIdPresent == false) throw new Exception("Invalid saveGameId: " + saveGameId);
             
             SaveGame s = dbContext.SaveGames
                 .Include(saveGame => saveGame.Rules)
@@ -662,7 +667,6 @@ namespace BLL
             CurrentPlayer = Player1;                                        // Game moves are preserved
             TargetPlayer = Player2;
             
-            return Result.ReplayReadySaveLoaded;
         }
         
         /**
@@ -671,14 +675,12 @@ namespace BLL
          * Or CurrentPlayer is switched and returns SuccessfulReplayBombing
          * @param locationString: locationString to be parsed into a Tile on a board (Example "B7")
          */
-        public Result BombShipReplay(string locationString)
+        public Result BombShipReplay(Tile targetTile)
         {
-            Tile targetTile = GetTile(locationString, TargetPlayer.Board);
             if (targetTile == null) return Result.NoSuchTile;
             if (targetTile.IsBombed) return Result.TileAlreadyBombed;
-
-            TargetPlayer.Board.BombLocation(targetTile.Row, targetTile.Col);
             
+            TargetPlayer.Board.BombLocation(targetTile.Row, targetTile.Col);
             if (TargetPlayer.Board.AnyShipsLeft() == false) return Result.GameOver;
             
             SwitchCurrentPlayer();
@@ -836,11 +838,14 @@ namespace BLL
         /**
          * Current menu is pushed to the MenuStack and then new menu is marked as current menu 
          */
-        public Result ChangeMenu(Menu menu)
+        public void ChangeMenu(Menu menu)
         {
             MenuStack.Push(CurrentMenu);
             CurrentMenu = menu;
-            return Result.ChangedMenu;
+            if (CurrentMenu.TitleWithName != null)
+            {
+                CurrentMenu.Title = CurrentMenu.TitleWithName.Replace("PLAYER_NAME", CurrentPlayer.Name);
+            }
         }
         
         /**
@@ -861,21 +866,34 @@ namespace BLL
         /**
          * Fills the menu's menuItems with id-s and names
          */
-        public Result PopulateLoadsMenu(Menu menu, bool isFinished, AppDbContext dbContext)
+        public Result FillLoadsMenu(Menu menu, bool isFinished, AppDbContext dbContext)
         {
             menu.MenuItems.Clear();
             List<SaveGame> saveGames = dbContext.SaveGames
                 .Where(game => game.IsFinished == isFinished)
+                .Include(game => game.Player1)
+                .Include(game => game.Player2)
+                .Include(game => game.GameMoves)
                 .OrderBy(game => game.SaveGameId)
                 .ToList();
-
+            int longestPad = saveGames.Max(game => game.Name.Length);
+            
             foreach (var saveGame in saveGames)
             {
                 menu.MenuItems.Add(new MenuItem
                 {
                     Shortcut = saveGame.SaveGameId.ToString(),
-                    Description = saveGame.Name,
-                    GetCommand = () => isFinished? Command.ReplayGame : Command.LoadGame
+                    Description = $"{saveGame.Name.PadRight(longestPad + 4)}{saveGame.Player1.Name} vs {saveGame.Player2.Name} with {saveGame.GameMoves.Count} moves",
+                    GetCommand = () =>
+                    {
+                        if (isFinished) LoadReplayGame(dbContext, saveGame.SaveGameId);
+                        else
+                        {
+                            LoadGame(dbContext, saveGame.SaveGameId);
+                            ChangeMenu(Menus.InGameMenu);
+                        }
+                        return isFinished ? Command.ShowGameReplay : Command.None;
+                    }
                 });
             }
 
@@ -897,6 +915,24 @@ namespace BLL
             {
                 CurrentPlayer.Board.HighLightedEnd.IsHighlightedEnd = false;
                 CurrentPlayer.Board.HighLightedEnd = null;
+            }
+        }
+
+        public int GetHighlightedSize()
+        {
+            Tile start = CurrentPlayer.Board.HighlightedStart, end = CurrentPlayer.Board.HighLightedEnd;
+            if (start == null || end == null)
+            {
+                return -1;
+            }
+            return start.Row - end.Row == 0 ? Math.Abs(start.Col - end.Col) + 1: Math.Abs(start.Row - end.Row) + 1;
+        }
+
+        public void ReturnToRootMenu()
+        {
+            while (PreviousMenu() != Result.NoPreviousMenuFound)
+            {
+                //Calls previousMenu until reaches bottom of the stack i.e, main menu
             }
         }
     }

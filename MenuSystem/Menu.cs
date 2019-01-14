@@ -9,13 +9,15 @@ namespace MenuSystem
     {
         public string Title { get; set; }
         public string TitleWithName;
-        public Display DisplayBefore;
+        public Display DisplayBefore = Display.Nothing;
         public List<MenuItem> MenuItems { get; set; }
         public MenuItem Previous { get; set; } = new MenuItem
         {
-            Shortcut = "X",
+            Shortcut = ExitString,
             Description = "Previous menu",
             GetCommand = () => Command.Previous
         };
+
+        public static string ExitString { get; set; } = "X";
     }
 }
