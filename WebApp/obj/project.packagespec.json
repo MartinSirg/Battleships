@@ -14,7 +14,14 @@
     ],
     "frameworks": {
       "netcoreapp2.2": {
-        "projectReferences": {}
+        "projectReferences": {
+          "C:\\Projects Repositories\\C#\\BLL\\BLL.csproj": {
+            "projectPath": "C:\\Projects Repositories\\C#\\BLL\\BLL.csproj"
+          },
+          "C:\\Projects Repositories\\C#\\DAL\\DAL.csproj": {
+            "projectPath": "C:\\Projects Repositories\\C#\\DAL\\DAL.csproj"
+          }
+        }
       }
     },
     "warningProperties": {
