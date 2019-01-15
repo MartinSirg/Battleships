@@ -19,7 +19,7 @@ namespace BLL
 
         private Menu GetMain()
         {
-            var shipsAndbombings = new Menu
+            var shipsAndBombings = new Menu
             {
                 Title = "CHANGE ME!!!",
                 TitleWithName = "PLAYER_NAME's ships",
@@ -49,7 +49,7 @@ namespace BLL
                         Description = "Show my ships and bombings",
                         GetCommand = () =>
                         {
-                            Game.ChangeMenu(shipsAndbombings);
+                            Game.ChangeMenu(shipsAndBombings);
                             return Command.None;
                         }
                     },
@@ -59,14 +59,14 @@ namespace BLL
                         Shortcut = "9",
                         Description = "Save and Exit",
                         GetCommand = () => Command.SaveUnfinishedGame
-                    },
-                    new MenuItem
-                    {
-                        Id = 4,
-                        Shortcut = "8",
-                        Description = "Exit without saving"
-                        //CommandToExecute added after mainMenu declaration
                     }
+//                    new MenuItem
+//                    {
+//                        Id = 4,
+//                        Shortcut = "8",
+//                        Description = "Exit without saving"
+//                        //CommandToExecute added after mainMenu declaration
+//                    }
                 }
             };
             InGameMenu = inGameMenu;
@@ -98,7 +98,7 @@ namespace BLL
                         Id = 7,
                         Shortcut = "3",
                         Description = "Delete ship",
-                        GetCommand = () => Command.DeleteShipInRules
+                        GetCommand = () => Command.DeleteShipFromRules
                     }
                     
                 }
@@ -162,13 +162,13 @@ namespace BLL
                             return Command.None;
                         }
                     },
-                    new MenuItem
-                    {
-                        Id = 13,
-                        Shortcut = "3",
-                        Description = "Set name",
-                        GetCommand = () => Command.SetRulesetName
-                    }
+//                    new MenuItem
+//                    {
+//                        Id = 13,
+//                        Shortcut = "3",
+//                        Description = "Set name",
+//                        GetCommand = () => Command.SetRulesetName
+//                    }
                 }
             };
             
@@ -185,11 +185,7 @@ namespace BLL
                         Description = "Set custom rules",
                         GetCommand = () =>
                         {
-                            if (Game.Rules.Name.Equals("Standard rules"))
-                            {
-                                Game.Rules = (Rules) Game.Rules.Clone();
-                                Game.Rules.Name = "Custom rules";
-                            }
+                            Game.SetCustomRules();
                             Game.ChangeMenu(customRulesMenu);
                             return Command.None;
                         }
@@ -517,17 +513,21 @@ namespace BLL
                     }
                 }
             };
-            
-            inGameMenu.MenuItems
-                .Find(item => item.Shortcut.Equals("8"))
-                .GetCommand = () =>
+
+            inGameMenu.Previous = new MenuItem
             {
-                Game.ResetAll();
-                Game.MenuStack.Clear();
-                Game.CurrentMenu = mainMenu;
-                
-                return Command.None;
+                Shortcut = Menu.ExitString,
+                Description = "Exit to main menu without saving",
+                GetCommand = () =>
+                {
+                    Game.ResetAll();
+                    Game.MenuStack.Clear();
+                    Game.CurrentMenu = mainMenu;
+
+                    return Command.None;
+                }
             };
+                
             
             
             return mainMenu;

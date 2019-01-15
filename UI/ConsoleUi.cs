@@ -42,7 +42,7 @@ namespace UI
             while (true)
             {
                 Console.Clear();
-                
+                Command command;
                 // 1)Parse DisplayBefore
                 ParseDisplayBefore(_game.CurrentMenu.DisplayBefore);
                 
@@ -54,13 +54,15 @@ namespace UI
                 if (shortcut.Equals("")) continue; // invalid shortcut, continue loop to try again
                 if (shortcut.ToLower().Equals(_exitString.ToLower()))
                 {
-                    _game.PreviousMenu();
-                    continue;
+                    command = _game.CurrentMenu.Previous.GetCommand();
+                }
+                else
+                {
+                    // 4)Run and save Command
+                    command = _game.CurrentMenu.MenuItems
+                        .Find(item => item.Shortcut.ToLower().Equals(shortcut.ToLower())).GetCommand();
                 }
                 
-                // 4)Run and save Command
-                var command = _game.CurrentMenu.MenuItems
-                    .Find(item => item.Shortcut.ToLower().Equals(shortcut.ToLower())).GetCommand();
 
                 // 5)Parse command
                 ParseCommand(command, shortcut);
@@ -149,7 +151,6 @@ namespace UI
                 
                 case Command.SaveUnfinishedGame:
                     _game.SaveGame(_dbContext, GetSaveGameName(), false);
-                    
                     break;
                 
                 case Command.EditShipInRules:
@@ -160,7 +161,7 @@ namespace UI
                     AddShipToRules();
                     break;
                 
-                case Command.DeleteShipInRules:
+                case Command.DeleteShipFromRules:
                     DeleteShipFromRules();
                     break;
                 
@@ -176,9 +177,9 @@ namespace UI
                     EditBoardHeight();
                     break;
                     
-                case Command.SetRulesetName:
-                    SetRulesetName();
-                    break;
+//                case Command.SetRulesetName:
+//                    SetRulesetName();
+//                    break;
                     
                 case Command.SetStandardRules:
                     Console.Clear();
@@ -232,10 +233,16 @@ namespace UI
                     _game.FillLoadsMenu(_game.CurrentMenu, false, _dbContext);
                     break;
                                         
-                case Command.ShowGameReplay:
+                case Command.LoadReplay:
+                    _game.LoadReplayGame(_dbContext, int.Parse(shortCut));
                     RunReplay();
                     break;
-                    
+                
+                case Command.LoadGame:
+                    _game.LoadGame(_dbContext, int.Parse(shortCut));
+                    _game.ChangeMenu(_game.Menus.InGameMenu);
+                    break;
+                
                 case Command.CantStartGame:
                     Alert("Both players have to be ready and all ships have to be placed!", ConsoleColor.Red);
                     break;
@@ -434,7 +441,7 @@ namespace UI
                 Console.Clear();
                 Console.WriteLine("Editing board width:\n");
                 DisplayBoardRules(_game.Rules);
-                Console.Write($"Enter the desired board width between {Game.MIN_COLS} and {Game.MAX_COLS} inclusive. ({_exitString} to exit): ");
+                Console.Write($"Enter the desired board width between {Game.MinCols} and {Game.MaxCols} inclusive. ({_exitString} to exit): ");
                 var input = Console.ReadLine();
                 if (input != null && input.ToLower().Equals(_exitString)) break;
                 
@@ -445,7 +452,7 @@ namespace UI
                 }
                 
                 var result = _game.EditBoardWidth(size);
-                if (result == Result.InvalidInput) Alert($"{input} is not between {Game.MIN_COLS} and {Game.MAX_COLS} inclusive!", ConsoleColor.Red);
+                if (result == Result.InvalidInput) Alert($"{input} is not between {Game.MinCols} and {Game.MaxCols} inclusive!", ConsoleColor.Red);
                 else break; //Successful change
             }
         }
@@ -457,7 +464,7 @@ namespace UI
                 Console.Clear();
                 Console.WriteLine("Editing board height:\n");
                 DisplayBoardRules(_game.Rules);
-                Console.Write($"Enter the desired board height between {Game.MIN_ROWS} and {Game.MAX_ROWS} inclusive. ({_exitString} to exit): ");
+                Console.Write($"Enter the desired board height between {Game.MinRows} and {Game.MaxRows} inclusive. ({_exitString} to exit): ");
                 var input = Console.ReadLine();
                 if (input != null && input.ToLower().Equals(_exitString)) break;
                 
@@ -468,27 +475,27 @@ namespace UI
                 }
                 
                 var result = _game.EditBoardHeight(size);
-                if (result == Result.InvalidInput) Alert($"{input} is not between {Game.MIN_ROWS} and {Game.MAX_ROWS} inclusive!", ConsoleColor.Red);
+                if (result == Result.InvalidInput) Alert($"{input} is not between {Game.MinRows} and {Game.MaxRows} inclusive!", ConsoleColor.Red);
                 else break; //Successful change
             }
         }
 
-        private void SetRulesetName()
-        {
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine("Editing ruleset name:\n");
-                Console.WriteLine($"Current ruleset name: {_game.Rules.Name}\n");
-                Console.Write($"Enter a new name for current ruleset. ({_exitString} to exit): ");
-                var input = Console.ReadLine();
-                if (input != null && input.ToLower().Equals(_exitString)) break;
-                
-                var result = _game.SetRulesetName(input);
-                if (result == Result.InvalidInput) Alert($"Name can't be {input}", ConsoleColor.Red);
-                else break; //Successful change
-            }
-        }
+//        private void SetRulesetName()
+//        {
+//            while (true)
+//            {
+//                Console.Clear();
+//                Console.WriteLine("Editing ruleset name:\n");
+//                Console.WriteLine($"Current ruleset name: {_game.Rules.Name}\n");
+//                Console.Write($"Enter a new name for current ruleset. ({_exitString} to exit): ");
+//                var input = Console.ReadLine();
+//                if (input != null && input.ToLower().Equals(_exitString)) break;
+//                
+//                var result = _game.SetRulesetName(input);
+//                if (result == Result.InvalidInput) Alert($"Name can't be {input}", ConsoleColor.Red);
+//                else break; //Successful change
+//            }
+//        }
 
         private void SetShipStartTile()
         {
@@ -827,7 +834,6 @@ namespace UI
             if (input == null) return "";
             if (menu.Previous?.Shortcut.ToLower().Equals(input.ToLower()) ?? false)
             {
-                menu.Previous.GetCommand();
                 return input;
             }
             if (menu.MenuItems.All(item => item.Shortcut.ToUpper() != input.ToUpper()))

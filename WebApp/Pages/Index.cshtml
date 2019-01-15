@@ -1,13 +1,54 @@
 ﻿@page
+@using BLL
 @model IndexModel
 @{
     ViewData["Title"] = "Home page";
 }
 
-@* <div class="text-center"> *@
-@*     <h1 class="display-4">Welcome</h1> *@
-@*     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p> *@
-@* </div> *@
+@foreach (var msgTuple in Model.Messages)
+{
+    switch (msgTuple.type)
+    {
+        case MsgType.Good:
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                @msgTuple.msg
+            </div>
+            break;
+        case MsgType.Bad:
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                @msgTuple.msg
+            </div>
+            break;
+        default:
+            throw new ArgumentOutOfRangeException();
+    }
+}
 
-@Html.Partial("Shared/_Menu", Model)
-<h1>@Model.ErrorId</h1>
+@Html.Partial("Shared/_GameRules")
+
+
+<h1> @Model.Game.CurrentMenu.Title </h1>
+@foreach (var menuItem in Model.Game.CurrentMenu.MenuItems)
+{
+    if (!Model.HiddenMenuItemIds.Contains(menuItem.Id))    //Only render menu items that change menu
+    {
+        <form method="post" class="form-group">
+            <input type="hidden" name="shortCut" value="@menuItem.Shortcut"/>
+            <input type="submit" class="btn btn-success" value="@menuItem.Description"/>
+        </form>
+    }
+}
+
+@if (Model.Game.CurrentMenu.Previous != null)
+{
+    <form method="post" class="form-group">
+        <input type="hidden" name="shortCut" value="@Model.Game.CurrentMenu.Previous.Shortcut"/>
+        <input type="submit" class="btn btn-danger" value="@Model.Game.CurrentMenu.Previous.Description"/>
+    </form>
+}

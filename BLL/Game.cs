@@ -33,10 +33,13 @@ namespace BLL
         public ApplicationMenu Menus;
         private readonly LetterNumberSystem _converter = new LetterNumberSystem();
         public string SelectedMode { get; set; } = "";
-        public const int MAX_ROWS = 24, MIN_ROWS = 10, MIN_COLS = 10, MAX_COLS = 24;
+        public const int MaxRows = 24, MinRows = 10, MinCols = 10, MaxCols = 24;
+        public const int MaxBoatQuantity = 5, MinBoatQuantity = 1, MaxBoatSize = 10, MinBoatSize = 1;
         
         public Menu CurrentMenu { get; set; }
         public Stack<Menu> MenuStack { get; set; } = new Stack<Menu>();
+
+        public List<(string text, MsgType type)> Messages { get; set; } = new List<(string text, MsgType type)>();
 
         private Game()
         {
@@ -148,8 +151,8 @@ namespace BLL
         {
             List<int> currentSizes = new List<int>();
             Rules.BoatRules.ForEach(rule => currentSizes.Add(rule.Size));
-            if (size < 1 || size > 10 || currentSizes.Contains(size)) return Result.InvalidSize;
-            if (quantity < 1 || quantity > 5) return Result.InvalidQuantity;
+            if (size < MinBoatSize || size > MaxBoatSize || currentSizes.Contains(size)) return Result.InvalidSize;
+            if (quantity < MinBoatQuantity || quantity > MaxBoatQuantity) return Result.InvalidQuantity;
             Rules.BoatRules.Add(new BoatRule(size, quantity));
             Rules.BoatRules.Sort((rule, boatRule) =>
             {   //This is a comparable thingamajig
@@ -172,7 +175,7 @@ namespace BLL
         public Result EditShipInRules(int size, int quantity)
         {
             if (Rules.BoatRules.All(rule => rule.Size != size)) return Result.InvalidSize;
-            if (quantity < 1 || quantity > 5) return Result.InvalidQuantity;
+            if (quantity < MinBoatQuantity || quantity > MaxBoatQuantity) return Result.InvalidQuantity;
             
             Rules.BoatRules.Find(rule => rule.Size == size).Quantity = quantity;
      
@@ -232,7 +235,7 @@ namespace BLL
          */
         public Result EditBoardHeight(int newHeight)
         {
-            if (newHeight < MIN_ROWS || newHeight > MAX_ROWS) return Result.InvalidInput;
+            if (newHeight < MinRows || newHeight > MaxRows) return Result.InvalidInput;
             if (Rules.BoardRows == newHeight) return Result.None;     //current rule == new rule. Do nothing
             
             CurrentPlayer.Board = new Board(newHeight, Rules.BoardCols, Rules.CanShipsTouch);
@@ -251,7 +254,7 @@ namespace BLL
          */
         public Result EditBoardWidth(int newWidth)
         {
-            if (newWidth < MIN_COLS || newWidth > MAX_COLS) return Result.InvalidInput;
+            if (newWidth < MinCols || newWidth > MaxCols) return Result.InvalidInput;
             if (Rules.BoardCols == newWidth) return Result.None;        //current rule == new rule. Do nothing
             
             CurrentPlayer.Board = new Board(Rules.BoardRows, newWidth, Rules.CanShipsTouch);
@@ -561,7 +564,7 @@ namespace BLL
          * @param saveGameId: loadable save game's id (can be received from selecting one from GetSaveGames() method)
          * @returns Result: enum Result of the method call (NoSuchSaveGameId, GameParametersLoaded) 
          */
-        private void LoadGame(AppDbContext dbContext, int saveGameId)
+        public void LoadGame(AppDbContext dbContext, int saveGameId)
         {
             bool isIdPresent = dbContext.SaveGames
                 .Where(game => game.IsFinished == false).ToList()
@@ -624,7 +627,7 @@ namespace BLL
          * @param saveGameId: loadable save game's id (can be received from selecting one from GetSaveGames() method)
          * @returns Result: enum Result of the method call (NoSuchSaveGameId, GameParametersLoaded) 
          */
-        private void LoadReplayGame(AppDbContext dbContext, int saveGameId)
+        public void LoadReplayGame(AppDbContext dbContext, int saveGameId)
         {
             
             bool isIdPresent = dbContext.SaveGames
@@ -883,17 +886,9 @@ namespace BLL
                 menu.MenuItems.Add(new MenuItem
                 {
                     Shortcut = saveGame.SaveGameId.ToString(),
-                    Description = $"{saveGame.Name.PadRight(longestPad + 4)}{saveGame.Player1.Name} vs {saveGame.Player2.Name} with {saveGame.GameMoves.Count} moves",
-                    GetCommand = () =>
-                    {
-                        if (isFinished) LoadReplayGame(dbContext, saveGame.SaveGameId);
-                        else
-                        {
-                            LoadGame(dbContext, saveGame.SaveGameId);
-                            ChangeMenu(Menus.InGameMenu);
-                        }
-                        return isFinished ? Command.ShowGameReplay : Command.None;
-                    }
+//                    Description = $"{saveGame.Name.PadRight(longestPad + 4)}{saveGame.Player1.Name} vs {saveGame.Player2.Name} with {saveGame.GameMoves.Count} moves",
+                    Description = saveGame.Name,
+                    GetCommand = () => isFinished ? Command.LoadReplay : Command.LoadGame
                 });
             }
 
@@ -934,6 +929,13 @@ namespace BLL
             {
                 //Calls previousMenu until reaches bottom of the stack i.e, main menu
             }
+        }
+
+        public void SetCustomRules()
+        {
+            if (!Rules.Name.Equals("Standard rules")) return;
+            Rules = (Rules) Rules.Clone();
+            Rules.Name = "Custom rules";
         }
     }
 }

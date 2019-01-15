@@ -1,6 +1,6 @@
 namespace MenuSystem
 {
-    public enum Command
+    public enum Command : int
     {
         Previous,                //Call Game.Previous()
         BombLocation,            //Call Game.BombLocation()
@@ -8,11 +8,10 @@ namespace MenuSystem
         SaveUnfinishedGame,
         EditShipInRules,
         AddShipToRules,
-        DeleteShipInRules,
+        DeleteShipFromRules,
         EditShipsCanTouchRule,
         EditBoardWidth,
         EditBoardHeight,
-        SetRulesetName,
         SetStandardRules,
         SetShipStartTile,
         PlaceShipOnBoard,
@@ -23,8 +22,8 @@ namespace MenuSystem
         FillReplayMenu,
         FillLoadMenu,
         LoadGame,
-        ShowGameReplay,
         CantStartGame,
-        GenerateRandomBoard
+        GenerateRandomBoard,
+        LoadReplay
     }
 }

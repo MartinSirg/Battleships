@@ -1,0 +1,68 @@
+@using BLL
+@using MenuSystem
+@model IndexModel
+<style type="text/css">.editFields { }</style>
+
+<h3> Current rules </h3>
+<p>Type: @Model.Game.Rules.Name</p>
+
+
+<form method="post" asp-page-handler="boardRules">
+    <div class="row">
+        <div class="col">
+            Board width: 
+            <input type="number" style="width: 3em" min="@Game.MinCols" max="@Game.MaxCols" name="width" value="@Model.Game.Rules.BoardCols"/>
+        </div>
+        <div class="col">
+            Board height: 
+            <input type="number" style="width: 3em" min="@Game.MinRows" max="@Game.MaxRows" name="height" value="@Model.Game.Rules.BoardRows"/>
+        </div>
+        <div class="col">
+            Ships can touch: 
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="canTouch" id="canTouch1" value="Yes" @if (Model.Game.Rules.CanShipsTouch == 1)
+                                                                                                        {
+                                                                                                            @:checked
+                                                                                                        }>
+                <label class="form-check-label" for="canTouch1">
+                    Yes
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="canTouch" id="canTouch2" value="No" @if (Model.Game.Rules.CanShipsTouch == 0)
+                                                                                                       {
+                                                                                                           @:checked
+                                                                                                       }>
+                <label class="form-check-label" for="canTouch2">
+                    No
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <input type="submit" class="btn-sm btn-info" value="Change board rules"/>
+    </div>
+</form>
+@foreach (var boatRule in Model.Game.Rules.BoatRules)
+{
+    <form>
+        Size @boatRule.Size boat: 
+        <input type="number" min="@Game.MinBoatQuantity" class="editFields" id="@boatRule.Size" max="@Game.MaxBoatQuantity", value="@boatRule.Quantity" disabled>
+        <button type="button" class="btn btn-warning" onclick="edit(@boatRule.Size)">Edit</button>
+    </form>
+}
+<script>
+    function edit(id) {
+        var elements = document.getElementsByClassName("editFields");
+        for (var i = 0, len = elements.length; i < len; i++) {
+            elements[i].disabled = true;
+            if (elements[i].id === id.toString()) {
+                elements[i].disabled = false;
+            }
+        }
+        
+        
+        
+    }
+</script>
+
