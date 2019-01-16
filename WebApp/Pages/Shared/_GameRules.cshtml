@@ -1,7 +1,6 @@
 @using BLL
 @using MenuSystem
 @model IndexModel
-<style type="text/css">.editFields { }</style>
 
 <h3> Current rules </h3>
 <p>Type: @Model.Game.Rules.Name</p>
@@ -45,22 +44,33 @@
 </form>
 @foreach (var boatRule in Model.Game.Rules.BoatRules)
 {
-    <form>
-        Size @boatRule.Size boat: 
-        <input type="number" min="@Game.MinBoatQuantity" class="editFields" id="@boatRule.Size" max="@Game.MaxBoatQuantity", value="@boatRule.Quantity" disabled>
+    <form method="post" asp-page-handler="alt">
+        Size @boatRule.Size boat:
+        <input type="hidden" name="command" value="@((int)Command.EditShipInRules)"/>
+        <input type="hidden" name="value1" value="@boatRule.Size"/>
+        <input type="number" min="@Game.MinBoatQuantity" class="numberFields" id="@boatRule.Size" max="@Game.MaxBoatQuantity" name="value2" value="@boatRule.Quantity" disabled>
         <button type="button" class="btn btn-warning" onclick="edit(@boatRule.Size)">Edit</button>
+        <input type="submit" class="btn btn-success submitFields" id="@boatRule.Size" value="Change" hidden/>
     </form>
 }
 <script>
     function edit(id) {
-        var elements = document.getElementsByClassName("editFields");
-        for (var i = 0, len = elements.length; i < len; i++) {
+        var elements = document.getElementsByClassName("numberFields");
+        var i;
+        var len;
+        for (i = 0, len = elements.length; i < len; i++) {
             elements[i].disabled = true;
             if (elements[i].id === id.toString()) {
                 elements[i].disabled = false;
             }
         }
-        
+        elements = document.getElementsByClassName("submitFields");
+        for (i = 0, len = elements.length; i < len; i++) {
+            elements[i].hidden = true;
+            if (elements[i].id === id.toString()) {
+                elements[i].hidden = false;
+            }
+        }
         
         
     }
