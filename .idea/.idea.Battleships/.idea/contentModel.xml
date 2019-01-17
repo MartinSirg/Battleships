@@ -154,9 +154,12 @@
           <e p="Privacy.cshtml" t="Include" />
           <e p="Privacy.cshtml.cs" t="Include" />
           <e p="shared" t="Include">
+            <e p="_BombShip.cshtml" t="Include" />
             <e p="_CookieConsentPartial.cshtml" t="Include" />
+            <e p="_Empty.cshtml" t="Include" />
             <e p="_GameRules.cshtml" t="Include" />
             <e p="_Layout.cshtml" t="Include" />
+            <e p="_ShipsAddDelete.cshtml" t="Include" />
             <e p="_ValidationScriptsPartial.cshtml" t="Include" />
           </e>
         </e>

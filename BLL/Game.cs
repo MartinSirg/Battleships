@@ -31,7 +31,7 @@ namespace BLL
         public Player TargetPlayer { get; set; }
         public List<GameMove> GameMoves = new List<GameMove>();
         public ApplicationMenu Menus;
-        private readonly LetterNumberSystem _converter = new LetterNumberSystem();
+        public readonly LetterNumberSystem Converter = new LetterNumberSystem();
         public string SelectedMode { get; set; } = "";
         public const int MaxRows = 24, MinRows = 10, MinCols = 10, MaxCols = 24;
         public const int MaxBoatQuantity = 5, MinBoatQuantity = 1, MaxBoatSize = 10, MinBoatSize = 1;
@@ -406,16 +406,15 @@ namespace BLL
          */
         public Result SetTileContainingDeletableShip(string locationString)
         {
-            if (CurrentPlayer.Board.HighlightedStart != null) // resets current highlight if there is one
-                CurrentPlayer.Board.HighlightedStart.IsHighlightedStart = false;
+            ClearCurrentHighlights();
             
-            Tile startTile = GetTile(locationString, CurrentPlayer.Board);
+            Tile targetTile = GetTile(locationString, CurrentPlayer.Board);
             
-            if (startTile == null)   return Result.NoSuchTile;
-            if (startTile.IsEmpty()) return Result.TileNotHighlighted;
+            if (targetTile == null)   return Result.NoSuchTile;
+            if (targetTile.IsEmpty()) return Result.TileNotHighlighted;
         
-            startTile.IsHighlightedStart = true;
-            CurrentPlayer.Board.HighlightedStart = startTile;
+            targetTile.IsHighlightedStart = true;
+            CurrentPlayer.Board.HighlightedStart = targetTile;
             return Result.None;
         }
 
@@ -499,7 +498,7 @@ namespace BLL
 
             try // tries to convert row int from row string(i.e "B"). Returns tile if successful
             {
-                int row = _converter.GetNumberFromLetters(stringRow.ToUpper()) - 1, col = int.Parse(stringCol) - 1;
+                int row = Converter.GetNumberFromLetters(stringRow.ToUpper()) - 1, col = int.Parse(stringCol) - 1;
                 return board.Tiles[row]?[col];
             }
             catch (IndexOutOfRangeException e) {return null;}

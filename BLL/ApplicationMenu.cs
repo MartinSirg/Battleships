@@ -322,7 +322,7 @@ namespace BLL
                     {
                         Id = 26,
                         Shortcut = "4",
-                        Description = "Finished!",
+                        Description = "Ready Up!",
                         GetCommand = () =>
                         {
                             Game.SetCurrentPlayerReady();

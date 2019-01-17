@@ -1,0 +1,136 @@
+@using BLL
+@using Domain
+@using MenuSystem
+@model IndexModel
+@{
+    var game = Model.Game;
+}
+<style type="text/css">
+    table {
+        margin: 1em 0;
+    }
+    
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 2px;
+        width: 3em;
+        height: 3em;
+        display: table-cell;
+        text-align: center;
+        vertical-align: middle;
+    }
+    .shipTile {
+        background-color: green;
+    }
+    .highlightStart {
+        background-color: red;
+    }
+    .highlightEnd {
+        background-color: yellow;
+    }
+    
+    .highlightBoth {
+        background-color: orange;
+    }
+    
+</style>
+<script>
+</script>
+<form method="post" asp-page-handler="alt" id="form">
+    <input type="hidden" id="command" name="command" value=""/>
+    <input type="hidden" id="value1" name="value1" value=""/>
+    <input type="hidden" id="value2" name="value2" value=""/>
+</form>
+
+<div class="row">
+    <div class="col-md-6">
+        <table>
+            <thead>
+            <tr>
+                <th scope="col" class="cell">#</th>
+                @for (var i = 1; i <= game.Rules.BoardCols; i++)
+                {
+                    <th scope="col" class="cell">@i</th>
+                }
+            </tr>
+            </thead>
+            <tbody>
+            @for (var i = 1; i <= game.Rules.BoardRows; i++)
+            {
+                <tr>
+                    @{ var letter = game.Converter.GetLetter(i);}
+                    <th scope="row" class="cell">@letter</th>
+                    @for (var j = 1; j <= Model.Game.Rules.BoardCols; j++)
+                    {
+                        Tile tile = Model.Game.CurrentPlayer.Board.Tiles[i-1][j-1];
+                        var className = "";
+                        if (tile.IsHighlightedStart && tile.IsHighlightedEnd){className = "highlightBoth";}
+                        else if (tile.IsHighlightedStart){className = "highlightStart";}
+                        else if (tile.IsHighlightedEnd){className = "highlightEnd";}
+                        else if (!tile.IsEmpty()){className = "shipTile";}
+                        <td id="@tile" class="@className" onclick="highlightCell('@tile')">@tile</td>
+                    }
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-2">
+        Highlighting:
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="canTouch" id="toggleAdd" value="Yes" checked>
+            <label class="form-check-label" for="toggleAdd">
+                Add
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="canTouch" id="toggleDelete" value="No">
+            <label class="form-check-label" for="toggleDelete">
+                Delete
+            </label>
+        </div>
+    </div>
+    <div class="col-md-2">
+        @foreach (var (key, value) in game.AvailableShips(game.CurrentPlayer))
+        {
+            <p>Size @key ships: @value left</p>
+        }
+    </div>
+    <div class="col-md-2">
+        <form method="post" asp-page-handler="alt" class="form-group">
+            <input type="hidden" name="command" value="@((int)Command.GenerateRandomBoard)"/>
+            <input type="submit" class="btn btn-success" value="Generate random ships"/>
+        </form>
+    </div>
+</div>
+<form method="post" asp-page-handler="alt" id="form2" class="form-group">
+    <label >Player name: </label>
+    <input type="hidden" name="command" value="@((int) Command.ChangePlayersName)">
+    <input type="text" name="value1" value="@game.CurrentPlayer.Name"/>
+    <input type="submit" class="btn btn-info" value="Change"/>
+</form>
+
+
+<script>
+    function highlightCell(cell) {
+        if (document.getElementById("toggleAdd").checked === true) {
+            var hasStart = '@(Model.Game.CurrentPlayer.Board.HighlightedStart != null)';
+            var hasEnd = '@(Model.Game.CurrentPlayer.Board.HighLightedEnd != null)';
+            if (hasStart === 'False') document.getElementById("command").value = @((int)Command.SetShipStartTile);
+            else if (hasEnd === 'False') document.getElementById("command").value = @((int)Command.SetEndTileAndAdd);
+            else document.getElementById("command").value = @((int)Command.ResetAndSetStart);
+
+            document.getElementById("value1").value = cell;
+            document.getElementById("form").submit();
+        } else {
+            document.getElementById("command").value = @((int)Command.SetTileAndDelete);
+            document.getElementById("value1").value = cell;
+            document.getElementById("form").submit();
+            document.getElementById("cell");
+        }
+    }
+</script>
+

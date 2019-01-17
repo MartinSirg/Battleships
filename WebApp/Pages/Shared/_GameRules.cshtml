@@ -2,21 +2,19 @@
 @using MenuSystem
 @model IndexModel
 
-<h3> Current rules </h3>
-<p>Type: @Model.Game.Rules.Name</p>
-
+<h4> Board rules </h4>
 
 <form method="post" asp-page-handler="boardRules">
     <div class="row">
-        <div class="col">
+        <div class="col col-2">
             Board width: 
             <input type="number" style="width: 3em" min="@Game.MinCols" max="@Game.MaxCols" name="width" value="@Model.Game.Rules.BoardCols"/>
         </div>
-        <div class="col">
+        <div class="col col-2">
             Board height: 
             <input type="number" style="width: 3em" min="@Game.MinRows" max="@Game.MaxRows" name="height" value="@Model.Game.Rules.BoardRows"/>
         </div>
-        <div class="col">
+        <div class="col col-2">
             Ships can touch: 
             <div class="form-check">
                 <input class="form-check-input" type="radio" name="canTouch" id="canTouch1" value="Yes" @if (Model.Game.Rules.CanShipsTouch == 1)
@@ -37,42 +35,115 @@
                 </label>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <input type="submit" class="btn-sm btn-info" value="Change board rules"/>
+        <div class="col col-1">
+            <input type="submit" class="btn btn-info" value="Change board rules"/>
+        </div>
     </div>
 </form>
+<h4> Boat rules </h4>
 @foreach (var boatRule in Model.Game.Rules.BoatRules)
 {
-    <form method="post" asp-page-handler="alt">
-        Size @boatRule.Size boat:
-        <input type="hidden" name="command" value="@((int)Command.EditShipInRules)"/>
-        <input type="hidden" name="value1" value="@boatRule.Size"/>
-        <input type="number" min="@Game.MinBoatQuantity" class="numberFields" id="@boatRule.Size" max="@Game.MaxBoatQuantity" name="value2" value="@boatRule.Quantity" disabled>
-        <button type="button" class="btn btn-warning" onclick="edit(@boatRule.Size)">Edit</button>
-        <input type="submit" class="btn btn-success submitFields" id="@boatRule.Size" value="Change" hidden/>
+    <form method="post" class="form-group" tyle="margin-bottom: 0.5em">
+        Size @boatRule.Size boat: 
+        <input  type="hidden" id="command @boatRule.Size" name="command" value="@((int)Command.EditShipInRules)"/>
+        <input  type="hidden" name="value1" value="@boatRule.Size"/>
+        <input  type="number" min="@Game.MinBoatQuantity" class="numberFields" id="field @boatRule.Size" max="@Game.MaxBoatQuantity" name="value2" value="@boatRule.Quantity" disabled> 
+        <button type="button" class="btn btn-warning" onclick="edit(@boatRule.Size)">Edit</button> 
+        <button type="button" class="btn btn-danger" onclick="deleteShip(@boatRule.Size)">Delete</button> 
+        <input  type="submit" asp-page-handler="alt" class="btn btn-success submitFields" id="change @boatRule.Size" value="Change" hidden/>
     </form>
 }
+
+<div>
+    <button type="button" class="btn btn-info mb-3" onclick="toggleAdd()">Add ships</button>
+    <form method="post" asp-page-handler="alt" id="addSection" hidden="true">
+        <div class="row">
+            <div class="col col-1">
+                <div class="form-group">
+                    <select class="form-control form-control-sm" id="addSize" name="value1" style="width: 4em">
+                        @foreach (var i in Enumerable.Range(Game.MinBoatSize, Game.MaxBoatSize - Game.MinBoatSize + 1))
+                        {
+                            if (Model.Game.Rules.BoatRules.Exists(rule => rule.Size == i))
+                            {
+                                continue;
+                            }
+                            <option>@i</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col col-1">
+                <div class="form-group">
+                    <input type="number" min="@Game.MinBoatQuantity" style="width: 3em" id="addQuantity" max="@Game.MaxBoatQuantity" name="value2" value="@Game.MinBoatQuantity">
+                </div>
+            </div>
+            <div class="col col-1">
+                <div class="form-group">
+                    <input type="hidden" name="command" value="@((int) Command.AddShipToRules)"/>
+                    <input type="submit" class="btn btn-success" value="Add ship to rules">
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+
+
+
+
+
+
+
+
+
 <script>
-    function edit(id) {
+    var lastEditSize;
+    var lastEditQuantity;
+    
+    function edit(size) {
+        if (lastEditSize != null) document.getElementById("field " + lastEditSize).value = lastEditQuantity;
+        lastEditSize = size;
+        lastEditQuantity = document.getElementById("field " + size).value;
+        
         var elements = document.getElementsByClassName("numberFields");
         var i;
         var len;
         for (i = 0, len = elements.length; i < len; i++) {
+
+            console.log(elements[i].id);
+            
             elements[i].disabled = true;
-            if (elements[i].id === id.toString()) {
+            if (elements[i].id.toString() === "field " + size.toString()) {
                 elements[i].disabled = false;
             }
         }
         elements = document.getElementsByClassName("submitFields");
         for (i = 0, len = elements.length; i < len; i++) {
             elements[i].hidden = true;
-            if (elements[i].id === id.toString()) {
+            if (elements[i].id.toString() === "change " + size.toString()) {
                 elements[i].hidden = false;
             }
         }
+    }
+
+    function toggleAdd() {
+        var elements = document.getElementsByClassName("numberFields");
+        for (var i = 0, len = elements.length; i < len; i++) elements[i].disabled = true;
         
+        var element = document.getElementById("addSection");
+        element.hidden = !element.hidden;
+    }
+
+    function deleteShip(size) {
+        if (lastEditSize != null) document.getElementById("field " + lastEditSize).value = lastEditQuantity;
+        lastEditSize = size;
+        lastEditQuantity = document.getElementById("field " + size).value;
         
+        var element = document.getElementById("command " + size);
+        element.value = @((int)Command.DeleteShipFromRules);
+        document.getElementById("change " + size).click();;
+
     }
 </script>
 

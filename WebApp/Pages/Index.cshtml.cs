@@ -7,6 +7,7 @@ using BLL;
 using DAL;
 using Domain;
 using MenuSystem;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using MySqlX.XDevAPI.Common;
@@ -20,12 +21,12 @@ namespace WebApp.Pages
         private AppDbContext _dbContext;
         public List<int> HiddenMenuItemIds { get; set; }    //Menu items that have functionality(not menu changing item ids)
         public List<(string msg, MsgType type)> Messages { get; set; } = new List<(string msg, MsgType type)>();
+        
         public IndexModel(AppDbContext dbContext, Game game)
         {
             _dbContext = dbContext;
-            Game = game;
-            //TODO: testing hide replay menu item(id = 35) REMOVE LATER 
-            HiddenMenuItemIds = new List<int>{};
+            Game = game; 
+            HiddenMenuItemIds = new List<int>{14, 23, 24, 25};
         }
 
         public void OnGet()
@@ -249,7 +250,21 @@ namespace WebApp.Pages
                     Game.GenerateRandomBoard(Game.CurrentPlayer);
                     Game.Messages.Add( ("New board generated", MsgType.Good));
                     return RedirectToPage();
-                    
+                case Command.ResetAndSetStart:
+                    Game.ClearCurrentHighlights();
+                    SetShipStartTile(value1);
+                    break;
+                case Command.SetEndTileAndAdd:
+                    SetShipEndTile(value1);
+                    return PlaceShipOnBoard();
+                
+                case Command.SetTileAndDelete:
+                    SetTileOfDeletableShip(value1);
+                    result = Game.DeleteShipFromBoard();
+                    if (result == Result.TileNotHighlighted) Game.Messages.Add( ("Tile not highlighted!", MsgType.Bad));
+                    else if (result == Result.ShipNotDeleted) Game.Messages.Add( ("Selected tile does not contain a ship!", MsgType.Bad));
+                    else Game.Messages.Add( ("Ship deleted!", MsgType.Good));
+                    return RedirectToPage();
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -389,7 +404,7 @@ namespace WebApp.Pages
             var result = Game.AddShipToRules(size, quantity);
             if (result == Result.InvalidSize) Game.Messages.Add( ($"Can't add ship, size: {size} is incorrect!", MsgType.Bad));
             else if (result == Result.InvalidQuantity) Game.Messages.Add( ($"Can't add ship, Quantity: {quantity} is incorrect", MsgType.Bad));
-            else Game.Messages.Add( ($"{quantity} size {size} ships added to rules ", MsgType.Bad));
+            else Game.Messages.Add( ($"{quantity} size {size} ships added to rules ", MsgType.Good));
         }
 
         private void DeleteShipFromRules(string sizeString)
@@ -488,6 +503,9 @@ namespace WebApp.Pages
                 Game.Messages.Add( ($"No more {Game.GetHighlightedSize()} sized ships left in rules", MsgType.Bad));
             else if (result == Result.Overlap) 
                 Game.Messages.Add( ("The ship you wish to place would overlap/touch another ship!", MsgType.Bad));
+            else
+                Game.Messages.Add( ("Ship placed on board", MsgType.Good));
+            Game.ClearCurrentHighlights();
             return RedirectToPage();
         }
 
@@ -501,7 +519,9 @@ namespace WebApp.Pages
                 
             var result = Game.SetShipStartTile(location);
             if (result == Result.NoSuchTile) Game.Messages.Add( ($"{location.ToUpper()} is not a valid tile!", MsgType.Bad));
-            else if (result == Result.TileNotHighlighted) Game.Messages.Add( ($"{location.ToUpper()} already contains a ship!", MsgType.Bad));
+            else if (result == Result.TileNotHighlighted)
+                Game.Messages.Add(($"{location.ToUpper()} already contains a ship!", MsgType.Bad));
+            else Game.Messages.Add(($"Highlighted start tile({location})", MsgType.Good));
             return RedirectToPage(); //Successful highlight
         }
 
@@ -548,12 +568,48 @@ namespace WebApp.Pages
             else if (result == Result.TooShort) Game.Messages.Add( ($"{name} is too short! Min length is {Player.MinLength}.", MsgType.Bad));
             else
             {    
+                Game.Messages.Add( ($"Player's name changed!", MsgType.Good));
                 Game.CurrentMenu.Title =
                     Game.CurrentMenu.TitleWithName?.Replace("PLAYER_NAME", Game.CurrentPlayer.Name) 
                     ?? Game.CurrentMenu.Title;
             }
 
             return RedirectToPage();
+        }
+
+        public string ParseDisplayBefore()
+        {
+            switch (Game.CurrentMenu.DisplayBefore)
+            {
+                case Display.ShipsAndBombings:
+                    break;
+                case Display.ShipRules:
+                    break;
+                case Display.BoardRules:
+                    break;
+                case Display.CurrentRules:
+                    return "Shared/_GameRules";
+                case Display.CurrentAndAvailableShips:
+                    break;
+                case Display.CurrentShipsDeleting:
+                    break;
+                case Display.FinishedGames:
+                    break;
+                case Display.UnfinishedGames:
+                    break;
+                case Display.Bombings:
+                    break;
+                case Display.Nothing:
+                    break;
+                case Display.CurrentShipsAdding:
+                    break;
+                case Display.CurrentShips:
+                    return "Shared/_ShipsAddDelete";
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return "Shared/_Empty";
         }
     }
 }

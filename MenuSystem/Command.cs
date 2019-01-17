@@ -24,6 +24,9 @@ namespace MenuSystem
         LoadGame,
         CantStartGame,
         GenerateRandomBoard,
-        LoadReplay
+        LoadReplay,
+        ResetAndSetStart,
+        SetTileAndDelete,
+        SetEndTileAndAdd
     }
 }
