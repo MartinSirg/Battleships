@@ -10,7 +10,9 @@ namespace BLL
         public Menu MainMenu { get; set; }
         public Menu InGameMenu { get; set; }
 
-        
+        public Menu ReplayMenu { get; set; }
+
+
         public ApplicationMenu(Game game)
         {
             Game = game;
@@ -528,7 +530,25 @@ namespace BLL
                 }
             };
                 
-            
+            ReplayMenu =  new Menu //Applicable in web UI
+            {
+                Title = $"{Game.Player1.Name} vs {Game.Player2.Name}",
+                DisplayBefore = Display.Replay,
+                Previous = new MenuItem
+                {
+                    Shortcut = Menu.ExitString,
+                    Description = "Exit to main menu",
+                    GetCommand = () =>
+                    {
+                        Game.ResetAll();
+                        Game.MenuStack.Clear();
+                        Game.CurrentMenu = mainMenu;
+
+                        return Command.None;
+                    }
+                },
+                MenuItems = new List<MenuItem>()
+            };
             
             return mainMenu;
         }

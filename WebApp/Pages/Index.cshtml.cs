@@ -81,8 +81,10 @@ namespace WebApp.Pages
                     Game.ChangeMenu(Game.Menus.InGameMenu);
                     break;
                 
-                case Command.LoadReplay: //TODO:
+                case Command.LoadReplay:
                     Game.LoadReplayGame(_dbContext, int.Parse(shortCut));
+                    Game.Menus.ReplayMenu.Title = $"{Game.Player1.Name} vs {Game.Player2.Name}";
+                    Game.ChangeMenu(Game.Menus.ReplayMenu);
                     RunReplay();
                     break;
                 
@@ -177,7 +179,6 @@ namespace WebApp.Pages
                     break;
                 
                 case Command.LoadReplay:
-                    Game.LoadReplayGame(_dbContext, int.Parse(value1));
                     RunReplay();
                     break;
                 
@@ -230,7 +231,26 @@ namespace WebApp.Pages
 //        -------------------Game methods controlling methods-----------------------
         private void RunReplay()
         {
-            throw new NotImplementedException();
+            if (Game.LastReplayMoveIndex >= Game.GameMoves.Count)
+            {
+                Game.Messages.Add(("Game already finished. Go back to main!", MsgType.Bad));
+                return;
+            }
+            var move = Game.GameMoves[Game.LastReplayMoveIndex++];
+            var result = Game.BombShipReplay(move.Tile);
+            if (result == Result.GameOver)
+            {
+                Game.Messages.Add(($"{Game.GameMoves[Game.GameMoves.Count - 2].Target.Name} has Won!", MsgType.Good));
+            }
+            else if (result == Result.SuccessfulReplayBombing)
+            {
+                string bResult = move.Tile.IsEmpty() ? "Miss!" : "Hit!";
+                Game.Messages.Add(($"{move.Target.Name} is bombed at {move.Tile}. It's a {bResult}", move.Tile.IsEmpty() ? MsgType.Info : MsgType.Good));
+            }
+            else
+            {
+                throw new Exception("Unknown exception in Index.RunReplay()");
+            }
         }
 
         private RedirectToPageResult BombLocation(string locationString)
@@ -272,11 +292,13 @@ namespace WebApp.Pages
                     move = Game.GameMoves[Game.GameMoves.Count - 2];
                     sb = new StringBuilder($"{move.Target.Name} is bombed at {move.Tile}.\n");
                     sb.Append(move.Tile.IsEmpty() ? "Its a MISS!" : "Its a HIT!");
+                    Game.Messages.Add((sb.ToString(), move.Tile.IsEmpty() ? MsgType.Info : MsgType.Good));
+                    sb.Clear();
                     
                     move = Game.GameMoves[Game.GameMoves.Count - 1];
-                    sb.Append($"\n{move.Target.Name} is bombed at {move.Tile}.");
+                    sb.Append($"\n{move.Target.Name} is bombed at {move.Tile}. ");
                     sb.Append(move.Tile.IsEmpty() ? "Its a MISS!" : "Its a HIT!");
-                    Game.Messages.Add( (sb.ToString(), MsgType.Good));
+                    Game.Messages.Add( (sb.ToString(), move.Tile.IsEmpty() ? MsgType.Info : MsgType.Bad));
                     return;
                    
                 case Result.ComputerWon:
@@ -350,6 +372,7 @@ namespace WebApp.Pages
             var result = Game.AddShipToRules(size, quantity);
             if (result == Result.InvalidSize) Game.Messages.Add( ($"Can't add ship, size: {size} is incorrect!", MsgType.Bad));
             else if (result == Result.InvalidQuantity) Game.Messages.Add( ($"Can't add ship, Quantity: {quantity} is incorrect", MsgType.Bad));
+            else if (result == Result.TooManyShipTiles) Game.Messages.Add( ($"Can't add ship. There can't be more than {Game.Rules.MaxShipTiles()} ship tiles", MsgType.Bad));
             else Game.Messages.Add( ($"{quantity} size {size} ships added to rules ", MsgType.Good));
         }
 
@@ -551,6 +574,8 @@ namespace WebApp.Pages
                     break;
                 case Display.CurrentShips:
                     return "Shared/_ShipsAddDelete";
+                case Display.Replay:
+                    return "Shared/_ReplayScreen";
                 default:
                     throw new ArgumentOutOfRangeException();
             }

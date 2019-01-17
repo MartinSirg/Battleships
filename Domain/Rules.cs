@@ -32,6 +32,11 @@ namespace Domain
         {
         }
 
+        public int MaxShipTiles()
+        {
+            return BoardCols * BoardRows / 2 ;
+        }
+
 
         public static Rules GetDefaultRules()
         {

@@ -30,6 +30,7 @@ namespace BLL
         public Player CurrentPlayer { get; set; }
         public Player TargetPlayer { get; set; }
         public List<GameMove> GameMoves = new List<GameMove>();
+        public int LastReplayMoveIndex = 0;
         public ApplicationMenu Menus;
         public readonly LetterNumberSystem Converter = new LetterNumberSystem();
         public string SelectedMode { get; set; } = "";
@@ -74,7 +75,7 @@ namespace BLL
             if (targetTile == null) return Result.NoSuchTile;
             if (targetTile.IsBombed) return Result.TileAlreadyBombed;
 
-            var isHit = TargetPlayer.Board.BombLocation(targetTile.Row, targetTile.Col);
+            TargetPlayer.Board.BombLocation(targetTile.Row, targetTile.Col);
             GameMoves.Add(new GameMove(TargetPlayer, targetTile));
 
             if (TargetPlayer.Board.AnyShipsLeft() == false)
@@ -158,6 +159,13 @@ namespace BLL
             Rules.BoatRules.ForEach(rule => currentSizes.Add(rule.Size));
             if (size < MinBoatSize || size > MaxBoatSize || currentSizes.Contains(size)) return Result.InvalidSize;
             if (quantity < MinBoatQuantity || quantity > MaxBoatQuantity) return Result.InvalidQuantity;
+
+            int currentShipTilesTotal = 0;
+            Rules.BoatRules.ForEach(rule => currentShipTilesTotal += rule.Size * rule.Quantity);
+            if (Rules.MaxShipTiles() < size * quantity + currentShipTilesTotal)
+                return Result.TooManyShipTiles;
+            
+            
             Rules.BoatRules.Add(new BoatRule(size, quantity));
             Rules.BoatRules.Sort((rule, boatRule) =>
             {   //This is a comparable thingamajig
@@ -594,7 +602,8 @@ namespace BLL
             SelectedMode = new string(save.Mode.ToCharArray());
             RestorePlayerBoardTiles(tempPlayer2, save, dbContext);
 
-            List<GameMove> tempGameMoves = save.GameMoves.OrderBy(move => move.GameMoveId).ToList();
+            List<GameMove> tempGameMoves = save.GameMoves.OrderBy(move => move.MoveNumber).ToList();
+            GameMove.NextMoveNumber = tempGameMoves.Max(move => move.MoveNumber) + 1;
             Player1 = (Player) tempPlayer1.Clone();
             Player2 = (Player) tempPlayer2.Clone();
             
@@ -658,7 +667,7 @@ namespace BLL
             RestorePlayerBoardTiles(tempPlayer1, s, dbContext); // clones tiles into player's boards
             RestorePlayerBoardTiles(tempPlayer2, s, dbContext);
 
-            var tempGameMoves = s.GameMoves;
+            var tempGameMoves = s.GameMoves.OrderBy(move => move.MoveNumber).ToList();
             Player1 = (Player) tempPlayer1.Clone();
             Player2 = (Player) tempPlayer2.Clone();
             
@@ -688,7 +697,11 @@ namespace BLL
             if (targetTile.IsBombed) return Result.TileAlreadyBombed;
             
             TargetPlayer.Board.BombLocation(targetTile.Row, targetTile.Col);
-            if (TargetPlayer.Board.AnyShipsLeft() == false) return Result.GameOver;
+            if (TargetPlayer.Board.AnyShipsLeft() == false)
+            {
+                GameOver = true;
+                return Result.GameOver;
+            }
             
             SwitchCurrentPlayer();
             return Result.SuccessfulReplayBombing;
@@ -840,6 +853,8 @@ namespace BLL
             Player1 = CurrentPlayer;
             Player2 = TargetPlayer;
             GameMoves = new List<GameMove>();
+            GameMove.NextMoveNumber = 0;
+            LastReplayMoveIndex = 0;
             
             GameOver = false;
         }
@@ -885,7 +900,6 @@ namespace BLL
                 .Include(game => game.GameMoves)
                 .OrderBy(game => game.SaveGameId)
                 .ToList();
-            int longestPad = saveGames.Max(game => game.Name.Length);
             
             foreach (var saveGame in saveGames)
             {

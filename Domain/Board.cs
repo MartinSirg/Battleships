@@ -86,10 +86,11 @@ namespace Domain
                 foreach (var coord in GetAllCoords((start.row, start.col), (end.row, end.col)))
                 {
                     if (coord.col + 1 <= MaxCol) neighbourTiles.Add(Tiles[coord.row][coord.col + 1]);
-                    if (coord.col - 1 <= 0)      neighbourTiles.Add(Tiles[coord.row][coord.col - 1]);
+                    if (coord.col - 1 >= 0)      neighbourTiles.Add(Tiles[coord.row][coord.col - 1]);
                     if (coord.row + 1 <= MaxRow) neighbourTiles.Add(Tiles[coord.row + 1][coord.col]);
-                    if (coord.row - 1 <= 0)      neighbourTiles.Add(Tiles[coord.row - 1][coord.col]);
+                    if (coord.row - 1 >= 0)      neighbourTiles.Add(Tiles[coord.row - 1][coord.col]);
                 }
+                neighbourTiles.ForEach(Console.WriteLine);
 
                 foreach (var tile in neighbourTiles)
                 {

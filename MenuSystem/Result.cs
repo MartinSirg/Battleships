@@ -38,6 +38,7 @@ namespace MenuSystem
         Break,
         TooLong,
         TooShort,
-        GameAlreadyOver
+        GameAlreadyOver,
+        TooManyShipTiles
     }
 }

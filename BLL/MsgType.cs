@@ -1,4 +1,6 @@
 namespace BLL
 {
-    public enum MsgType {Good, Bad}
+    public enum MsgType {Good, Bad,
+        Info
+    }
 }

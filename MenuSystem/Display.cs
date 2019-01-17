@@ -13,6 +13,7 @@ namespace MenuSystem
         Bombings,
         Nothing,
         CurrentShipsAdding,
-        CurrentShips
+        CurrentShips,
+        Replay
     }
 }

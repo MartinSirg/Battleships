@@ -5,38 +5,9 @@
 @{
     var game = Model.Game;
 }
-<style type="text/css">
-    table {
-        margin: 1em 0;
-    }
-    
-    table, th, td {
-        border: 1px solid black;
-        border-collapse: collapse;
-    }
-    th, td {
-        padding: 2px;
-        width: 3em;
-        height: 3em;
-        display: table-cell;
-        text-align: center;
-        vertical-align: middle;
-    }
-    .shipTile {
-        background-color: green;
-    }
-    .highlightStart {
-        background-color: red;
-    }
-    .highlightEnd {
-        background-color: yellow;
-    }
-    
-    .highlightBoth {
-        background-color: orange;
-    }
-    
-</style>
+<head>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
 <script>
 </script>
 <form method="post" asp-page-handler="alt" id="form">
@@ -67,9 +38,7 @@
                     {
                         Tile tile = Model.Game.CurrentPlayer.Board.Tiles[i-1][j-1];
                         var className = "";
-                        if (tile.IsHighlightedStart && tile.IsHighlightedEnd){className = "highlightBoth";}
-                        else if (tile.IsHighlightedStart){className = "highlightStart";}
-                        else if (tile.IsHighlightedEnd){className = "highlightEnd";}
+                        if (tile.IsHighlightedStart){className = "highlightStart";}
                         else if (!tile.IsEmpty()){className = "shipTile";}
                         <td id="@tile" class="@className" onclick="highlightCell('@tile')">@tile</td>
                     }

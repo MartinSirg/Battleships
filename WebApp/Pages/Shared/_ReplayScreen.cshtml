@@ -5,39 +5,14 @@
 @{
     var game = Model.Game;
 }
-<style type="text/css">
-    table {
-        margin: 1em 0;
-    }
-    
-    table, th, td {
-        border: 1px solid black;
-        border-collapse: collapse;
-    }
-    th, td {
-        padding: 2px;
-        width: 3em;
-        height: 3em;
-        display: table-cell;
-        text-align: center;
-        vertical-align: middle;
-    }
-    .green {
-        background-color: green;
-    }
-    .red {
-        background-color: red;
-    }
-    
-</style>
-<script>
-</script>
-
+<head>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
 
 <div class="row">
     <div class="col-md-auto">
         <table>
-            <caption>My bombings on enemy board</caption>
+            <caption>@game.Player1.Name ships</caption>
             <thead>
             <tr>
                 <th scope="col">#</th>
@@ -56,11 +31,12 @@
                     @for (var j = 1; j <= Model.Game.Rules.BoardCols; j++)
                     {
                         var className = "";
-                        Tile enemyPlayerTile = game.TargetPlayer.Board.Tiles[i - 1][j - 1];
-                        if (enemyPlayerTile.IsBombed && !enemyPlayerTile.IsEmpty()){className = "green";}
-                        else if (enemyPlayerTile.IsBombed && enemyPlayerTile.IsEmpty()){className = "red";}
+                        Tile player1Tile = game.Player1.Board.Tiles[i - 1][j - 1];
+                        if (!player1Tile.IsBombed && !player1Tile.IsEmpty()){className = "green";}
+                        else if (player1Tile.IsBombed && !player1Tile.IsEmpty()){className = "red";}
+                        else if (player1Tile.IsBombed) {className = "yellow";}
 
-                        <td class="@className">@enemyPlayerTile</td>
+                        <td class="@className">@player1Tile</td>
                     }
                 </tr>
             }
@@ -69,7 +45,7 @@
     </div>
     <div class="col-md-auto">
         <table>
-            <caption>My ships</caption>
+            <caption>@game.Player2.Name ships</caption>
             <thead>
             <tr>
                 <th scope="col">#</th>
@@ -88,14 +64,37 @@
                     @for (var j = 1; j <= Model.Game.Rules.BoardCols; j++)
                     {
                         var className = "";
-                        Tile currentPlayerTile = Model.Game.CurrentPlayer.Board.Tiles[i - 1][j - 1];
-                        if (!currentPlayerTile.IsEmpty() && !currentPlayerTile.IsBombed){className = "green";}
-                        else if (!currentPlayerTile.IsEmpty() && currentPlayerTile.IsBombed){className = "red";}
+                        Tile player2Tile = game.Player2.Board.Tiles[i - 1][j - 1];
+                        if (!player2Tile.IsBombed && !player2Tile.IsEmpty()){className = "green";}
+                        else if (player2Tile.IsBombed && !player2Tile.IsEmpty()){className = "red";}
+                        else if (player2Tile.IsBombed) {className = "yellow";}
 
-                        <td class="@className">@currentPlayerTile</td>
+                        <td class="@className">@player2Tile</td>
                     }
                 </tr>
             }
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-auto">
+        <form method="post" asp-page-handler="alt" class="form-group">
+            <input type="hidden" name="command" value="@((int)Command.LoadReplay)"/>
+            <input type="submit" value="Next move" class="btn btn-success"/>
+        </form>
+    </div>
+    <div class="col-md-auto">
+        <table>
+            <tbody>
+                <tr>
+                    <td class="green"></td>
+                    <td style="width: inherit">Alive ship tile</td>
+                    <td class="red"></td>
+                    <td style="width: inherit">Sunk ship tile</td>
+                    <td class="yellow"></td>
+                    <td style="width: inherit">Empty bombed tile</td>
+                </tr>
             </tbody>
         </table>
     </div>

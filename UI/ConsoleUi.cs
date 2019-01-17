@@ -369,6 +369,7 @@ namespace UI
                 var result = _game.AddShipToRules(size, quantity);
                 if (result == Result.InvalidSize) Alert($"Size: {size} is incorrect!", ConsoleColor.Red);
                 else if (result == Result.InvalidQuantity) Alert($"Quantity: {quantity} is incorrect",ConsoleColor.Red);
+                else if (result == Result.TooManyShipTiles) Alert($"Too many ship tiles. Can't be more than {_game.Rules.MaxShipTiles()} tiles!", ConsoleColor.Red);
                 else break; //Successful add
             }
         }
