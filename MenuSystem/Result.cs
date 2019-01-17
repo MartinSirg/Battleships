@@ -37,6 +37,7 @@ namespace MenuSystem
         Continue,
         Break,
         TooLong,
-        TooShort
+        TooShort,
+        GameAlreadyOver
     }
 }

@@ -4,6 +4,7 @@
 @model IndexModel
 @{
     var game = Model.Game;
+    Tile lastBombedTile = game.GameMoves[game.GameMoves.Count - 1].Tile;
 }
 <style type="text/css">
     table {
@@ -22,17 +23,19 @@
         text-align: center;
         vertical-align: middle;
     }
-    .shipTile {
+    .bombedHit {
         background-color: green;
     }
-    .highlightStart {
+    .bombedMiss {
         background-color: red;
     }
-    .highlightEnd {
+    .lastBombed {
         background-color: yellow;
     }
-    
-    .highlightBoth {
+    .lastBombedAndCurrentHit {
+        background-color: greenyellow;
+    }
+    .lastBombedAndCurrentMiss {
         background-color: orange;
     }
     
@@ -46,14 +49,14 @@
 </form>
 
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-auto">
         <table>
             <thead>
             <tr>
-                <th scope="col" class="cell">#</th>
+                <th scope="col">#</th>
                 @for (var i = 1; i <= game.Rules.BoardCols; i++)
                 {
-                    <th scope="col" class="cell">@i</th>
+                    <th scope="col">@i</th>
                 }
             </tr>
             </thead>
@@ -62,42 +65,63 @@
             {
                 <tr>
                     @{ var letter = game.Converter.GetLetter(i);}
-                    <th scope="row" class="cell">@letter</th>
+                    <th scope="row">@letter</th>
                     @for (var j = 1; j <= Model.Game.Rules.BoardCols; j++)
                     {
-                        Tile tile = Model.Game.CurrentPlayer.Board.Tiles[i-1][j-1];
                         var className = "";
-                        if (tile.IsHighlightedStart && tile.IsHighlightedEnd){className = "highlightBoth";}
-                        else if (tile.IsHighlightedStart){className = "highlightStart";}
-                        else if (tile.IsHighlightedEnd){className = "highlightEnd";}
-                        else if (!tile.IsEmpty()){className = "shipTile";}
-                        <td id="@tile" class="@className" onclick="highlightCell('@tile')">@tile</td>
+                        Tile currentPlayerTile = Model.Game.CurrentPlayer.Board.Tiles[i-1][j-1];
+                        Tile enemyPlayerTile = game.TargetPlayer.Board.Tiles[i - 1][j - 1];
+                        if (enemyPlayerTile.IsBombed && !enemyPlayerTile.IsEmpty())
+                        {
+                            className = "bombedHit";
+                            if (lastBombedTile == currentPlayerTile){className = "lastBombedAndCurrentHit";}
+                        }
+                        else if (enemyPlayerTile.IsBombed && enemyPlayerTile.IsEmpty())
+                        {
+                            className = "bombedMiss";
+                            if (lastBombedTile == currentPlayerTile){className = "lastBombedAndCurrentMiss";}
+                        }
+                        else if (lastBombedTile == currentPlayerTile)
+                        {
+                            className = "lastBombed";
+                        }
+                        
+                        <td id="@currentPlayerTile" class="@className" onclick="bombTile('@currentPlayerTile')">@currentPlayerTile</td>
                     }
                 </tr>
             }
             </tbody>
         </table>
     </div>
+    <div class="col-md-auto">
+        <div class="row">
+            <table>
+                <tbody>
+                <tr><td style="background-color: green"></td><td style="width: inherit">Successful hit on enemy board</td></tr>
+                <tr><td style="background-color: red"></td><td style="width: inherit">Failed hit on enemy board</td></tr>
+                <tr><td style="background-color: yellow"></td><td style="width: inherit">Last bombing by enemy</td></tr>
+                <tr><td style="background-color: greenyellow"></td><td style="width: inherit">Successful hit on enemy and last bombing by enemy</td></tr>
+                <tr><td style="background-color: orange"></td><td style="width: inherit">Failed hit on enemy and last bombing by enemy</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="row">
+            <form method="post" asp-page-handler="alt" class="form-group">
+                <input type="hidden" name="command" value="@((int)Command.SaveGame)"/>
+                <input type="text" name="value1" placeholder="Save game's name"/>
+                <input type="submit" value="Save Game" class="btn btn-success"/>
+            </form>
+        </div>
+        
+    </div>
 </div>
 
 
 <script>
-    function highlightCell(cell) {
-        if (document.getElementById("toggleAdd").checked === true) {
-            var hasStart = '@(Model.Game.CurrentPlayer.Board.HighlightedStart != null)';
-            var hasEnd = '@(Model.Game.CurrentPlayer.Board.HighLightedEnd != null)';
-            if (hasStart === 'False') document.getElementById("command").value = @((int)Command.SetShipStartTile);
-            else if (hasEnd === 'False') document.getElementById("command").value = @((int)Command.SetEndTileAndAdd);
-            else document.getElementById("command").value = @((int)Command.ResetAndSetStart);
-
-            document.getElementById("value1").value = cell;
-            document.getElementById("form").submit();
-        } else {
-            document.getElementById("command").value = @((int)Command.SetTileAndDelete);
-            document.getElementById("value1").value = cell;
-            document.getElementById("form").submit();
-            document.getElementById("cell");
-        }
+    function bombTile(cell) {
+        document.getElementById("command").value = @((int)Command.BombLocation);
+        document.getElementById("value1").value = cell;
+        document.getElementById("form").submit();
     }
 </script>
 

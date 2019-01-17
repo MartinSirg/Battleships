@@ -26,7 +26,7 @@ namespace WebApp.Pages
         {
             _dbContext = dbContext;
             Game = game; 
-            HiddenMenuItemIds = new List<int>{14, 23, 24, 25};
+            HiddenMenuItemIds = new List<int>{1, 3, 5, 6, 7, 8, 9,10,11,12, 14,16,17,18,19,20,21,22, 23, 24, 25};
         }
 
         public void OnGet()
@@ -37,18 +37,20 @@ namespace WebApp.Pages
                 Game.Messages.Clear();
             }
         }
-        
+        /**
+         * This post is only used when navigating menus (clicking on menu items)
+         */
         public RedirectToPageResult OnPost(string shortCut, string value1 = default, string value2 = default)
         {
             Command command;
-            if (shortCut.ToLower().Equals(Menu.ExitString.ToLower()))
+            if (shortCut.ToLower().Equals(Menu.ExitString.ToLower()) && Game.CurrentMenu.Previous != null)
             {
                 command = Game.CurrentMenu.Previous.GetCommand();
             }
             else
             {
                 var menuItem = Game.CurrentMenu.MenuItems.FirstOrDefault(item => item.Shortcut == shortCut);
-                if (menuItem == null)
+                if (menuItem == null || HiddenMenuItemIds.Contains(menuItem.Id))
                 {
                     Game.Messages.Add( ($"Invalid shortcut {shortCut}", MsgType.Bad));
                     return RedirectToPage();
@@ -59,70 +61,13 @@ namespace WebApp.Pages
             
             switch (command)
             {
+                case Command.None:
+                    break;
+                
                 case Command.Previous:
                     Game.PreviousMenu();
                     break;
                 
-                case Command.BombLocation:
-                    return BombLocation(value1);
-                
-                case Command.None:
-                    break;
-                
-                case Command.SaveUnfinishedGame:
-                    return SaveUnfinishedGame(value1);
-                    
-                case Command.EditShipInRules:
-                    EditShipInRules(value1, value2);
-                    break;
-                                    
-                case Command.AddShipToRules:
-                    AddShipToRules(value1, value2);
-                    break;
-                                    
-                case Command.DeleteShipFromRules:
-                    DeleteShipFromRules(value1);
-                    break;
-                                    
-                case Command.EditShipsCanTouchRule:
-                    EditShipsCanTouchRule(value1);
-                    break;
-                                    
-                case Command.EditBoardWidth:
-                    EditBoardWidth(value1);
-                    break;
-                                    
-                case Command.EditBoardHeight:
-                    EditBoardHeight(value1);
-                    break;
-                                    
-                case Command.SetStandardRules:
-                    Game.SetStandardRules();
-                    Game.Messages.Add( ("Standard rules set!", MsgType.Good));
-                    break;
-                                    
-                case Command.SetShipStartTile:
-                    return SetShipStartTile(value1);
-                                    
-                case Command.PlaceShipOnBoard:
-                    return PlaceShipOnBoard();
-                                    
-                case Command.SetShipEndTile:
-                    return SetShipEndTile(value1);
-                                    
-                case Command.SetTileOfDeleteableShip:
-                    return SetTileOfDeletableShip(value1);
-                                    
-                case Command.DeleteShipFromBoard:
-                    var result = Game.DeleteShipFromBoard();
-                    if (result == Result.TileNotHighlighted) Game.Messages.Add( ("Tile not highlighted!", MsgType.Bad));
-                    else if (result == Result.ShipNotDeleted) Game.Messages.Add( ("Selected tile does not contain a ship!", MsgType.Bad));
-                    else Game.Messages.Add( ("Ship deleted from board!", MsgType.Good));
-                    break;
-                
-                case Command.ChangePlayersName:
-                    return ChangeName(value1);
-                                    
                 case Command.FillReplayMenu:
                     Game.FillLoadsMenu(Game.CurrentMenu, true, _dbContext);
                     break;
@@ -145,9 +90,6 @@ namespace WebApp.Pages
                     Game.Messages.Add( ($"Can't start game, All players have to be ready and all ships must have been placed", MsgType.Bad));
                     break;
                 
-                case Command.GenerateRandomBoard:
-                    Game.GenerateRandomBoard(Game.CurrentPlayer);
-                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -170,7 +112,7 @@ namespace WebApp.Pages
                     return RedirectToPage("Index");
                 
                 case Command.SaveUnfinishedGame:
-                    return SaveUnfinishedGame(value1);
+                    return SaveGame(value1);
                     
                 case Command.EditShipInRules:
                     EditShipInRules(value1, value2);
@@ -228,19 +170,16 @@ namespace WebApp.Pages
                 case Command.FillLoadMenu:
                     Game.FillLoadsMenu(Game.CurrentMenu, false, _dbContext);
                     return RedirectToPage();
-                    
-
-//                !Not applicable!
-//
-//                    case Command.LoadGame:
-//                    Game.LoadGame(_dbContext, int.Parse(shortCut));
-//                    Game.ChangeMenu(Game.Menus.InGameMenu);
-//                    break;
-//                
-//                case Command.LoadReplay:
-//                    Game.LoadReplayGame(_dbContext, int.Parse(shortCut));
-//                    RunReplay();
-//                    break;
+                
+                case Command.LoadGame:
+                    Game.LoadGame(_dbContext, int.Parse(value1));
+                    Game.ChangeMenu(Game.Menus.InGameMenu);
+                    break;
+                
+                case Command.LoadReplay:
+                    Game.LoadReplayGame(_dbContext, int.Parse(value1));
+                    RunReplay();
+                    break;
                 
                 case Command.CantStartGame:
                     Game.Messages.Add( ($"Can't start game, All players have to be ready and all ships must have been placed", MsgType.Bad));
@@ -265,6 +204,10 @@ namespace WebApp.Pages
                     else if (result == Result.ShipNotDeleted) Game.Messages.Add( ("Selected tile does not contain a ship!", MsgType.Bad));
                     else Game.Messages.Add( ("Ship deleted!", MsgType.Good));
                     return RedirectToPage();
+                
+                case Command.SaveGame:
+                    SaveGame(value1);
+                    break;    
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -309,10 +252,12 @@ namespace WebApp.Pages
             GameMove move;
             switch (result)
             {
+                case Result.GameAlreadyOver:
+                    Game.Messages.Add(($"{Game.GameMoves[Game.GameMoves.Count - 2].Target.Name} has already Won!. Please save or exit.", MsgType.Bad));
+                    return;
+                
                 case Result.GameOver:
                     Player p = Game.CurrentPlayer;
-
-                    Game.SaveGame(_dbContext, $"{Game.CurrentPlayer.Name}(WINNER!) vs {Game.TargetPlayer.Name} with {Game.GameMoves.Count} moves", true);
                     Game.Messages.Add( ($"{Game.CurrentPlayer.Name} has won!", MsgType.Good));
                     return;
                 
@@ -335,7 +280,6 @@ namespace WebApp.Pages
                     return;
                    
                 case Result.ComputerWon:
-                    Game.SaveGame(_dbContext, $"{Game.CurrentPlayer.Name}(WINNER!) vs {Game.TargetPlayer.Name} with {Game.GameMoves.Count} moves", true);
                     Game.Messages.Add( ("Computer has won!", MsgType.Good));
                     return;
                 
@@ -351,16 +295,18 @@ namespace WebApp.Pages
             }
         }
 
-        private RedirectToPageResult SaveUnfinishedGame(string saveGameName)
+        private RedirectToPageResult SaveGame(string saveGameName)
         {
-            if (saveGameName == null)
+            if (string.IsNullOrEmpty(saveGameName))
             {
-                Game.Messages.Add( ("Can't save game. Name is null", MsgType.Bad));
+                Game.Messages.Add( ("Can't save game. Name is empty", MsgType.Bad));
             }
             else
             {
-                var result = Game.SaveGame(_dbContext, saveGameName, false);
-                if (result == Result.TooLong) Game.Messages.Add( ("Game not saved, name was too long!", MsgType.Bad));
+                var result = Game.SaveGame(_dbContext, saveGameName, Game.GameOver);
+                Game.Messages.Add(result == Result.TooLong
+                    ? ("Game not saved, name was too long!", MsgType.Bad)
+                    : ($"Game saved with name: {saveGameName}", MsgType.Good));
             }
             return RedirectToPage();
         }
@@ -582,7 +528,7 @@ namespace WebApp.Pages
             switch (Game.CurrentMenu.DisplayBefore)
             {
                 case Display.ShipsAndBombings:
-                    break;
+                    return "Shared/_ShipsAndBombings";
                 case Display.ShipRules:
                     break;
                 case Display.BoardRules:
@@ -598,7 +544,7 @@ namespace WebApp.Pages
                 case Display.UnfinishedGames:
                     break;
                 case Display.Bombings:
-                    break;
+                    return "Shared/_BombShip";
                 case Display.Nothing:
                     break;
                 case Display.CurrentShipsAdding:

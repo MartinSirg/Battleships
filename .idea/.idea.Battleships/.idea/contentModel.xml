@@ -159,7 +159,9 @@
             <e p="_Empty.cshtml" t="Include" />
             <e p="_GameRules.cshtml" t="Include" />
             <e p="_Layout.cshtml" t="Include" />
+            <e p="_ReplayScreen.cshtml" t="Include" />
             <e p="_ShipsAddDelete.cshtml" t="Include" />
+            <e p="_ShipsAndBombings.cshtml" t="Include" />
             <e p="_ValidationScriptsPartial.cshtml" t="Include" />
           </e>
         </e>

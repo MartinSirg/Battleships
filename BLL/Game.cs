@@ -33,6 +33,7 @@ namespace BLL
         public ApplicationMenu Menus;
         public readonly LetterNumberSystem Converter = new LetterNumberSystem();
         public string SelectedMode { get; set; } = "";
+        public bool GameOver = false;
         public const int MaxRows = 24, MinRows = 10, MinCols = 10, MaxCols = 24;
         public const int MaxBoatQuantity = 5, MinBoatQuantity = 1, MaxBoatSize = 10, MinBoatSize = 1;
         
@@ -68,6 +69,7 @@ namespace BLL
          */
         public Result BombLocation(string locationString)
         {
+            if (GameOver) return Result.GameAlreadyOver;
             Tile targetTile = GetTile(locationString, TargetPlayer.Board);
             if (targetTile == null) return Result.NoSuchTile;
             if (targetTile.IsBombed) return Result.TileAlreadyBombed;
@@ -75,7 +77,11 @@ namespace BLL
             var isHit = TargetPlayer.Board.BombLocation(targetTile.Row, targetTile.Col);
             GameMoves.Add(new GameMove(TargetPlayer, targetTile));
 
-            if (TargetPlayer.Board.AnyShipsLeft() == false) return Result.GameOver;
+            if (TargetPlayer.Board.AnyShipsLeft() == false)
+            {
+                GameOver = true;
+                return Result.GameOver;
+            }
             if (SelectedMode.Equals("MP"))
             {
                 SwitchCurrentPlayer();
@@ -91,11 +97,15 @@ namespace BLL
             
             
             Tile computerTarget = tiles[new Random().Next(0, tiles.Count - 1)];
-            bool computerResultbool = CurrentPlayer.Board.BombLocation(computerTarget.Row, computerTarget.Col);
-            BombingResult computerResult = computerResultbool ? BombingResult.Hit : BombingResult.Miss;
+            bool computerResultBool = CurrentPlayer.Board.BombLocation(computerTarget.Row, computerTarget.Col);
+            BombingResult computerResult = computerResultBool ? BombingResult.Hit : BombingResult.Miss;
             GameMoves.Add(new GameMove(CurrentPlayer, computerTarget));
 
-            if (CurrentPlayer.Board.AnyShipsLeft() == false) return Result.ComputerWon;
+            if (CurrentPlayer.Board.AnyShipsLeft() == false)
+            {
+                GameOver = true;
+                return Result.ComputerWon;
+            }
             return Result.TwoBombings;
         }
 
@@ -126,12 +136,7 @@ namespace BLL
             dbContext.SaveChanges();
 
 
-            Rules = Rules.GetDefaultRules();
-            CurrentPlayer = new Player(new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch ), "Player 1" );
-            TargetPlayer = new Player(new Board(Rules.BoardRows,Rules.BoardCols, Rules.CanShipsTouch ), "Player 2" );
-            Player1 = CurrentPlayer;
-            Player2 = TargetPlayer;
-            GameMoves = new List<GameMove>();
+            ResetAll();
             
             while (PreviousMenu() != Result.NoPreviousMenuFound)
             {
@@ -835,6 +840,8 @@ namespace BLL
             Player1 = CurrentPlayer;
             Player2 = TargetPlayer;
             GameMoves = new List<GameMove>();
+            
+            GameOver = false;
         }
 
         /**

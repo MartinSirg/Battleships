@@ -27,6 +27,7 @@ namespace MenuSystem
         LoadReplay,
         ResetAndSetStart,
         SetTileAndDelete,
-        SetEndTileAndAdd
+        SetEndTileAndAdd,
+        SaveGame
     }
 }

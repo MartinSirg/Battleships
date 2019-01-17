@@ -274,6 +274,11 @@ namespace UI
             GameMove move;
             switch (result)
             {
+                case Result.GameAlreadyOver:
+                    Alert("Game already over!", ConsoleColor.Red);
+                    _game.SaveGame(_dbContext, GetSaveGameName(), true);
+                    return Result.Continue;
+                
                 case Result.GameOver:
                     Alert($"{_game.CurrentPlayer.Name} has won!", ConsoleColor.Green);
                     
