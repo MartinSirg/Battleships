@@ -13,12 +13,6 @@ namespace UI
 {
     public class ConsoleUi
     {
-        enum PrintBoard
-        {
-            Regular,
-            Adding,
-            Deleting
-        }
         private LetterNumberSystem Letters { get; } = new LetterNumberSystem();
         private string LeftPad { get; } = "            ";
         private ConsoleColor Background { get; }
@@ -176,10 +170,6 @@ namespace UI
                 case Command.EditBoardHeight:
                     EditBoardHeight();
                     break;
-                    
-//                case Command.SetRulesetName:
-//                    SetRulesetName();
-//                    break;
                     
                 case Command.SetStandardRules:
                     Console.Clear();
@@ -486,23 +476,6 @@ namespace UI
             }
         }
 
-//        private void SetRulesetName()
-//        {
-//            while (true)
-//            {
-//                Console.Clear();
-//                Console.WriteLine("Editing ruleset name:\n");
-//                Console.WriteLine($"Current ruleset name: {_game.Rules.Name}\n");
-//                Console.Write($"Enter a new name for current ruleset. ({_exitString} to exit): ");
-//                var input = Console.ReadLine();
-//                if (input != null && input.ToLower().Equals(_exitString)) break;
-//                
-//                var result = _game.SetRulesetName(input);
-//                if (result == Result.InvalidInput) Alert($"Name can't be {input}", ConsoleColor.Red);
-//                else break; //Successful change
-//            }
-//        }
-
         private void SetShipStartTile()
         {
             while (true)
@@ -777,7 +750,7 @@ namespace UI
             Console.WriteLine(sb.ToString());
         }
 
-        public string GetTargetLocation()
+        private string GetTargetLocation()
         {
             Console.Write($"Select target({_exitString} to exit): ");
             return Console.ReadLine();

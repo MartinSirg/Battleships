@@ -10,25 +10,13 @@
       "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
     ],
     "originalTargetFrameworks": [
-      "netcoreapp2.1"
+      "netcoreapp2.2"
     ],
     "frameworks": {
-      "netcoreapp2.1": {
+      "netcoreapp2.2": {
         "projectReferences": {
-          "C:\\Projects Repositories\\C#\\BLL\\BLL.csproj": {
-            "projectPath": "C:\\Projects Repositories\\C#\\BLL\\BLL.csproj"
-          },
-          "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj": {
-            "projectPath": "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj"
-          },
-          "C:\\Projects Repositories\\C#\\Initializers\\Initializers.csproj": {
-            "projectPath": "C:\\Projects Repositories\\C#\\Initializers\\Initializers.csproj"
-          },
-          "C:\\Projects Repositories\\C#\\MenuSystem\\MenuSystem.csproj": {
-            "projectPath": "C:\\Projects Repositories\\C#\\MenuSystem\\MenuSystem.csproj"
-          },
-          "C:\\Projects Repositories\\C#\\UI\\UI.csproj": {
-            "projectPath": "C:\\Projects Repositories\\C#\\UI\\UI.csproj"
+          "C:\\Projects Repositories\\C#\\ConsoleUI\\ConsoleUI.csproj": {
+            "projectPath": "C:\\Projects Repositories\\C#\\ConsoleUI\\ConsoleUI.csproj"
           }
         }
       }
@@ -40,16 +28,12 @@
     }
   },
   "frameworks": {
-    "netcoreapp2.1": {
+    "netcoreapp2.2": {
       "dependencies": {
-        "Microsoft.EntityFrameworkCore.Design": {
-          "target": "Package",
-          "version": "[2.2.1, )"
-        },
         "Microsoft.NETCore.App": {
           "suppressParent": "All",
           "target": "Package",
-          "version": "[2.1.0, )",
+          "version": "[2.2.0, )",
           "autoReferenced": true
         }
       },

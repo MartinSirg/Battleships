@@ -1,10 +1,10 @@
 ﻿{
   "version": "1.0.0",
   "restore": {
-    "projectUniqueName": "C:\\Projects Repositories\\C#\\UI\\UI.csproj",
-    "projectName": "UI",
-    "projectPath": "C:\\Projects Repositories\\C#\\UI\\UI.csproj",
-    "outputPath": "C:\\Projects Repositories\\C#\\UI\\obj\\",
+    "projectUniqueName": "C:\\Projects Repositories\\C#\\ConsoleUI\\ConsoleUI.csproj",
+    "projectName": "ConsoleUI",
+    "projectPath": "C:\\Projects Repositories\\C#\\ConsoleUI\\ConsoleUI.csproj",
+    "outputPath": "C:\\Projects Repositories\\C#\\ConsoleUI\\obj\\",
     "projectStyle": "PackageReference",
     "fallbackFolders": [
       "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

@@ -15,11 +15,11 @@
     "frameworks": {
       "netcoreapp2.1": {
         "projectReferences": {
+          "C:\\Projects Repositories\\C#\\ConsoleUI\\ConsoleUI.csproj": {
+            "projectPath": "C:\\Projects Repositories\\C#\\ConsoleUI\\ConsoleUI.csproj"
+          },
           "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj": {
             "projectPath": "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj"
-          },
-          "C:\\Projects Repositories\\C#\\UI\\UI.csproj": {
-            "projectPath": "C:\\Projects Repositories\\C#\\UI\\UI.csproj"
           }
         }
       }

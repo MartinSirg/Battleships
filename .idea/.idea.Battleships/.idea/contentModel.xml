@@ -8,7 +8,6 @@
         <e p="bin" t="ExcludeRecursive" />
         <e p="BLL.csproj" t="IncludeRecursive" />
         <e p="Game.cs" t="Include" />
-        <e p="GameOld.cs" t="Include" />
         <e p="MsgType.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
@@ -23,12 +22,25 @@
         <e p="ConsoleApp.csproj" t="IncludeRecursive" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
-            <e p="netcoreapp2.1" t="Include">
+            <e p="netcoreapp2.2" t="Include">
               <e p="ConsoleApp.AssemblyInfo.cs" t="Include" />
             </e>
           </e>
         </e>
         <e p="Program.cs" t="Include" />
+      </e>
+      <e p="ConsoleUI" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="ConsoleUI.cs" t="Include" />
+        <e p="ConsoleUI.csproj" t="IncludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netstandard2.0" t="Include">
+              <e p="ConsoleUI.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="StringBuilderExtensions.cs" t="Include" />
       </e>
       <e p="DAL" t="IncludeRecursive">
         <e p="AppDbContext.cs" t="Include" />
@@ -45,6 +57,10 @@
           <e p="20190114152723_AddModeToSaveGame.Designer.cs" t="Include" />
           <e p="20190114172915_Update.cs" t="Include" />
           <e p="20190114172915_Update.Designer.cs" t="Include" />
+          <e p="20190117181020_gameMoveNumberAdd.cs" t="Include" />
+          <e p="20190117181020_gameMoveNumberAdd.Designer.cs" t="Include" />
+          <e p="20190117221214_removeUniqueSaveName.cs" t="Include" />
+          <e p="20190117221214_removeUniqueSaveName.Designer.cs" t="Include" />
           <e p="NewDbContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="obj" t="ExcludeRecursive">
@@ -76,17 +92,6 @@
         <e p="SaveGame.cs" t="Include" />
         <e p="Tile.cs" t="Include" />
       </e>
-      <e p="Initializers" t="IncludeRecursive">
-        <e p="bin" t="ExcludeRecursive" />
-        <e p="Initializers.csproj" t="IncludeRecursive" />
-        <e p="obj" t="ExcludeRecursive">
-          <e p="Debug" t="Include">
-            <e p="netstandard2.0" t="Include">
-              <e p="Initializers.AssemblyInfo.cs" t="Include" />
-            </e>
-          </e>
-        </e>
-      </e>
       <e p="MenuSystem" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
         <e p="Command.cs" t="Include" />
@@ -116,22 +121,6 @@
         </e>
         <e p="TestBoard.cs" t="Include" />
         <e p="Tests.csproj" t="IncludeRecursive" />
-      </e>
-      <e p="UI" t="IncludeRecursive">
-        <e p="bin" t="ExcludeRecursive" />
-        <e p="ConsoleUI.cs" t="Include" />
-        <e p="ConsoleUIOld.cs" t="Include" />
-        <e p="IUserInterface.cs" t="Include" />
-        <e p="obj" t="ExcludeRecursive">
-          <e p="Debug" t="Include">
-            <e p="netstandard2.0" t="Include">
-              <e p="UI.AssemblyInfo.cs" t="Include" />
-            </e>
-          </e>
-        </e>
-        <e p="StringBuilderExtensions.cs" t="Include" />
-        <e p="UI.csproj" t="IncludeRecursive" />
-        <e p="UIController.cs" t="Include" />
       </e>
       <e p="WebApp" t="IncludeRecursive">
         <e p="appsettings.Development.json" t="Include" />

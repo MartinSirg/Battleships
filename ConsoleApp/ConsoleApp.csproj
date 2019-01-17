@@ -1,21 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp2.1</TargetFramework>
-        <LangVersion>latest</LangVersion>
+        <TargetFramework>netcoreapp2.2</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\BLL\BLL.csproj" />
-      <ProjectReference Include="..\Domain\Domain.csproj" />
-      <ProjectReference Include="..\Initializers\Initializers.csproj" />
-      <ProjectReference Include="..\MenuSystem\MenuSystem.csproj" />
-      <ProjectReference Include="..\UI\UI.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.1" />
+      <ProjectReference Include="..\ConsoleUI\ConsoleUI.csproj" />
     </ItemGroup>
 
 </Project>

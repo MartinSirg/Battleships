@@ -7,7 +7,6 @@ namespace MenuSystem
     public enum Result
     {
         None,
-        ChangedMenu,
         NoPreviousMenuFound,
         ReturnToPreviousMenu,
         GameOver,
@@ -22,15 +21,11 @@ namespace MenuSystem
         ShipDeleted,
         PlayerNameChanged,
         TileNotHighlighted,
-        NoSuchSaveGameId,
         PlayerNameNotChanged,
-        GameParametersLoaded,
-        ReplayReadySaveLoaded,
         SuccessfulReplayBombing,
         CouldntPlaceAllShips,
         TwoBombings,        // Returned when a player and computer have made bombings
-        OneBombing          // Returned when a player has made a bombing
-        ,
+        OneBombing,          // Returned when a player has made a bombing
         Overlap,
         NoCommonAxis,
         HighlightMissing,

@@ -99,6 +99,9 @@ namespace WebApp.Pages
             return RedirectToPage();
         }
         
+        /**
+         * This post is used for general commands using the Command enum
+         */
         public RedirectToPageResult OnPostAlt(int command, string value1 = default, string value2 = default)
         {
             switch ((Command)command)
@@ -216,11 +219,15 @@ namespace WebApp.Pages
             return RedirectToPage();
         }
 
+        /**
+         * This post is used to change all 3 board rules at the same time
+         */
         public RedirectToPageResult OnPostBoardRules(string width, string height, string canTouch) // canTouch: yes, no
         {
-            if (width == null || height == null || canTouch == null)
+            if (string.IsNullOrEmpty(width) || string.IsNullOrEmpty(height)|| string.IsNullOrEmpty(canTouch))
             {
-                throw new Exception("One of the elements is null");
+                Game.Messages.Add(("One of the elements is null, can't change settings", MsgType.Bad));
+                return RedirectToPage();
             }
             EditBoardWidth(width);
             EditBoardHeight(height);

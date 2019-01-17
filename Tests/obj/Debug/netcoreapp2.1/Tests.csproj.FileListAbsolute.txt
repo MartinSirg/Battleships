@@ -17,6 +17,10 @@ C:\Projects Repositories\C#\Tests\obj\Debug\netcoreapp2.1\Tests.csproj.CopyCompl
 C:\Projects Repositories\C#\Tests\obj\Debug\netcoreapp2.1\Tests.dll
 C:\Projects Repositories\C#\Tests\obj\Debug\netcoreapp2.1\Tests.pdb
 C:\Projects Repositories\C#\Tests\bin\Debug\netcoreapp2.1\BLL.dll
-C:\Projects Repositories\C#\Tests\bin\Debug\netcoreapp2.1\UI.dll
-C:\Projects Repositories\C#\Tests\bin\Debug\netcoreapp2.1\UI.pdb
 C:\Projects Repositories\C#\Tests\bin\Debug\netcoreapp2.1\BLL.pdb
+C:\Projects Repositories\C#\Tests\bin\Debug\netcoreapp2.1\ConsoleUI.dll
+C:\Projects Repositories\C#\Tests\bin\Debug\netcoreapp2.1\DAL.dll
+C:\Projects Repositories\C#\Tests\bin\Debug\netcoreapp2.1\MenuSystem.dll
+C:\Projects Repositories\C#\Tests\bin\Debug\netcoreapp2.1\ConsoleUI.pdb
+C:\Projects Repositories\C#\Tests\bin\Debug\netcoreapp2.1\DAL.pdb
+C:\Projects Repositories\C#\Tests\bin\Debug\netcoreapp2.1\MenuSystem.pdb

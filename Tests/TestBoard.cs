@@ -1,7 +1,6 @@
 using System;
 using Domain;
 using NUnit.Framework;
-using UI;
 
 namespace Tests
 {

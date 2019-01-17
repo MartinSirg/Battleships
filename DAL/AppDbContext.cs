@@ -32,28 +32,20 @@ namespace DAL
         {
             base.OnConfiguring(optionsBuilder);
             optionsBuilder
-//                .UseLoggerFactory(MyLoggerFactory)
                 .UseMySQL(
                 "server=alpha.akaver.com;" +
                 "database=student2018_179563;" +
                 "user=student2018;" +
                 "password=student2018");
-
-//            optionsBuilder.UseSqlServer(
-//                @"Server=(localdb)\mssqllocaldb;
-//                Database=MyDatabase;
-//                Trusted_Connection=True;
-//                MultipleActiveResultSets=true");
         }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             var converter = new BoolToStringConverter("N","Y");
-            
+
             modelBuilder
                 .Entity<SaveGame>()
-                .HasIndex(game => game.Name)
-                .IsUnique(); // Save game ie saa olla siis sama nimega
+                .HasIndex(game => game.Name);
 
             modelBuilder
                 .Entity<SaveGame>()
