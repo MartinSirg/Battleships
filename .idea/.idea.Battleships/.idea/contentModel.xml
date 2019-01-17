@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Projects Repositories\C#" t="IncludeFlat">
+    <e p="C:\Projects Repositories\battleships" t="IncludeFlat">
       <e p="Battleships.sln" t="IncludeFlat" />
       <e p="BLL" t="IncludeRecursive">
         <e p="ApplicationMenu.cs" t="Include" />
@@ -46,23 +46,6 @@
         <e p="AppDbContext.cs" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="DAL.csproj" t="IncludeRecursive" />
-        <e p="Migrations" t="Include">
-          <e p="20181223131213_InitialDbSetup.cs" t="Include" />
-          <e p="20181223131213_InitialDbSetup.Designer.cs" t="Include" />
-          <e p="20181223153952_addIsFinishedInSaveGame.cs" t="Include" />
-          <e p="20181223153952_addIsFinishedInSaveGame.Designer.cs" t="Include" />
-          <e p="20181223155402_defaultValueIsBombed.cs" t="Include" />
-          <e p="20181223155402_defaultValueIsBombed.Designer.cs" t="Include" />
-          <e p="20190114152723_AddModeToSaveGame.cs" t="Include" />
-          <e p="20190114152723_AddModeToSaveGame.Designer.cs" t="Include" />
-          <e p="20190114172915_Update.cs" t="Include" />
-          <e p="20190114172915_Update.Designer.cs" t="Include" />
-          <e p="20190117181020_gameMoveNumberAdd.cs" t="Include" />
-          <e p="20190117181020_gameMoveNumberAdd.Designer.cs" t="Include" />
-          <e p="20190117221214_removeUniqueSaveName.cs" t="Include" />
-          <e p="20190117221214_removeUniqueSaveName.Designer.cs" t="Include" />
-          <e p="NewDbContextModelSnapshot.cs" t="Include" />
-        </e>
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
             <e p="netstandard2.0" t="Include">
@@ -230,6 +213,6 @@
     <e p="C:\Users\sirgm\.nuget\packages\nunit3testadapter\3.10.0\build\netcoreapp1.0\NUnit3.TestAdapter.pdb" t="Include" />
     <e p="C:\Users\sirgm\.Rider2018.3\config\extensions" t="IncludeRecursive" />
     <e p="C:\Users\sirgm\.Rider2018.3\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\sirgm\.Rider2018.3\system\resharper-host\local\Transient\ReSharperHost\v183\SolutionCaches\_Battleships.831934058.00" t="ExcludeRecursive" />
+    <e p="C:\Users\sirgm\.Rider2018.3\system\resharper-host\local\Transient\ReSharperHost\v183\SolutionCaches\_Battleships.-963972727.00" t="ExcludeRecursive" />
   </component>
 </project>

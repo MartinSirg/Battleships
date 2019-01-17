@@ -7966,11 +7966,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Projects Repositories\\C#\\Tests\\Tests.csproj",
+      "projectUniqueName": "C:\\Projects Repositories\\battleships\\Tests\\Tests.csproj",
       "projectName": "Tests",
-      "projectPath": "C:\\Projects Repositories\\C#\\Tests\\Tests.csproj",
+      "projectPath": "C:\\Projects Repositories\\battleships\\Tests\\Tests.csproj",
       "packagesPath": "C:\\Users\\sirgm\\.nuget\\packages\\",
-      "outputPath": "C:\\Projects Repositories\\C#\\Tests\\obj\\",
+      "outputPath": "C:\\Projects Repositories\\battleships\\Tests\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -7989,11 +7989,11 @@
       "frameworks": {
         "netcoreapp2.1": {
           "projectReferences": {
-            "C:\\Projects Repositories\\C#\\ConsoleUI\\ConsoleUI.csproj": {
-              "projectPath": "C:\\Projects Repositories\\C#\\ConsoleUI\\ConsoleUI.csproj"
+            "C:\\Projects Repositories\\battleships\\ConsoleUI\\ConsoleUI.csproj": {
+              "projectPath": "C:\\Projects Repositories\\battleships\\ConsoleUI\\ConsoleUI.csproj"
             },
-            "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj": {
-              "projectPath": "C:\\Projects Repositories\\C#\\Domain\\Domain.csproj"
+            "C:\\Projects Repositories\\battleships\\Domain\\Domain.csproj": {
+              "projectPath": "C:\\Projects Repositories\\battleships\\Domain\\Domain.csproj"
             }
           }
         }

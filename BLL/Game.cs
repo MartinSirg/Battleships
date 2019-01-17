@@ -36,7 +36,7 @@ namespace BLL
         public string SelectedMode { get; set; } = "";
         public bool GameOver = false;
         public const int MaxRows = 24, MinRows = 10, MinCols = 10, MaxCols = 24;
-        public const int MaxBoatQuantity = 5, MinBoatQuantity = 1, MaxBoatSize = 10, MinBoatSize = 1;
+        public const int MaxBoatQuantity = 5, MinBoatQuantity = 1, MaxBoatSize = 9, MinBoatSize = 1;
         
         public Menu CurrentMenu { get; set; }
         public Stack<Menu> MenuStack { get; set; } = new Stack<Menu>();
@@ -189,6 +189,15 @@ namespace BLL
         {
             if (Rules.BoatRules.All(rule => rule.Size != size)) return Result.InvalidSize;
             if (quantity < MinBoatQuantity || quantity > MaxBoatQuantity) return Result.InvalidQuantity;
+            
+            int currentShipTilesTotal = 0;
+            Rules.BoatRules.ForEach(rule =>
+            {
+                if (rule.Size == size) currentShipTilesTotal += size * quantity;
+                else currentShipTilesTotal += rule.Size * rule.Quantity;
+            });
+            if (Rules.MaxShipTiles() < currentShipTilesTotal)
+                return Result.TooManyShipTiles;
             
             Rules.BoatRules.Find(rule => rule.Size == size).Quantity = quantity;
      
@@ -603,7 +612,10 @@ namespace BLL
             RestorePlayerBoardTiles(tempPlayer2, save, dbContext);
 
             List<GameMove> tempGameMoves = save.GameMoves.OrderBy(move => move.MoveNumber).ToList();
-            GameMove.NextMoveNumber = tempGameMoves.Max(move => move.MoveNumber) + 1;
+            if (tempGameMoves.Count >0)
+            {
+                GameMove.NextMoveNumber = tempGameMoves.Max(move => move.MoveNumber) + 1;    
+            }
             Player1 = (Player) tempPlayer1.Clone();
             Player2 = (Player) tempPlayer2.Clone();
             

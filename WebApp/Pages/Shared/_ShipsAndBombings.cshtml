@@ -65,7 +65,7 @@
                         Tile currentPlayerTile = Model.Game.CurrentPlayer.Board.Tiles[i - 1][j - 1];
                         if (!currentPlayerTile.IsEmpty() && !currentPlayerTile.IsBombed){className = "green";}
                         else if (!currentPlayerTile.IsEmpty() && currentPlayerTile.IsBombed){className = "red";}
-
+                        else if (currentPlayerTile.IsBombed){className = "yellow";}
                         <td class="@className">@currentPlayerTile</td>
                     }
                 </tr>

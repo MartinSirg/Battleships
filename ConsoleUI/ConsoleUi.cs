@@ -385,6 +385,7 @@ namespace UI
                 var result = _game.EditShipInRules(size, quantity);
                 if (result == Result.InvalidSize) Alert($"{size} sized ship not found!", ConsoleColor.Red);
                 else if (result == Result.InvalidQuantity) Alert($"Quantity: {quantity} is incorrect",ConsoleColor.Red);
+                else if (result == Result.TooManyShipTiles) Alert($"Too many ship tiles. Can't be more than {_game.Rules.MaxShipTiles()} tiles!", ConsoleColor.Red);
                 else break; //Successful edit
             }
         }
@@ -637,7 +638,8 @@ namespace UI
                 
                 foreach (var tile in playerRow)
                 {
-                    if (tile.IsEmpty()) sb.Append("   ");
+                    if (tile.IsEmpty() && tile.IsBombed) sb.PrintInColor("   ", ConsoleColor.Cyan);
+                    else if (tile.IsEmpty()) sb.Append("   ");
                     else if (tile.IsBombed) sb.PrintInColor(" - ", ConsoleColor.Red);
                     else sb.PrintInColor(" + ", ConsoleColor.Green);
 

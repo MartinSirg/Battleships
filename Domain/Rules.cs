@@ -34,7 +34,7 @@ namespace Domain
 
         public int MaxShipTiles()
         {
-            return BoardCols * BoardRows / 2 ;
+            return BoardCols * BoardRows * 50 / 100 ;
         }
 
 

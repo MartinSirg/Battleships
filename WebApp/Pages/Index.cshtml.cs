@@ -358,6 +358,7 @@ namespace WebApp.Pages
             var result = Game.EditShipInRules(size, quantity);
             if (result == Result.InvalidSize) Game.Messages.Add( ($"Can't edit ship, {size} sized ship not found!", MsgType.Bad));
             else if (result == Result.InvalidQuantity) Game.Messages.Add( ($"Can't edit ship, quantity: {quantity} is incorrect", MsgType.Bad));
+            else if (result == Result.TooManyShipTiles) Game.Messages.Add( ($"Can't edit ship. There can't be more than {Game.Rules.MaxShipTiles()} ship tiles", MsgType.Bad));
             else Game.Messages.Add( ($"Size {size} ship quantity is now set to {quantity}", MsgType.Good));
         }
 
