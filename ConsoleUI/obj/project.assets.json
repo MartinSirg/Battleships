@@ -4935,11 +4935,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Projects Repositories\\battleships\\ConsoleUI\\ConsoleUI.csproj",
+      "projectUniqueName": "C:\\Projects Repositories\\BattleshipsUpdate\\ConsoleUI\\ConsoleUI.csproj",
       "projectName": "ConsoleUI",
-      "projectPath": "C:\\Projects Repositories\\battleships\\ConsoleUI\\ConsoleUI.csproj",
+      "projectPath": "C:\\Projects Repositories\\BattleshipsUpdate\\ConsoleUI\\ConsoleUI.csproj",
       "packagesPath": "C:\\Users\\sirgm\\.nuget\\packages\\",
-      "outputPath": "C:\\Projects Repositories\\battleships\\ConsoleUI\\obj\\",
+      "outputPath": "C:\\Projects Repositories\\BattleshipsUpdate\\ConsoleUI\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -4958,14 +4958,14 @@
       "frameworks": {
         "netstandard2.0": {
           "projectReferences": {
-            "C:\\Projects Repositories\\battleships\\BLL\\BLL.csproj": {
-              "projectPath": "C:\\Projects Repositories\\battleships\\BLL\\BLL.csproj"
+            "C:\\Projects Repositories\\BattleshipsUpdate\\BLL\\BLL.csproj": {
+              "projectPath": "C:\\Projects Repositories\\BattleshipsUpdate\\BLL\\BLL.csproj"
             },
-            "C:\\Projects Repositories\\battleships\\Domain\\Domain.csproj": {
-              "projectPath": "C:\\Projects Repositories\\battleships\\Domain\\Domain.csproj"
+            "C:\\Projects Repositories\\BattleshipsUpdate\\Domain\\Domain.csproj": {
+              "projectPath": "C:\\Projects Repositories\\BattleshipsUpdate\\Domain\\Domain.csproj"
             },
-            "C:\\Projects Repositories\\battleships\\MenuSystem\\MenuSystem.csproj": {
-              "projectPath": "C:\\Projects Repositories\\battleships\\MenuSystem\\MenuSystem.csproj"
+            "C:\\Projects Repositories\\BattleshipsUpdate\\MenuSystem\\MenuSystem.csproj": {
+              "projectPath": "C:\\Projects Repositories\\BattleshipsUpdate\\MenuSystem\\MenuSystem.csproj"
             }
           }
         }

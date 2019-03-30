@@ -285,11 +285,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Projects Repositories\\battleships\\Domain\\Domain.csproj",
+      "projectUniqueName": "C:\\Projects Repositories\\BattleshipsUpdate\\Domain\\Domain.csproj",
       "projectName": "Domain",
-      "projectPath": "C:\\Projects Repositories\\battleships\\Domain\\Domain.csproj",
+      "projectPath": "C:\\Projects Repositories\\BattleshipsUpdate\\Domain\\Domain.csproj",
       "packagesPath": "C:\\Users\\sirgm\\.nuget\\packages\\",
-      "outputPath": "C:\\Projects Repositories\\battleships\\Domain\\obj\\",
+      "outputPath": "C:\\Projects Repositories\\BattleshipsUpdate\\Domain\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

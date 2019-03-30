@@ -1,10 +1,10 @@
 ﻿{
   "version": "1.0.0",
   "restore": {
-    "projectUniqueName": "C:\\Projects Repositories\\battleships\\Domain\\Domain.csproj",
+    "projectUniqueName": "C:\\Projects Repositories\\BattleshipsUpdate\\Domain\\Domain.csproj",
     "projectName": "Domain",
-    "projectPath": "C:\\Projects Repositories\\battleships\\Domain\\Domain.csproj",
-    "outputPath": "C:\\Projects Repositories\\battleships\\Domain\\obj\\",
+    "projectPath": "C:\\Projects Repositories\\BattleshipsUpdate\\Domain\\Domain.csproj",
+    "outputPath": "C:\\Projects Repositories\\BattleshipsUpdate\\Domain\\obj\\",
     "projectStyle": "PackageReference",
     "fallbackFolders": [
       "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

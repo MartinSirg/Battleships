@@ -1,10 +1,10 @@
 ﻿{
   "version": "1.0.0",
   "restore": {
-    "projectUniqueName": "C:\\Projects Repositories\\battleships\\WebApp\\WebApp.csproj",
+    "projectUniqueName": "C:\\Projects Repositories\\BattleshipsUpdate\\WebApp\\WebApp.csproj",
     "projectName": "WebApp",
-    "projectPath": "C:\\Projects Repositories\\battleships\\WebApp\\WebApp.csproj",
-    "outputPath": "C:\\Projects Repositories\\battleships\\WebApp\\obj\\",
+    "projectPath": "C:\\Projects Repositories\\BattleshipsUpdate\\WebApp\\WebApp.csproj",
+    "outputPath": "C:\\Projects Repositories\\BattleshipsUpdate\\WebApp\\obj\\",
     "projectStyle": "PackageReference",
     "fallbackFolders": [
       "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -15,11 +15,11 @@
     "frameworks": {
       "netcoreapp2.2": {
         "projectReferences": {
-          "C:\\Projects Repositories\\battleships\\BLL\\BLL.csproj": {
-            "projectPath": "C:\\Projects Repositories\\battleships\\BLL\\BLL.csproj"
+          "C:\\Projects Repositories\\BattleshipsUpdate\\BLL\\BLL.csproj": {
+            "projectPath": "C:\\Projects Repositories\\BattleshipsUpdate\\BLL\\BLL.csproj"
           },
-          "C:\\Projects Repositories\\battleships\\DAL\\DAL.csproj": {
-            "projectPath": "C:\\Projects Repositories\\battleships\\DAL\\DAL.csproj"
+          "C:\\Projects Repositories\\BattleshipsUpdate\\DAL\\DAL.csproj": {
+            "projectPath": "C:\\Projects Repositories\\BattleshipsUpdate\\DAL\\DAL.csproj"
           }
         }
       }

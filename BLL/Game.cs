@@ -393,6 +393,7 @@ namespace BLL
             Player temp = CurrentPlayer;
             CurrentPlayer = TargetPlayer;
             TargetPlayer = temp;
+            CurrentMenu.Title = CurrentMenu.TitleWithName.Replace("PLAYER_NAME", CurrentPlayer.Name);
         }
 
         /**

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Projects Repositories\battleships" t="IncludeFlat">
+    <e p="C:\Projects Repositories\BattleshipsUpdate" t="IncludeFlat">
       <e p="Battleships.sln" t="IncludeFlat" />
       <e p="BLL" t="IncludeRecursive">
         <e p="ApplicationMenu.cs" t="Include" />
@@ -46,6 +46,11 @@
         <e p="AppDbContext.cs" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="DAL.csproj" t="IncludeRecursive" />
+        <e p="Migrations" t="Include">
+          <e p="20190330214749_Initial.cs" t="Include" />
+          <e p="20190330214749_Initial.Designer.cs" t="Include" />
+          <e p="AppDbContextModelSnapshot.cs" t="Include" />
+        </e>
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
             <e p="netstandard2.0" t="Include">
@@ -213,6 +218,6 @@
     <e p="C:\Users\sirgm\.nuget\packages\nunit3testadapter\3.10.0\build\netcoreapp1.0\NUnit3.TestAdapter.pdb" t="Include" />
     <e p="C:\Users\sirgm\.Rider2018.3\config\extensions" t="IncludeRecursive" />
     <e p="C:\Users\sirgm\.Rider2018.3\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\sirgm\.Rider2018.3\system\resharper-host\local\Transient\ReSharperHost\v183\SolutionCaches\_Battleships.-963972727.00" t="ExcludeRecursive" />
+    <e p="C:\Users\sirgm\.Rider2018.3\system\resharper-host\local\Transient\ReSharperHost\v183\SolutionCaches\_Battleships.683722002.00" t="ExcludeRecursive" />
   </component>
 </project>

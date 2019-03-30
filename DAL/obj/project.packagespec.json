@@ -1,10 +1,10 @@
 ﻿{
   "version": "1.0.0",
   "restore": {
-    "projectUniqueName": "C:\\Projects Repositories\\battleships\\DAL\\DAL.csproj",
+    "projectUniqueName": "C:\\Projects Repositories\\BattleshipsUpdate\\DAL\\DAL.csproj",
     "projectName": "DAL",
-    "projectPath": "C:\\Projects Repositories\\battleships\\DAL\\DAL.csproj",
-    "outputPath": "C:\\Projects Repositories\\battleships\\DAL\\obj\\",
+    "projectPath": "C:\\Projects Repositories\\BattleshipsUpdate\\DAL\\DAL.csproj",
+    "outputPath": "C:\\Projects Repositories\\BattleshipsUpdate\\DAL\\obj\\",
     "projectStyle": "PackageReference",
     "fallbackFolders": [
       "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -15,8 +15,8 @@
     "frameworks": {
       "netstandard2.0": {
         "projectReferences": {
-          "C:\\Projects Repositories\\battleships\\Domain\\Domain.csproj": {
-            "projectPath": "C:\\Projects Repositories\\battleships\\Domain\\Domain.csproj"
+          "C:\\Projects Repositories\\BattleshipsUpdate\\Domain\\Domain.csproj": {
+            "projectPath": "C:\\Projects Repositories\\BattleshipsUpdate\\Domain\\Domain.csproj"
           }
         }
       }

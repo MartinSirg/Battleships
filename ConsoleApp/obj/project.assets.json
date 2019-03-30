@@ -5432,11 +5432,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Projects Repositories\\battleships\\ConsoleApp\\ConsoleApp.csproj",
+      "projectUniqueName": "C:\\Projects Repositories\\BattleshipsUpdate\\ConsoleApp\\ConsoleApp.csproj",
       "projectName": "ConsoleApp",
-      "projectPath": "C:\\Projects Repositories\\battleships\\ConsoleApp\\ConsoleApp.csproj",
+      "projectPath": "C:\\Projects Repositories\\BattleshipsUpdate\\ConsoleApp\\ConsoleApp.csproj",
       "packagesPath": "C:\\Users\\sirgm\\.nuget\\packages\\",
-      "outputPath": "C:\\Projects Repositories\\battleships\\ConsoleApp\\obj\\",
+      "outputPath": "C:\\Projects Repositories\\BattleshipsUpdate\\ConsoleApp\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -5455,8 +5455,8 @@
       "frameworks": {
         "netcoreapp2.2": {
           "projectReferences": {
-            "C:\\Projects Repositories\\battleships\\ConsoleUI\\ConsoleUI.csproj": {
-              "projectPath": "C:\\Projects Repositories\\battleships\\ConsoleUI\\ConsoleUI.csproj"
+            "C:\\Projects Repositories\\BattleshipsUpdate\\ConsoleUI\\ConsoleUI.csproj": {
+              "projectPath": "C:\\Projects Repositories\\BattleshipsUpdate\\ConsoleUI\\ConsoleUI.csproj"
             }
           }
         }
