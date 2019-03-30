@@ -289,6 +289,7 @@ namespace WebApp.Pages
                     return;
                 
                 case Result.OneBombing:
+                    Game.CurrentMenu.Title = Game.CurrentMenu.TitleWithName.Replace("PLAYER_NAME", Game.CurrentPlayer.Name);
                     move = Game.GameMoves[Game.GameMoves.Count - 1];
                     var sb = new StringBuilder($"{move.Target.Name} is bombed at {move.Tile}.\n");
                     sb.Append(move.Tile.IsEmpty() ? "Its a MISS!" : "Its a HIT!");
